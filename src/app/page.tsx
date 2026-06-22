@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { SiteShell } from "@/components/SiteShell";
 import { parseDoc, buildDocSearchEntries, type SearchEntry } from "@/lib/doc";
-import { PLAN_GROUPS, PLAN_EXCLUDE, INTEGRATION_GROUPS } from "@/data/docConfig";
+import { PLAN_GROUPS, PLAN_EXCLUDE, INTEGRATION_GROUPS, CABLING_GROUPS } from "@/data/docConfig";
 import { BEHAVIOURS } from "@/data/behaviours";
 import { ROOMS } from "@/data/rooms";
 
@@ -13,10 +13,12 @@ function loadDoc(name: string): string {
 export default function Home() {
   const planDoc = parseDoc(loadDoc("plan.md"), PLAN_GROUPS, "reference", PLAN_EXCLUDE);
   const integrationDoc = parseDoc(loadDoc("integration.md"), INTEGRATION_GROUPS, "reference");
+  const cablingDoc = parseDoc(loadDoc("cabling.md"), CABLING_GROUPS, "materials");
 
   const searchIndex: SearchEntry[] = [
     ...buildDocSearchEntries("plan", "Plan", planDoc),
     ...buildDocSearchEntries("integration", "Claude + HA", integrationDoc),
+    ...buildDocSearchEntries("cabling", "Cabling", cablingDoc),
     { title: "Behaviours", crumb: "Tab · interactive", tab: "behaviours" },
     { title: "Floorplan & planned kit", crumb: "Tab · interactive", tab: "floorplan" },
     { title: "Cost calculator", crumb: "Tab · interactive", tab: "calculator" },
@@ -26,6 +28,11 @@ export default function Home() {
   ];
 
   return (
-    <SiteShell planDoc={planDoc} integrationDoc={integrationDoc} searchIndex={searchIndex} />
+    <SiteShell
+      planDoc={planDoc}
+      integrationDoc={integrationDoc}
+      cablingDoc={cablingDoc}
+      searchIndex={searchIndex}
+    />
   );
 }
