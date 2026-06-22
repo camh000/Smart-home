@@ -289,87 +289,18 @@ Plus the boiler itself, which is in the building budget separately.
 - **Phase 2:** OTGW + 5× TRVs deployed, HA controls boiler + upstairs heating
 - **Phase 3:** UFH zone control wired in (Shelly + sensors), per-zone Generic Thermostats configured in HA
 
-## Cooling / AC (optional)
+## Cooling (no AC — passive only)
 
-Sheffield summers have crossed the line where AC in a semi is no longer ridiculous. Walls open now = cable/pipe runs cost pennies. Even if units are deferred, **rough in the routes during the rewire**.
+**Decision: no air conditioning.** It's a 1960s house expected to be decently insulated, so overheating is unlikely to justify the cost/disruption — and dropping AC removes the single biggest line item from the budget. No refrigerant rough-in during the rewire.
 
-**Heat pump = AC.** Modern air-to-air heat pumps and AC units are literally the same hardware — same refrigerant cycle, just reversible. Buying "AC" gets you supplementary heating in shoulder seasons for free.
+Heat is instead managed passively (cheap, and most of it already in the plan):
 
-### Options
+- **Shading first** — bay/bedroom **blinds** and **solar-reflective film** on the east-facing conservatory glass block heat before it gets in.
+- **Night-purge ventilation** — the **motorised window actuators + CO2/temp sensors** already in scope let HA crack windows overnight to flush heat.
+- **Ceiling / extractor fans** — circulation where needed (~£100/room), far cheaper and quieter than units.
+- **The head-end (Bed 3)** still gets its dedicated **temperature alert + active extraction** (server heat, not comfort cooling).
 
-**Multi-split heat pump (recommended)** — one outdoor unit feeds 2-5 indoor wall-mounted heads via small refrigerant pipes. Reversible. Quiet (modern units ~19-25 dB indoor). Brands with strong HA integration: Daikin, Mitsubishi Electric, Panasonic.
-
-**Single splits** — same tech, one outdoor unit per indoor unit. Cheaper if only 1-2 rooms need it. More outdoor units = uglier external wall.
-
-**Portable units** — avoid. Ugly, noisy, inefficient, vent hose problem.
-
-**Cheap alternatives (do these as well, not instead):**
-- External blinds / awnings — block sun before glass. ~£200-500 per window.
-- Solar reflective film on conservatory glass — ~£200-400. Massive temp drop.
-- Ceiling fans — circulation only, but combined with shading often enough. ~£100-200 per room.
-
-### Where to install (priority order)
-
-| Room | Priority | Why |
-|---|---|---|
-| Master bedroom | High | **South-facing** — heavy solar gain all afternoon + sleep quality. The room that'll cook in summer. |
-| Lounge | High | **South-facing** — main living space + bay window picking up afternoon sun. |
-| Bedroom 2 (office) | High | Two people working with two PCs + monitors = significant heat load during working hours. |
-| Conservatory | Medium | **East-facing** — morning sun only, less brutal than south-facing. Manageable with solar film + shade alone for most days. |
-| Bedroom 3 (head-end) | Low | No regular occupant. Equipment heat manageable with ventilation + quiet fan. |
-
-### Specific recommendations
-
-**Premium — Daikin Stylish 4-head multi-split** (master + lounge + office (bed 2) + conservatory). Sleek matte wall units, ~19 dB at lowest fan, official Daikin Onecta HA integration. **~£5,500-7,500 installed.**
-
-**Mid — Daikin Comfora 3-head multi-split** (master + lounge + office). Skip conservatory unless really used in summer. Same internals as Stylish, plainer body. **~£3,800-5,200 installed.**
-
-**Budget — 2× single splits** (master + office, OR master + lounge depending on whether you spend more time working from home or evenings downstairs). Mitsubishi or LG via local F-Gas installer. **~£1,800-3,000 installed.**
-
-**Bare minimum — master bedroom single split only.** 2.5-3.5 kW unit. South-facing bedroom is the priority — sleep matters most. **~£900-1,500 installed.**
-
-### Home Assistant integration
-
-| Brand | HA integration | Quality |
-|---|---|---|
-| Daikin | Daikin Onecta (built-in core) | Excellent |
-| Mitsubishi Electric | MELCloud (built-in) | Excellent |
-| Panasonic | Comfort Cloud (HACS) | Good |
-| LG | ThinQ (built-in) | OK — flaky cloud auth |
-| Any IR-remote AC | Sensibo / SwitchBot Hub 2 / Tado AC Control | Good — retrofits smarts to cheap units |
-
-### Smart automations this unlocks
-
-- **Bedroom pre-cool before sleep** — forecast > 24°C tomorrow → cooling starts 22:00, target 19°C by midnight
-- **Empty room auto-off** — mmWave detects nobody home → AC pauses after 15 min
-- **Window/door open detection** → AC pauses in that room + phone notification
-- **Octopus Agile cheapest-slot pre-cooling** — overnight cheap rate chills the thermal mass
-- **Conservatory hot alert** — past 28°C with someone home → "shall I cool the conservatory?"
-- **Office heat awareness** — head-end + PC heating Bed 3 → auto-cool when temp rises and PC is active
-- **Shoulder-season heating** — chilly spring evening, boiler off, AC reverses to heat just the lounge for 2 hours. Cheaper than firing the boiler.
-
-### Cabling and electrical (do NOW)
-
-Even if units are deferred, install infrastructure now. Adding later means ripped walls.
-
-- **Refrigerant pipe routes** — 8mm + 16mm copper pair with insulation. Run from each planned indoor location to outdoor unit position. Capped both ends.
-- **Communication cable** — 4-core low-voltage between indoor and outdoor. Run alongside refrigerant.
-- **Condensate drain** — gravity-fed flexible drain from each indoor head to nearest waste pipe or outside. Easier with floors up.
-- **Outdoor unit power** — dedicated 13A or 16A circuit from consumer unit to outdoor location. Add to electrical scope.
-- **Outdoor unit position** — back wall, side wall, or ground-mounted bracket. Needs clearance for airflow.
-
-Rough-in cost during the rewire: maybe **£150-400** in conduit + pipe + cable. Adding later costs £500-1,500 per indoor head plus the unit. Massive difference.
-
-### Open questions
-
-- Which windows are south-facing? Determines which rooms will actually need cooling.
-- Conservatory orientation — south-facing makes AC essential for summer use.
-- Where will the outdoor unit live? Check planning constraints (semis sometimes have permitted-development limits on heat pump placement).
-- How much do you actually feel the heat? Worth waiting one summer in the house before committing if budget's tight.
-
-### Recommendation
-
-Rough in the infrastructure for master + bed 3 + conservatory + lounge (4 positions) during the rewire — cheap insurance. Then defer the actual units until after one summer in the house. Summer 2027 will tell you what you need; the pipework will already be there.
+Revisit only if a summer in the house actually proves it's needed — but with no pipework committed, that's a clean future decision, not a now-cost.
 
 ## CCTV + doorbell
 
@@ -523,7 +454,7 @@ Stream PC games from the **gaming PC (office, Bed 2)** to the **lounge**, played
 
 **Smart-home layer (the "lounge gaming" scene):** Deck docked → AVR on, TV/AVR switches to the Deck's HDMI input, lights to a gaming scene, Claude DND. **Wake-on-LAN** the gaming PC from HA ("fire up the gaming PC") before you sit down; it sleeps again after. The Deck is just another HDMI source alongside the Apple TV.
 
-**Note:** the PC runs hard while you game in the lounge, adding heat to the office — reinforcing Bed 2 as an AC-priority room. **Cost: ~£0** — the **JSAUX dock (Ethernet) is already owned**, the lounge Cat6 is in scope, and the host software (Steam Remote Play / Sunshine + Moonlight) is free. **Phase 3.**
+**Note:** the PC runs hard while you game in the lounge, adding heat to the office — so the office wants decent ventilation / a fan. **Cost: ~£0** — the **JSAUX dock (Ethernet) is already owned**, the lounge Cat6 is in scope, and the host software (Steam Remote Play / Sunshine + Moonlight) is free. **Phase 3.**
 
 ## Displays &amp; touch panels
 
@@ -703,7 +634,7 @@ The office desk runs **two monitors** — one a **34" 21:9 ultrawide (3440×1440
 
 - **HA-switchable desk** — a network/RS-232 KVM (or its button wired to a Zigbee/Shelly relay) lets you say *"switch the desk to the gaming PC"*; the **9:00 work scene** (see Focus mode) can auto-flip it to the laptop.
 - **Works with lounge game-streaming** — when streaming to the docked Steam Deck, the KVM stays on the laptop and the gaming PC streams **headless via a Sunshine virtual display**.
-- **Heat/power** — ultrawide + gaming PC add desk load and heat, reinforcing Bed 2 as an AC-priority room and a candidate for a smart-plug "desk off when away" routine.
+- **Heat/power** — ultrawide + gaming PC add desk load and heat, so the office wants good ventilation / a fan, and it's a candidate for a smart-plug "desk off when away" routine.
 
 **Cost:** ~£350-550 for the ultrawide + ~£150-400 for a good dual-head DP 1.4 KVM (or less if the monitor's built-in KVM suffices). **Phase 3-4.**
 
@@ -1377,7 +1308,6 @@ The cabling spec covers data, AV and audio for the house but does **not** includ
 | Front door (low, near doorbell) | PoE doorbell | Cat6 to existing doorbell location |
 | Lounge speaker positions | 5.1 surround | Speaker cable, not Cat6 — see Audio section (5.1 only, no Atmos) |
 | **Every potential blind position** | Blind motor power option | Low-voltage DC / conduit / draw-string to every blind head — even though only the **bedrooms** are funded today, the *option* on the bonus tiers (lounge bay, conservatory, dining, kitchen) is only preserved while walls are open. |
-| **AC rough-in** (master, lounge, bed 2/office, conservatory) | Refrigerant + comms + condensate + outdoor power | Pipe routes (8mm + 16mm pair, capped), 4-core comms, gravity condensate drain, and a dedicated outdoor-unit circuit — run **now** even though the AC units are deferred (see Cooling section). Adding later means ripped walls. |
 
 **Plus a sensible "spare" or two** — pull extra Cat6 to any wall that might host a future TV, desk or wall-mounted tablet. Cheap now, impossible later.
 
@@ -1748,11 +1678,11 @@ Boiler itself is in the building budget separately. Wet UFH manifold + actuators
 - CCTV (incl. storage top-up, 4 cams + doorbell): **~£740-960**
 - Lighting / locks / blinds: **~£3,350-5,030**
 - Heating &amp; climate: **~£380**
-- Cooling / AC *(optional, deferred)*: **~£300 rough-in + £900-7,500 units**
+- Cooling: **£0 — no AC** (passive only: shading, fans, night-purge ventilation)
 - Displays / extras (incl. presence sensors): **~£860-1,150**
 - Signature behaviours hardware (CO2, plant care, driveway): **~£430-520**
 - Window motors (~7-8 actuators, every non-conservatory): **~£1,600-3,600**
-- **Total range (excl. AC units): ~£9,820-14,975**
+- **Total range: ~£9,820-14,975**
 
 Plus optional add-ons (Airthings master ~£250, outdoor irrigation ~£150-300, window motors as scoped) if pursued.
 

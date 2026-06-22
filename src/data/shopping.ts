@@ -70,8 +70,6 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b16s1", name: "Zigbee smoke + CO alarms (×3)", meta: "Life safety — Frient/Heiman, still function as standalone alarms", cost: 120, costLabel: "~£120", search: "Frient smoke detector Zigbee" },
       { id: "b16s2", name: "Zigbee water-leak sensors (×4)", meta: "UFH manifold, boiler, under sinks, behind washer/dishwasher", cost: 60, costLabel: "~£60", search: "Aqara water leak sensor" },
       { id: "b16s3", name: "Motorised stopcock / mains water valve", meta: "Auto-shut on confirmed leak — highest-ROI safety device", cost: 90, costLabel: "~£90", search: "smart water shut off valve" },
-      { id: "b16g", name: "AC rough-in (4 positions)", meta: "Refrigerant pipes + comms + drain to master, lounge, bed 2, conservatory. Units bought later.", cost: 300, costLabel: "~£150-400" },
-      { id: "b16h", name: "AC outdoor unit power circuit", meta: "Dedicated 16A circuit to outdoor location — add to sparky's scope", cost: 0, costLabel: "in electrical" },
     ],
   },
   {
@@ -158,9 +156,6 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b50", name: "OpenSprinkler (outdoor irrigation)", meta: "Only if irrigation installed", cost: 150, costLabel: "~£150", search: "OpenSprinkler" },
       { id: "b51", name: "Garden moisture sensors (4-5 beds)", meta: "Aqara T1 outdoor or Ecowitt", cost: 80, costLabel: "~£80", search: "Ecowitt soil moisture sensor" },
       { id: "b52", name: "Airthings View Plus (master bedroom)", meta: "Proper CO2 + radon + PM2.5 — optional premium", cost: 250, costLabel: "~£250", search: "Airthings View Plus" },
-      { id: "b53", name: "AC: master bedroom single-split (bare minimum)", meta: "~2.5-3.5 kW unit installed. Mitsubishi or LG via F-Gas installer.", cost: 900, costLabel: "~£900-1,500" },
-      { id: "b54", name: "AC: 3-head Daikin Comfora multi-split", meta: "Master + lounge + office (bed 2). Plain body, same internals as Stylish.", cost: 3800, costLabel: "~£3,800-5,200" },
-      { id: "b55", name: "AC: 4-head Daikin Stylish multi-split (premium)", meta: "Master + lounge + office + conservatory. Sleek wall units, ~19 dB.", cost: 5500, costLabel: "~£5,500-7,500" },
     ],
   },
 ];

@@ -21,7 +21,6 @@ const GROUP_LABELS: Record<string, string> = {
   voice: "Voice & sensors",
   stark: "Displays & extras",
   windows: "Window motors",
-  cooling: "Cooling / AC",
 };
 
 const STORAGE_KEY = "wh-calc-state-v1";

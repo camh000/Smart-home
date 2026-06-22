@@ -28,7 +28,7 @@ export const PLAN_GROUPS: GroupDef[] = [
       "Blinds",
       "Safety sensors (smoke, CO, water leak)",
       "Heating & climate control",
-      "Cooling / AC (optional)",
+      "Cooling (no AC — passive only)",
       "CCTV + doorbell",
       "Audio / music",
       "Game streaming (office → lounge)",

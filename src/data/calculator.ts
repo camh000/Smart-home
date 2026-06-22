@@ -325,25 +325,6 @@ export const CALC_GROUPS: CalcGroup[] = [
       },
     ],
   },
-  {
-    key: "cooling",
-    title: "Optional: Cooling / AC",
-    fields: [
-      {
-        key: "cooling",
-        label: "AC infrastructure + units",
-        sub: "Rough-in cheap during rewire; units deferrable",
-        options: [
-          { value: 0, label: "None" },
-          { value: 300, label: "Rough-in only (4 positions, ~£300)" },
-          { value: 1200, label: "Rough-in + master single-split (~£1,200)" },
-          { value: 2500, label: "Rough-in + 2× single-splits (~£2,500)" },
-          { value: 4500, label: "Rough-in + 3-head Daikin Comfora (~£4,500)" },
-          { value: 6500, label: "Rough-in + 4-head Daikin Stylish (~£6,500)" },
-        ],
-      },
-    ],
-  },
 ];
 
 export type CalcState = Record<string, number>;
@@ -355,7 +336,7 @@ export const PRESETS: Record<string, CalcState> = {
     light: 300, locks: 250, blinds: 700,
     voice: 220, buttons: 0, sensors: 100,
     tablets: 80, "tablet-mounts": 70, mirror: 0, mmwave: 65, energy: 0, garage: 0,
-    windows: 200, cooling: 0,
+    windows: 200,
   },
   balanced: {
     avr: 350, speakers: 350, atmos: 0, sub: 150, wiim: 540, powered: 425, "audio-misc": 120,
@@ -363,7 +344,7 @@ export const PRESETS: Record<string, CalcState> = {
     light: 500, locks: 590, blinds: 700,
     voice: 275, buttons: 60, sensors: 200,
     tablets: 320, "tablet-mounts": 140, mirror: 150, mmwave: 250, energy: 120, garage: 0,
-    windows: 1800, cooling: 300,
+    windows: 1800,
   },
   generous: {
     avr: 475, speakers: 600, atmos: 500, sub: 220, wiim: 540, powered: 600, "audio-misc": 150,
@@ -371,7 +352,7 @@ export const PRESETS: Record<string, CalcState> = {
     light: 700, locks: 680, blinds: 3400,
     voice: 275, buttons: 120, sensors: 300,
     tablets: 320, "tablet-mounts": 160, mirror: 200, mmwave: 250, energy: 120, garage: 30,
-    windows: 2800, cooling: 4500,
+    windows: 2800,
   },
 };
 
@@ -394,7 +375,6 @@ export function computeTotals(state: CalcState) {
     voice: v("voice") + v("buttons") + v("sensors"),
     stark: v("tablets") + v("tablet-mounts") + v("mirror") + v("mmwave") + v("energy") + v("garage"),
     windows: v("windows"),
-    cooling: v("cooling"),
   };
   const grand = Object.values(groups).reduce((a, b) => a + b, 0);
   return { groups, grand };
