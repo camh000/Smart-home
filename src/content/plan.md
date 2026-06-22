@@ -185,6 +185,7 @@ Approx zones to cover: dining, kitchen, conservatory, lounge, hall, porch, landi
 
 - Candidates: Yale Assure 2 (front), Aqara U100 (conservatory Euro-cylinder retrofit), Aqara A100 Pro or Nuki 4 Pro (dining French-door multi-point cylinder)
 - All three are Tier-2 (verbal confirmation before lock/unlock; tool-layer challenge token for locks specifically)
+- **🔁 The secure-unlock gate must not depend on the cloud brain (dependency-loop trap).** The Tier-2 "say yes first" + the challenge token live in Claude + the memory service. If the internet/HA/memory is down you'd either be **unable to unlock** or the local fallback would **bypass the safety**. Two requirements: (a) every lock keeps a **physical key + lock-resident keypad codes** (codes stored *on* the lock, validated offline — not by HA in real time), so a software outage never locks you out and guest codes work without HA; (b) decide explicitly whether the local-intent fallback is *allowed* to do a confirmed unlock, or refuses Tier-2 entirely and defers to the physical key.
 
 ## Blinds
 
@@ -1240,8 +1241,9 @@ The house *runs on* Unraid + the network + the Claude pipeline. Each needs a def
 
 ### Power / UPS
 
-- **Size the head-end UPS by *runtime*, not just VA.** "1000-1500VA" names apparent power, not minutes. With Unraid + a loaded PoE switch (cameras can pull 30-60W+) + Decos + media converter, a 1500VA unit may only give a few minutes. Compute the actual watt load and target a defined runtime (**≥15 min** to ride out blips + trigger a clean Unraid shutdown via NUT).
-- **Consider a second small UPS for the network gear** (UCG-Max + core switch) so the **SD-WAN / Tailscale / remote support stays up** even while the server is shutting down or rebooting.
+- **Size the head-end UPS by *runtime*, not just VA.** "1000-1500VA" names apparent power, not minutes. With Unraid + a loaded PoE switch (cameras can pull 30-60W+) + Decos + media converter, a 1500VA unit may only give a few minutes. Compute the actual watt load and target a defined runtime (**≥15 min** to ride out blips + trigger a clean shutdown).
+- **🔁 The shutdown must be driven by Unraid, not HA (dependency-loop trap).** Don't make "clean shutdown on power loss" an *HA automation* — HA runs *on* the box it would be shutting down, and a hung/updating HA may never fire it, risking a dirty stop and a corrupt array. Use **Unraid's own native UPS/NUT daemon** to self-shut-down; HA's role is *notification only*.
+- **Consider a second small UPS for the network gear** (UCG-Max + core switch) so the **SD-WAN / remote access / off-site watchdog reachability stays up** even while the server is shutting down or rebooting.
 
 ### Backup & disaster recovery (3-2-1, with a *tested* restore)
 
@@ -1252,13 +1254,25 @@ Today only "a Qdrant volume backup" exists. That's not a backup strategy. Define
 - **Memory layer** — Qdrant volume + the structured SQLite store.
 - **Immich (family photos)** — the irreplaceable one. Back up the **Immich library + its Postgres DB**, **client-side encrypted**, **off-site to Selby over the SD-WAN**. Use **restic** or **borg** (or `rclone` with crypt) so the data is encrypted *before* it leaves the house — dad hosts the bytes but **cannot read the photos**. Keep a local fast copy too (3-2-1: ≥3 copies, 2 media, 1 off-site).
 - **Off-site target = the Selby SD-WAN** for HA snapshots and the Immich/memory backups; private link, no public exposure.
+- **🔁 Store the decryption key *off the box* (dependency-loop trap).** restic/borg encrypt client-side — but if the only copy of the passphrase lives on the Unraid box that died/burned/was stolen, the Selby backup is **unrecoverable ciphertext**. Keep the passphrase out-of-band: a password manager that syncs off-box, a paper copy, and a sealed copy at Selby. The restore drill must start *from the key store*, not from the box.
 - **Rehearse a restore.** A backup you've never restored is a hope, not a plan. Do one real restore drill and write a short runbook.
 
 ### Graceful degradation & fallbacks
 
 - **"Claude API slow/down" fallback is a Phase-1 deliverable, not an open question.** When the API times out, fall back to **HA's built-in local intents** for the essentials — lights, "goodnight", and a confirmed unlock — so the house still works offline.
 - **"HA / Unraid down" story:** keep **physical switches live** (never fully remove dumb control); document that voice + automations degrade gracefully and the house remains hand-operable.
-- **Head-end heat:** Bedroom 3 holds Unraid + a loaded PoE switch + UPS + patch panel — a real heat load. Spec **active extraction + a temperature alert** for that room specifically (PoE switches run hot under load); don't rely on "a quiet fan."
+- **Head-end heat:** Bedroom 3 holds Unraid + a loaded PoE switch + UPS + patch panel — a real heat load. Spec **active extraction + a temperature alert** for that room specifically (PoE switches run hot under load); don't rely on "a quiet fan." **🔁 But note the loop:** that temp alert runs on HA/Unraid *inside* the head-end, so a thermal runaway that cooks the server also kills the warning. Give the head-end an **independent** alert path (a UPS/PDU temperature probe, or a sensor that alerts via the gateway/external watchdog), or accept that the dead-man's-switch only tells you *after* it's died.
+
+### Dependency loops & single points of failure
+
+A dedicated pass for the "depends on the very thing it's meant to protect/observe/recover" class of bug — the trap the HA-on-Unraid monitoring fell into. (Backup-key, UPS-shutdown and head-end-thermal loops are covered above.)
+
+- **🔁 Remote-recovery access must not live on the box you're recovering.** If the Tailscale node runs as an Unraid container, then when Unraid is down you **can't VPN in to fix it**. Run the recovery VPN on the **UCG-Max** (UniFi's built-in WireGuard / Teleport) — independent of Unraid, and kept alive by the network UPS. Keep Tailscale too, but don't let it be the *only* way in.
+- **🔁 Don't single-home DNS on the everything-box.** The classic next step is Pi-hole/AdGuard on Unraid — and then when Unraid is down the **whole house (and your phones) lose name resolution**, breaking even unrelated internet. Set a fallback resolver on the gateway/clients (or run DNS on the gateway), so a server outage doesn't take the internet with it.
+- **🔁 Keep a doorbell chime that works with HA dead.** If the PoE doorbell's only alert path is Frigate/HA, an outage = a **silent doorbell**. Ensure a standalone/local chime so visitors still register without the smart stack.
+- **🔁 Guest mode can't key off guest *presence*.** Guests aren't in your HA Companion, so "auto-disable when their phone leaves" is unreliable for exactly the people it's for. Drive guest mode off a **date window + a manual/host toggle**, not the presence of an untracked phone.
+- **⚠️ One UCG-Max is the whole network (single point of failure).** Its death simultaneously takes internet, the SD-WAN, VLAN routing, remote access *and* the off-site watchdog's reachability — and the Decos can't route without it. Treat it as a conscious accepted risk: keep the old **Deco-as-router config documented as break-glass** (or a cheap spare gateway), so a dead UCG-Max is a swap, not a rebuild.
+- See also: the **confirmed-unlock** and **multi-turn confirmation** loops in the Locks section and the integration doc — the security gate and the "yes" antecedent must not depend on a cloud/service that can be down.
 
 ### Monitoring beyond the server
 
