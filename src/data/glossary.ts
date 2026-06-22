@@ -38,7 +38,13 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["Picovoice Eagle", "Eagle"], def: "Speaker-recognition SDK that identifies who is talking from their voice." },
 
   // Audio / AV
-  { terms: ["WiiM Mini", "WiiM Pro", "WiiM"], def: "Compact network audio streamer (AirPlay/Chromecast/Spotify/DLNA) that HA can control." },
+  { terms: ["WiiM Mini", "WiiM Pro", "WiiM Amp", "WiiM"], def: "Compact network audio streamer (AirPlay/Chromecast/Spotify/DLNA) that HA can control. Mini is Wi-Fi-only; Pro adds Ethernet + sub-out; the Amp also drives passive speakers." },
+  { terms: ["Music Assistant"], def: "A Home Assistant add-on that pulls your music sources together and drives any endpoint (WiiM, Sonos, Chromecast, AirPlay, Snapcast) from HA — the control plane that decouples you from any one speaker brand." },
+  { terms: ["Snapcast"], def: "Open-source server for sample-accurate synchronised multi-room audio — the fully-local DIY alternative to a commercial multi-room system." },
+  { terms: ["LinkPlay"], def: "The streaming platform WiiM is built on; what HA's integration talks to for local control." },
+  { terms: ["Spotify Connect", "Tidal Connect"], def: "Cast a stream straight from the Spotify/Tidal app to a network speaker, which then pulls the audio itself." },
+  { terms: ["Roon"], def: "High-end music library/streaming software; WiiM units can act as Roon playback endpoints." },
+  { terms: ["Sonos"], def: "The mainstream commercial multi-room audio system — polished but cloud-dependent and pricier than WiiM." },
   { terms: ["AVR"], def: "AV receiver — the home-cinema amplifier that drives surround speakers and switches HDMI." },
   { terms: ["eARC"], def: "Enhanced Audio Return Channel — sends the TV's audio back to the AVR over one HDMI cable." },
   { terms: ["QD-Mini LED", "Mini-LED"], def: "A TV backlight of thousands of tiny LEDs + Quantum Dots — very bright with deep local-dimming contrast; great in bright rooms." },

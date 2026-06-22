@@ -431,6 +431,27 @@ Each room gets a WiiM Mini (~£90) plugged into a powered speaker. Supports AirP
 | Bedroom 3 | Voice PE built-in initially | Upgrade later if used for music |
 | Garage | WiiM Mini | Rugged powered speaker |
 
+### Is WiiM the right pick? — and how it differs from Voice PE
+
+**First, the Voice PE comparison you're drawing — they're complementary, not the same job.** A Voice PE is *ears*: mic array + wake word + a tiny speaker that's only good for "okay, playing now" confirmations and timers. A WiiM is *output*: a network streamer that turns a powered speaker into a room-filling, HA-controllable music endpoint. You can't replace WiiMs with more Voice PEs (their speakers are too small for music); what you *do* get is the nice tie-in — **route TTS/announcements to the WiiM** so the assistant can talk through the good speaker, while the Voice PE just listens.
+
+**Verdict: yes, WiiM is the right call — it's the audio analogue of the Voice PE decision.** Cheap, local-controllable, HA-native, and it speaks every casting protocol (AirPlay 2, Chromecast, Spotify/Tidal Connect, DLNA, Roon). It's effectively the **open, affordable Sonos** — punches well above its price on DAC quality, gets frequent firmware updates, and the **Music Assistant** add-on drives it from HA. Crucially, Music Assistant also drives Sonos / Chromecast / AirPlay / Snapcast, so **the brand is decoupled from the control plane** — you're not locked in.
+
+**Where it can disappoint:**
+
+- **The Mini is Wi-Fi-only** (like the Voice PE). In a room with a Cat6 drop, step up to the **WiiM Pro** (Ethernet + better DAC + sub-out) for wired reliability — see the networking caveat above.
+- **Cloud-touch on setup** — initial config and some music-service logins go through WiiM's cloud. Day-to-day *control* via HA, plus AirPlay/DLNA/Roon playback, are fully local, but it isn't as purely local as a Pi running Music Assistant.
+- **It's a streamer, not an amp** — the Mini needs a powered speaker. For a tidier install (kitchen/bathroom in-ceiling), a **WiiM Amp** is one box that streams *and* drives passive speakers.
+
+**Pick the tier per room:** **Mini** (cheap, Wi-Fi, line/optical out) → **Pro** (Ethernet, sub-out — use in wired rooms) → **Amp** (built-in amplifier for passive/in-ceiling) → **Ultra** (touchscreen, phono). My rec: **Pro in the wired rooms** (kitchen, conservatory, garage), Mini for cheap secondary zones, consider an **Amp** anywhere you'd otherwise buy streamer + powered speaker.
+
+**Fallback ladder if it underwhelms:**
+
+1. **Right tier, same ecosystem** — Pro for wired reliability, Amp to lose the separate speaker box. Usually the fix is "the right WiiM," not a different brand.
+2. **Music Assistant stays the control plane** — already decouples you, so you can mix in other endpoints without re-architecting.
+3. **Fully-local DIY** — Raspberry Pi + Music Assistant + **Snapcast** for sample-accurate whole-house sync (and shairport-sync for AirPlay). More boxes, totally local, free-ish.
+4. **Sonos** — only if you want plug-and-play polish and accept the cloud dependency, higher price, and their track record of bricking old kit. Against the local-first ethos.
+
 ### Multi-room sync
 
 Lounge AVR (HEOS/MusicCast) won't sample-accurately sync with WiiMs in other rooms. Accepting that — rooms usually want different audio anyway. WiiMs sync between themselves when "play everywhere" is needed.
@@ -1620,6 +1641,7 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - [ ] **Voice PE — confirm lounge performance before buying the full set.** Test one unit in the lounge with media playing (worst-case acoustics); decide STT route (local Whisper+GPU vs HA Cloud) off the back of it. See "Is Voice PE good enough?" above.
 - [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.
 - [ ] Lounge speaker positions chalked on wall before plastering (5.1 positions only)
+- [ ] **WiiM tier per room** — Mini (Wi-Fi) vs Pro (Ethernet, for the wired rooms: kitchen, conservatory, garage) vs Amp (drives passive/in-ceiling, no separate powered speaker). See "Is WiiM the right pick?" — affects the audio budget.
 - [ ] Blind motor power: mains vs battery decision (deferred to contractor walk-through — but provision/conduit must be in place by then)
 - [ ] **Window actuator power approach**: battery (~£200/window, 6-12mo battery) vs mains-powered (~£400/window, needs 13A spurs in electrical scope) vs PoE (rare, needs Cat6 spec amendment)
 - [ ] **Window types confirmed** on site survey for motor compatibility (casement/tilt-and-turn straightforward; sash + bay sections need specialist actuators)
