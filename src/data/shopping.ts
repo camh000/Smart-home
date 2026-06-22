@@ -112,6 +112,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b29t", name: "Adaptive Lighting (HACS)", meta: "Circadian lighting integration, free", cost: 0, costLabel: "free" },
       { id: "b29u", name: "Google Calendar integration", meta: "Calendar-driven anticipation", cost: 0, costLabel: "free" },
       { id: "b29v", name: "Energy dashboards setup", meta: "Octopus Agile + National Grid carbon intensity", cost: 0, costLabel: "free" },
+      { id: "b29w", name: "Focus mode — NFC tag + desk LED", meta: "Phone-mindfulness: NFC focus-dock + green→red accountability LED. Fixed 9–5:30 schedule, no work-laptop software needed.", cost: 15, costLabel: "~£12-17" },
     ],
   },
   {

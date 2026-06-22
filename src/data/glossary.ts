@@ -86,6 +86,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["NFC"], def: "Near-field tags you tap a phone/reader on — here, coasters that queue a song or open a tab." },
   { terms: ["CodeProject.AI"], def: "Self-hosted AI server (runs on Unraid) for tasks like licence-plate or dart scoring via the cameras." },
   { terms: ["HX711"], def: "A small amplifier board that reads load cells (weight sensors) into an ESP32 — used here to weigh bottles." },
+  { terms: ["Pomodoro"], def: "A focus technique: work in timed sprints (e.g. 25 min) with short breaks between." },
   { terms: ["Adaptive Lighting"], def: "HA add-on that auto-shifts bulb colour temperature through the day (circadian)." },
   { terms: ["Fully Kiosk"], def: "Android app that locks a tablet into a single full-screen HA dashboard." },
   { terms: ["Shelly"], def: "Small Wi-Fi relays/meters with a proper local API — used here for UFH actuators and energy metering." },

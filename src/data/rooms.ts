@@ -134,6 +134,8 @@ export const ROOMS: Room[] = [
       { cat: "blind", label: "Motorised blind", detail: "Single motor on the window opposite the desks. Auto-tilt to reduce screen glare based on sun position." },
       { cat: "window", label: "Window actuator", detail: "Motorised opening for ventilation. Two people working all day = high CO2; automated opening when CO2 climbs above threshold." },
       { cat: "heat", label: "TRV (Aqara E1)", detail: "Zigbee TRV on radiator. Office mode bumps temp when either desk is occupied." },
+      { cat: "light", label: "Focus accountability LED", detail: "Small desk LED/WLED for the “Focus mode / phone mindfulness” system: green while focused → amber → red as personal-phone screen-time climbs during work hours (fixed 9:00–17:30 weekdays, minus a declared lunch). Silent, glanceable — needs nothing on the locked-down work laptop." },
+      { cat: "display", label: "NFC focus-dock", detail: "A tag on a phone stand: tap to start a Pomodoro focus sprint; phone goes face-down and lifting it early is the nudge. Pairs with auto-DND on the personal phone. The work laptop's presence on Wi-Fi is the (optional) no-install “awake/working” proxy." },
     ],
   },
   {
