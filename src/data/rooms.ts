@@ -185,7 +185,10 @@ export const ROOMS: Room[] = [
       { cat: "net", label: "Deco 3 + fibre media converter", detail: "Inter-building fibre link from head-end. Avoids ground-potential-difference / surge risk per cabling spec §8." },
       { cat: "camera", label: "Exterior camera", detail: "Covers main garage door. Can share garage fibre conduit." },
       { cat: "light", label: "Garage lighting", detail: "Workshop lighting, motion-activated." },
-      { cat: "speaker", label: "WiiM Mini + rugged speaker", detail: "Workshop tunes." },
+      { cat: "speaker", label: "WiiM Mini + rugged speaker", detail: "Workshop tunes — also the bar's audio + DJ-Claude endpoint." },
+      { cat: "light", label: "Bar — WLED + scenes", detail: "Addressable strip (ESP32) behind the bar for under-counter glow, bottle backlighting and team/holiday colours. Drives the “open the bar” / “last orders” / “closing time” scenes and goal-reactive flashes. See the Garage bar section." },
+      { cat: "display", label: "Bar tablet — now playing / tabs / quiz", detail: "Bar dashboard: now playing, who's here, tabs, the cocktail menu, and the pub-quiz/darts scoreboard. NFC-jukebox tap target." },
+      { cat: "heat", label: "Bar heater (pre-warm)", detail: "Smart heater so a planned bar night pre-warms the cold detached garage — “bar's warming, ready in 20”. Plus keg/bar-fridge temp control and a CO2 leak sensor if a keg CO2 cylinder is used (enclosed-space safety)." },
     ],
   },
 ];

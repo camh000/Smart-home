@@ -43,6 +43,7 @@ export const PLAN_GROUPS: GroupDef[] = [
       "PC integration",
       "Smart plug deployment",
       "Optional: Window motors",
+      "Garage bar",
     ],
   },
   {

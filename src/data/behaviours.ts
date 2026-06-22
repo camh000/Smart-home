@@ -209,6 +209,22 @@ export const BEHAVIOURS: Behaviour[] = [
     ],
   },
   {
+    id: "bar",
+    title: "Garage bar mode",
+    phase: 4,
+    cost: "~£100-150",
+    hardware: "Existing + WLED/sensors",
+    summary: "The garage's voice, audio, lighting and camera turn into a Claude-run bar — scenes, pour tracking, a cocktail assistant and proper banter.",
+    points: [
+      "“Open the bar” → warm lights, back-bar WLED, neon sign, music, heater and the TV all come up; an Open/Closed status shows on the house tablets.",
+      "“The usual?” — voice-ID + memory greets each person with their drink, music and lighting prefs.",
+      "Keg flow-meter tracks pints, keg % remaining and who poured what — with a gamified leaderboard.",
+      "Claude bartender: “what can I make with what's in?” → suggests, reads the recipe aloud, and does a named “bartender's choice”.",
+      "Camera dart auto-scoring (reusing CodeProject.AI) + a pub-quiz host with Zigbee-button buzzers; goal-reactive team-colour WLED for the match.",
+      "Auto close-up: last one out → everything off, garage locked, and Claude posts the night's stats. Local fallback so it survives a fibre-link blip.",
+    ],
+  },
+  {
     id: "photo",
     title: "Photo digest",
     phase: 4,
