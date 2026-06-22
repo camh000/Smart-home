@@ -72,6 +72,9 @@ export const GLOSSARY: GlossaryEntry[] = [
   // Power / monitoring
   { terms: ["UPS"], def: "Uninterruptible power supply — battery backup that rides out power cuts." },
   { terms: ["NUT"], def: "Network UPS Tools — lets HA read the UPS and trigger a safe shutdown on power loss." },
+  { terms: ["Uptime Kuma"], def: "Self-hosted uptime monitor that actively pings your services and alerts when one goes down." },
+  { terms: ["Healthchecks.io", "Healthchecks"], def: "A 'dead man's switch' service — your system pings it on a schedule; if the pings stop, it alerts you." },
+  { terms: ["dead-man's-switch", "dead man's switch"], def: "Monitoring that alerts on the *absence* of an expected signal — so a total outage (which can't send an alert itself) still gets noticed." },
 
   // Brands / integrations
   { terms: ["HASS.Agent"], def: "Windows app that exposes PC sensors (active/idle, focused window…) to HA over MQTT." },
