@@ -112,7 +112,7 @@ Output channels available:
 - **Wall tablets** — kitchen, hall, optional master
 - **PC desktop overlay** — via HASS.Agent or custom Tauri app (phase 3+)
 - **Phone push** — via HA Companion app
-- **Smart mirror** — wet room (Aqara button-driven, but can also receive proactive)
+- **Smart mirror** — bathroom (Aqara button-driven, but can also receive proactive)
 
 ## Person identification
 
@@ -174,7 +174,7 @@ Conversational and brief. Acknowledge the action, don't be robotic.
 
 **Tier 2 — requires verbal confirmation before action:**
 
-- Both door locks (lock and unlock)
+- All three door locks — front, conservatory, dining (lock and unlock)
 - Heating / thermostat set-points
 - Any alarm or siren
 - Disarming any security state

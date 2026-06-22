@@ -11,6 +11,38 @@ A bespoke, self-hosted replacement for Alexa, covering voice control, lighting, 
 - Voice control in all main rooms: lounge, kitchen, both downstairs… (see Voice Coverage below)
 - Everything local-first where possible; cloud only where unavoidable
 
+## Start now for £0
+
+Roughly the entire *software* brain plus every device already owned can go in today, before spending another penny or moving house. The stuff that needs money is almost all physical sensors/actuators not yet owned.
+
+**The brain — free Docker/VM on the existing Unraid:**
+
+- **Home Assistant** itself — the foundation.
+- **Full RAG memory layer** (the phase-1 "jump path"): **Qdrant** + **Ollama** (bge-small / nomic-embed) + the custom Python wrapper. Pure software, no hardware.
+- **Frigate** — install/configure now (CPU/OpenVINO detection, no Coral needed; test with a phone-as-IP-camera) so it's ready when cameras arrive.
+- **Grocy** — stand it up and start populating inventory.
+- **Mosquitto MQTT** broker.
+- **Unraid health monitoring** — **Glances + Scrutiny → HA**, immediately useful on the current box (SMART, capacity, temps, containers).
+
+**Owned devices, integrated today:**
+
+- **4× Govee bulbs** → HA → scenes (cosy/movie/reading) + **Adaptive Lighting** circadian.
+- **4× Meross Matter plugs** → HA via Matter → control + **energy monitoring** + "washing's done" cycle detection + safety auto-off.
+- **Apple TV** → media-player entity, auto-dim on play/pause, "what's playing".
+- **Phones** → HA Companion → **Tier-1 presence** + push notifications.
+- **Cam + Nova's PCs** → **HASS.Agent** → ~30 activity/presence sensors each + a pinned dashboard.
+
+**Voice pipeline — prototype with no hardware:**
+
+- **openWakeWord + Whisper + Piper** run locally on Unraid (free).
+- Use the **HA Companion app's Assist on a phone** as the satellite to prove the full *wake → STT → reasoning → tool-call → TTS* loop and the memory retrieval — no Voice PE needed yet (and remember the Voice PE is Wi-Fi-only anyway).
+
+**Network — when the UCG-Max lands (it's a gift, £0):** set it as root, Decos as APs, the 2× TP-Link switches as VLAN access switches, define the VLAN scheme, and bring up **Site Magic SD-WAN to Selby** with the off-site backups below.
+
+**The one caveat:** using **Claude** as the brain is pay-per-use (fractions of a penny per request). For a *strict* £0 prototype, use HA's built-in **local conversation agent** first, then swap Claude in once a few pennies are acceptable.
+
+**First things that actually cost money:** a **Zigbee coordinator dongle (~£20)** — the single gate that unlocks all Zigbee kit — then a **Voice PE (~£55)** for hands-free room voice.
+
 ## Foundation: structured cabling
 
 The whole-house Cat6 install is being procured separately under the **Woodhouse Road Cabling Specification (May 2026)**. That spec is the physical backbone everything in this plan plugs into. Key points relevant here:
@@ -23,7 +55,7 @@ The whole-house Cat6 install is being procured separately under the **Woodhouse 
 - **Patch panels:** client-supplied (reclaimed enterprise panels)
 - **Active equipment:** all client-supplied (Unraid, switches, cameras, voice nodes — everything in this plan)
 
-**Implication for this plan:** every voice node room has at least one Cat6 drop. **Wire the voice nodes, don't rely on WiFi.** Same for WiiM endpoints.
+**Implication for this plan:** every voice node room has at least one Cat6 drop — valuable for wired endpoints, tablets and future kit. **Caveat (corrected):** the **HA Voice PE is Wi-Fi-only** — USB-C powered, **no Ethernet port** — so the voice nodes themselves run over Wi-Fi (a strong wired-backhaul mesh is what makes that reliable). If a genuinely *wired* mic is ever required, the fallback is an Ethernet-capable satellite (ESP32-S3-BOX or a Pi-based Wyoming satellite). The **WiiM Mini is likewise Wi-Fi-only** — step up to a **WiiM Pro** for a wired audio endpoint. So: wire the *room* for everything else, but don't assume the voice/audio nodes plug into it.
 
 **Additions needed to the cabling scope** (see "Additions to cabling scope" below).
 
@@ -45,7 +77,7 @@ See **`claude_ha_integration.md`** for the Claude + Home Assistant technical des
 
 Headline points that affect this plan:
 
-- Voice nodes are **HA Voice Preview Edition** (wired Cat6 to each node)
+- Voice nodes are **HA Voice Preview Edition** (Wi-Fi + USB-C power — no Ethernet port; see the Foundation caveat)
 - Frigate runs alongside HA on Unraid for CCTV
 - Claude is the conversation/reasoning layer via HA's built-in Anthropic integration
 - API cost is negligible (~£5-10/month tiered)
@@ -58,7 +90,7 @@ The network root is the **UniFi Cloud Gateway Max (UCG-Max)**, gifted by dad. It
 
 ### Switching layer
 
-- **Core PoE+ switch** (head-end, Bedroom 3) — feeds the PoE devices. In practice that's only the **4 cameras + doorbell** (the Voice PE units are USB-C powered, so their Cat6 carries data, not power). The 16-port in the shopping list is therefore mostly headroom — an 8-port PoE+ would technically cover the PoE load — but the extra ports and the option to run voice/AP data drops off it are worth keeping.
+- **Core PoE+ switch** (head-end, Bedroom 3) — feeds the PoE devices. In practice that's only the **4 cameras + doorbell** (the Voice PE units are Wi-Fi + USB-C, so they don't touch the switch at all). The 16-port in the shopping list is therefore mostly headroom — an 8-port PoE+ would technically cover the PoE load — but the extra ports and the option to run AP/tablet data drops off it are worth keeping.
 - **2× TP-Link 9-port gigabit Easy Smart (owned)** — reused as **VLAN-aware access switches** where several non-PoE wired devices fan out off one drop: the **office desk** (two PCs + peripherals for Cam + Nova), the **lounge AV stack** (AVR, Apple TV, TV, console), and/or the **garage**. Configure 802.1Q on them (PVID + tagged/untagged) to match the UniFi VLAN IDs.
 - **Caveats:** these are **gigabit, not 2.5G** (keep the Unraid uplink and the CCTV/backup path on the gateway's 2.5G ports), and they're **not UniFi-managed** (they won't appear in the UniFi controller — configure once in TP-Link's web UI and leave them). Free kit, zero added cost, and they cut how many home-run drops the core switch has to terminate.
 
@@ -132,21 +164,43 @@ Routine scene buttons worth adding regardless of voice coverage:
 - **Future bulbs** — Zigbee (Hue, Innr, Ikea Tradfri) or Matter, not WiFi
 - **Switched fittings** — Shelly or Aqara Zigbee relays behind the switch where pendant fittings aren't worth replacing
 
-Approx zones to cover: dining, kitchen, conservatory, lounge, hall, porch, landing, 3 bedrooms, wet room, garage, front exterior, back exterior. ~13 zones.
+Approx zones to cover: dining, kitchen, conservatory, lounge, hall, porch, landing, 3 bedrooms, bathroom, garage, front exterior, back exterior. **~14 zones** (counted from this list).
 
 ## Locks
 
-- **Front door** and **back door** — Zigbee or Z-Wave, not WiFi
-- Candidates: Yale Assure 2, Schlage Encode Plus (Matter), Aqara U100
-- Confirm back door exit point (kitchen vs conservatory) — affects fitting
+**Three entries, three locks** (confirmed in Open questions): the **front door**, the **conservatory hinged door** (S wall), and the **dining French doors** (N wall). Zigbee/Z-Wave/Matter — not Wi-Fi.
+
+- Candidates: Yale Assure 2 (front), Aqara U100 (conservatory Euro-cylinder retrofit), Aqara A100 Pro or Nuki 4 Pro (dining French-door multi-point cylinder)
+- All three are Tier-2 (verbal confirmation before lock/unlock; tool-layer challenge token for locks specifically)
 
 ## Blinds
 
-- Front bays (showpiece, expensive — each pane needs a motor)
-- Bedrooms
-- Conservatory (heat management — worth it if it bakes in summer)
+**Baseline scope: bedroom blinds only.** That's the priority — motorise the three bedrooms (master, bed 2, bed 3) and treat everything else as a *bonus tier if budget allows*. This keeps the blinds line small and certain rather than a £2-3k whole-house commitment.
+
+- **Baseline (do this):** bedrooms — master, bed 2, bed 3. The master bay is 3 panes (3 motors); bed 2/3 are single windows. ≈ 5 motors, ~£700.
+- **Bonus tier 1 (if money comes in):** lounge bay (showpiece, 3 panes/motors).
+- **Bonus tier 2:** conservatory (5-7 panels — heat/glare; biggest single swing in cost) + dining/kitchen.
+- **Note — motors vs openings:** count blinds in *motors* (one per pane → bays inflate the motor count) not windows. Blind motors (shading) are a **separate** device from any window-vent actuators (ventilation) in the optional Window-motors section — the two budget lines are not double-counting.
 - Retrofit existing: SwitchBot Blind Tilt or Aqara Roller Shade Driver E1
 - New install: IKEA Fyrtur (Zigbee) or Matter-over-Thread
+
+Cabling note: because the *option* on the bonus tiers is only preserved while walls are open, still pull low-voltage DC / draw-string to **every** potential blind head now (see "Additions to cabling scope") even though only the bedrooms are funded today.
+
+## Safety sensors (smoke, CO, water leak)
+
+The most important gap the plan was missing. A JARVIS-grade home that promises to override its own DND "except for smoke" needs to actually *sense* smoke — and floors-open is the cheapest moment to protect against leaks.
+
+**Smoke + CO (life safety):**
+
+- Interlinked smart **smoke + heat + CO** alarms feeding HA — e.g. Zigbee **Frient**/**Heiman**, or mains **Ei Electronics** with a relay/contact module into HA. Keep them functioning as standalone alarms too (HA is a *notifier*, never the only line of defence).
+- Unlocks the real version of Cinema-mode's "except smoke" override, plus per-room alerting, phone push when away, and a spoken Claude warning.
+
+**Water leak (protect the build):**
+
+- Zigbee **leak sensors** at the obvious sources: **UFH manifold**, **boiler**, under **kitchen/bathroom sinks**, behind the **washing machine/dishwasher**.
+- Highest-ROI add: a **motorised stopcock** (e.g. Sonoff/Aqara valve or a proper actuator on the mains) so HA can auto-shut the water on a confirmed leak — the single best "catastrophe avoided" device in a smart home.
+
+**Cost:** ~£15-25 per Zigbee sensor, ~£60-120 for a motorised stopcock. All on the Zigbee mesh, no new hub. Phase 2 with the rest of the Zigbee fleet (the coordinator must exist first).
 
 ## Heating &amp; climate control
 
@@ -166,8 +220,8 @@ OpenTherm lets the boiler **modulate** — run at the lowest temp that satisfies
 ### Architecture
 
 1. **Boiler** with OpenTherm support
-2. **OpenTherm Gateway (~£80)** sits between boiler and master thermostat — exposes OpenTherm to HA, lets HA modulate boiler temp based on demand from all zones
-3. **TRVs upstairs (5)** — Aqara E1 Zigbee on master, bed 2, bed 3, landing, wet room
+2. **OpenTherm Gateway (~£80)** sits between boiler and the room sensor — exposes OpenTherm to HA, lets HA modulate boiler flow temp. Note: with OTGW + HA, **HA effectively *becomes* the thermostat** — you don't necessarily keep a separate smart wall stat. Boiler modulation driven by the TRV/zone *demand* isn't automatic; it needs a bit of HA logic (sum/!max of zone calls-for-heat → target flow temp). Keep a simple physical room stat as a fail-safe if HA is down.
+3. **TRVs upstairs (5)** — Aqara E1 Zigbee on master, bed 2, bed 3, landing, bathroom
 4. **UFH downstairs (2 zones)** — DIY control for lounge + dining
 
 ### Wet UFH — DIY zone control (lounge + dining)
@@ -179,7 +233,7 @@ For 2 zones, DIY is both cheaper and more JARVIS-friendly than Heatmiser/Wunda. 
 - Standard wet UFH manifold actuator (installed with the system)
 - **Shelly relay** controlling the actuator (~£20)
 - **Aqara temperature sensor** in the room (~£15)
-- **HA "Generic Thermostat"** entity ties it together — calls for heat when room temp &lt; target
+- **HA "Generic Thermostat"** entity ties it together — calls for heat when room temp &lt; target. **Caveat:** UFH is high-thermal-mass and slow; a naive on/off Generic Thermostat will overshoot badly. Use a PWM/TPI duty-cycle approach (Generic Thermostat's `min_cycle_duration` / a PID or `better_thermostat`-style control) so the floor doesn't keep cooking after the call-for-heat clears.
 
 Target temp can be set per-person, per-time-of-day, per-occupancy state. mmWave presence directly influences heating (room occupied → warm; vacant for an hour → drop).
 
@@ -295,9 +349,9 @@ Rough in the infrastructure for master + bed 3 + conservatory + lounge (4 positi
 
 ## CCTV + doorbell
 
-- **NVR**: Frigate on Unraid, Coral TPU for object detection
-- **Cameras**: PoE only. Reolink (budget), Amcrest/Dahua (mid), Unifi (premium)
-- **Doorbell**: Reolink PoE Video Doorbell — works with Frigate, runs off PoE switch
+- **NVR**: Frigate on Unraid. **Detector: Coral TPU is optional now, not required** — Frigate also supports **OpenVINO on an Unraid iGPU** (or ONNX/CPU) for object detection, so don't let chronic Coral supply block the build. Use whichever the Unraid box can run; Coral is a nice-to-have for low CPU load.
+- **Cameras**: PoE only. Reolink (budget), Amcrest/Dahua (mid), Unifi (premium). *Verify* the specific Reolink models stream cleanly to Frigate with internet egress fully blocked (some Reolink firmware misbehaves when firewalled).
+- **Doorbell**: Reolink PoE Video Doorbell — works with Frigate, runs off PoE switch. *Verify* doorbell-press events reach HA/Frigate with egress blocked.
 - **PoE switch** — 8-port minimum (TP-Link or Unifi)
 - **Storage** — event recording + 24-48hr continuous buffer. Unraid has plenty.
 - **VLAN** — cameras isolated from main network (good hygiene, not essential)
@@ -352,10 +406,9 @@ Buying secondhand off FB Marketplace. AVR acts as both surround processor AND th
 
 **Target spec when hunting:**
 
-- Atmos support (height channels)
 - AirPlay 2 (Plex casts to it natively)
 - HEOS (Denon/Marantz) or MusicCast (Yamaha) — both have solid HA integration
-- 7.2 channels minimum, ideally 9.2 for 5.1.4 Atmos
+- **7.2 channels is plenty — the install is 5.1 only** (Atmos/heights were dropped in Open questions: no ceiling runs, no upfiring). Atmos-capable AVRs are fine as future-proofing, just don't pay extra for height channels you won't wire.
 - HDMI 2.1 with 4K/120 passthrough
 - eARC for TV audio
 
@@ -1140,12 +1193,13 @@ The cabling spec covers data, AV and audio for the house but does **not** includ
 |---|---|---|
 | Front high (eave / soffit) | Front camera | Covers porch, bays, driveway |
 | Rear high (above conservatory) | Rear camera | Garden coverage |
-| Side passage (if present) | Side camera | TBC on site |
-| Garage exterior | Garage camera | Can share garage fibre conduit |
+| Driveway side (house-mounted) | Driveway-side camera | Looks down the side passage toward the garage (confirmed — there's no passage on the opposite side) |
+| Garage exterior | Above-garage camera | Garage-mounted, looking back at the house; shares the garage fibre conduit |
 | Garage interior (optional) | Interior camera | Workshop / storage |
 | Front door (low, near doorbell) | PoE doorbell | Cat6 to existing doorbell location |
-| Lounge speaker positions | Surround / Atmos | Speaker cable, not Cat6 — see Audio section |
-| **Every blind position** (all rooms with motorised blinds planned) | Blind motor power option | Low-voltage DC cable or conduit/draw-string to each blind head. Decision on mains vs battery deferred to contractor walk-through — but **provision must be in place** while walls are open or option is lost. Bay heads (lounge + master), conservatory panels, dining, kitchen, bedrooms 2/3. |
+| Lounge speaker positions | 5.1 surround | Speaker cable, not Cat6 — see Audio section (5.1 only, no Atmos) |
+| **Every potential blind position** | Blind motor power option | Low-voltage DC / conduit / draw-string to every blind head — even though only the **bedrooms** are funded today, the *option* on the bonus tiers (lounge bay, conservatory, dining, kitchen) is only preserved while walls are open. |
+| **AC rough-in** (master, lounge, bed 2/office, conservatory) | Refrigerant + comms + condensate + outdoor power | Pipe routes (8mm + 16mm pair, capped), 4-core comms, gravity condensate drain, and a dedicated outdoor-unit circuit — run **now** even though the AC units are deferred (see Cooling section). Adding later means ripped walls. |
 
 **Plus a sensible "spare" or two** — pull extra Cat6 to any wall that might host a future TV, desk or wall-mounted tablet. Cheap now, impossible later.
 
@@ -1166,6 +1220,57 @@ Most cable runs are already in the spec. The remaining decisions are about **act
 - **Speaker cable** to lounge surround / Atmos positions — separate from the Cat6 spec, runs while walls are open.
 - **Mains for voice nodes** — each room with a Voice PE needs a socket nearby. Most rooms will have this anyway; flag any awkward locations (e.g. landing) to the sparky.
 - **Power for Decos** — hall, landing, garage. Decos aren't PoE. Already noted in spec but worth checking sockets exist at planned Deco positions.
+
+## Resilience: power, backup & fallback
+
+The house *runs on* Unraid + the network + the Claude pipeline. Each needs a defined failure story — this was the biggest non-safety gap in the original plan.
+
+### Power / UPS
+
+- **Size the head-end UPS by *runtime*, not just VA.** "1000-1500VA" names apparent power, not minutes. With Unraid + a loaded PoE switch (cameras can pull 30-60W+) + Decos + media converter, a 1500VA unit may only give a few minutes. Compute the actual watt load and target a defined runtime (**≥15 min** to ride out blips + trigger a clean Unraid shutdown via NUT).
+- **Consider a second small UPS for the network gear** (UCG-Max + core switch) so the **SD-WAN / Tailscale / remote support stays up** even while the server is shutting down or rebooting.
+
+### Backup & disaster recovery (3-2-1, with a *tested* restore)
+
+Today only "a Qdrant volume backup" exists. That's not a backup strategy. Define:
+
+- **Home Assistant** — automated, versioned full snapshots (config + DB + secrets), local **and** off-site.
+- **Frigate** — config + recordings policy (recordings are replaceable; config and the event DB are not).
+- **Memory layer** — Qdrant volume + the structured SQLite store.
+- **Immich (family photos)** — the irreplaceable one. Back up the **Immich library + its Postgres DB**, **client-side encrypted**, **off-site to Selby over the SD-WAN**. Use **restic** or **borg** (or `rclone` with crypt) so the data is encrypted *before* it leaves the house — dad hosts the bytes but **cannot read the photos**. Keep a local fast copy too (3-2-1: ≥3 copies, 2 media, 1 off-site).
+- **Off-site target = the Selby SD-WAN** for HA snapshots and the Immich/memory backups; private link, no public exposure.
+- **Rehearse a restore.** A backup you've never restored is a hope, not a plan. Do one real restore drill and write a short runbook.
+
+### Graceful degradation & fallbacks
+
+- **"Claude API slow/down" fallback is a Phase-1 deliverable, not an open question.** When the API times out, fall back to **HA's built-in local intents** for the essentials — lights, "goodnight", and a confirmed unlock — so the house still works offline.
+- **"HA / Unraid down" story:** keep **physical switches live** (never fully remove dumb control); document that voice + automations degrade gracefully and the house remains hand-operable.
+- **Head-end heat:** Bedroom 3 holds Unraid + a loaded PoE switch + UPS + patch panel — a real heat load. Spec **active extraction + a temperature alert** for that room specifically (PoE switches run hot under load); don't rely on "a quiet fan."
+
+### Monitoring beyond the server
+
+The Unraid health section covers the box; also watch the **edges**: UCG-Max status, **SD-WAN tunnel up/down**, **WAN reachability**, and a **Claude-API error-rate** counter — all on the same alerting rails (push / toast / proactive Claude).
+
+## Operations: network scheme, accounts & updates
+
+### Network & IP scheme + as-built docs
+
+- **Define the VLAN/IP scheme now** (IoT / voice / CCTV / guest / main), **non-overlapping with Selby** (e.g. `10.10.x` here, `10.20.x` there) — it's a prerequisite for the SD-WAN, guest isolation and the camera egress-blocking the privacy plan relies on.
+- Keep **as-built documentation**: a **patch-panel port map**, a **device/IP inventory**, and the VLAN plan. Cheap to do as you go, painful to reconstruct later. (The "friendly names" convention is good; this is the infrastructure equivalent.)
+
+### Accounts, credentials & access
+
+- **Secrets management** — decide where the Claude/ElevenLabs API keys, lock challenge tokens and UniFi/Unraid/Grocy/Immich logins live (HA `secrets.yaml` hygiene + a password manager), and a rotation policy.
+- **Multi-admin + break-glass** — two cohabitants (Cam + Nova) plus a remote co-admin (dad, via the SD-WAN). Define HA admin accounts with **2FA** and a **recovery/break-glass** procedure if the primary owner is unavailable.
+- **Per-person capability model** — who can do *what* by voice? Lock/unlock, heating, alarm disarm and "away" should be gated by person (and guests/children must **not** trigger Tier-2 actions). This is the voice-ID + presence work made into a policy.
+
+### Software updates & change management
+
+- **Don't auto-update the house.** HA's `x.0` releases break things; Frigate/Qdrant/Ollama move fast. **Pin container versions**, read release notes, and test major HA updates against a **backup/VM clone** before rolling forward. A broken update at 6pm shouldn't mean no lights.
+
+### Privacy / compliance note (UK)
+
+- Face recognition of visitors + **ALPR** of plates + 30-day digests edge into **UK GDPR** territory once you process/retain footage of non-household members or the street beyond your boundary. Note the **domestic-purposes exemption limits**, add **recording signage**, and set a **retention + lawful-basis** line for ALPR and face data. (See also the Privacy section below.)
 
 ## Privacy
 
@@ -1265,12 +1370,11 @@ The aim: prove the full pipeline (voice → Claude → tool calls → response) 
 - Scene buttons on landing
 - Motion sensors, contact sensors, presence detection
 - **Remaining wall tablets** (hall + optional bedroom)
-- **Smart mirror** in wet room (DIY)
+- **Smart mirror** in bathroom (DIY)
 - **Scene buttons** next to mirror, plus more around the house
 - **Proactive Claude service** deployed (custom Python on Unraid)
 - **Energy monitoring** via Shelly EM on consumer unit
 - **Second FP2** (master bedroom), optional FP1E (office)
-- **Humidity sensor + PIR** in wet room
 - **PC integration** — HASS.Agent on Windows PC, pinned browser dashboard, optional custom Tauri overlay app
 - **UFH zone control** — Shelly relays on lounge + dining actuators, Aqara temp sensors, HA Generic Thermostats configured
 
@@ -1364,24 +1468,26 @@ Offset: Echo resale ~£60-100.
 | Item | Est. |
 |---|---|
 | 16-port PoE+ switch (Unifi USW-Lite-16-PoE or TP-Link TL-SG1218MP) | £180-220 |
-| 3× Reolink PoE cameras (RLC-810A / 811A, 4K) | £210-270 |
+| 4× Reolink PoE cameras (RLC-810A / 811A, 4K) — front, rear, driveway-side, garage | £280-360 |
 | 1× Reolink PoE doorbell | £100-120 |
-| Coral USB TPU (already in phase 1) | — |
+| Coral USB TPU (optional — OpenVINO/iGPU is the free fallback) | 0-60 |
 | Frigate storage top-up (4TB HDD + 1TB SSD cache, if Unraid is tight) | £120-180 |
 | Mounts, weatherproof boxes, cable glands | £40-80 |
-| **CCTV total** | **~£740-960** |
+| **CCTV total** | **~£820-1,080** |
 
-Could downsize the PoE switch to 8-port (~£100) given only 4 PoE devices (3 cams + doorbell), but 16-port leaves headroom for future expansion.
+The build is **4 cameras + doorbell** (front, rear, driveway-side, above-garage), i.e. **5 PoE devices** — an 8-port PoE+ (~£100) would cover it, but the 16-port leaves headroom for future expansion.
 
 ### Lighting, locks, blinds (rough placeholders)
 
 | Item | Est. |
 |---|---|
-| Zigbee bulbs / relays — ~13 zones (mix of Hue/Innr/Shelly/Aqara) | £400-700 |
+| Zigbee bulbs / relays — ~14 zones (mix of Hue/Innr/Shelly/Aqara) | £400-700 |
 | 3× smart locks (front + conservatory + dining) | £400-500 |
-| Motorised blinds — ~14-17 units (2 bays × 3 panes + dining/kitchen/conservatory/bed 2/bed 3) | £2,200-3,400 |
+| Motorised blinds — **baseline: bedrooms only** (master bay 3 + bed 2/3 ≈ 5 motors) | £700 |
+| Motorised blinds — *bonus, if budget allows* (lounge bay, conservatory, dining, kitchen) | +£1,500-2,700 |
 | Sensors, buttons, misc Zigbee tat | £150-250 |
-| **Lighting/locks/blinds total** | **~£3,350-5,030** |
+| **Lighting/locks/blinds total (baseline)** | **~£1,650-2,150** |
+| **Lighting/locks/blinds total (with all blind bonuses)** | **~£3,150-4,850** |
 
 ### Heating &amp; climate
 

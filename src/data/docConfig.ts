@@ -9,6 +9,7 @@ export const PLAN_GROUPS: GroupDef[] = [
     label: "Overview",
     sections: [
       "Goals",
+      "Start now for £0",
       "Foundation: structured cabling",
       "Existing kit to reuse",
       "Technical integration",
@@ -25,6 +26,7 @@ export const PLAN_GROUPS: GroupDef[] = [
       "Lighting",
       "Locks",
       "Blinds",
+      "Safety sensors (smoke, CO, water leak)",
       "Heating & climate control",
       "Cooling / AC (optional)",
       "CCTV + doorbell",
@@ -49,6 +51,8 @@ export const PLAN_GROUPS: GroupDef[] = [
     sections: [
       "Additions to cabling scope (NOT in current spec)",
       "Pre-move-in wiring — additional considerations",
+      "Resilience: power, backup & fallback",
+      "Operations: network scheme, accounts & updates",
       "Privacy",
     ],
   },
