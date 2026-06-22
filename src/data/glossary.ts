@@ -41,6 +41,9 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["ALLM"], def: "Auto Low Latency Mode — the TV auto-switches to its low-lag Game Mode when a console/PC is detected." },
   { terms: ["HDMI-CEC", "CEC"], def: "HDMI control signalling — lets one device power on/switch others (e.g. HA/AVR turning the TV on and selecting an input)." },
   { terms: ["Google TV", "Android TV"], def: "Google's smart-TV platform (on TCL here) — HA controls it for power, volume, apps and playback state." },
+  { terms: ["Dolby Vision"], def: "A premium HDR format with scene-by-scene tone mapping for better contrast and colour on supported TVs." },
+  { terms: ["AirPlay 2"], def: "Apple's wireless streaming — lets Plex/phones cast audio or video straight to the TV." },
+  { terms: ["one-touch play"], def: "HDMI-CEC feature where waking one device (the Apple TV) powers on the TV + soundbar and switches to the right input." },
   { terms: ["Plex"], def: "Self-hosted media server for your films and music." },
 
   // Networking

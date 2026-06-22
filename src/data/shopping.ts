@@ -56,7 +56,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b14", name: "AVR (FB Marketplace)", meta: "Denon X3700H or Marantz SR6014", cost: 350, costLabel: "~£350" },
       { id: "b15", name: "Lounge speakers — Front L/R + centre", meta: "Q Acoustics / Monitor Audio / KEF, secondhand", cost: 350, costLabel: "~£350" },
       { id: "b16", name: "Subwoofer (used)", meta: "BK Electronics / SVS / REL", cost: 150, costLabel: "~£150" },
-      { id: "b15a", name: "Lounge TV — TCL 65\" QD-Mini LED", meta: "Mini-LED suits the bright south-facing lounge. HDMI 2.1/VRR/Game Mode + eARC; Google TV → HA Android TV integration. Check exact UK model reviews.", cost: 750, costLabel: "~£600-900" },
+      { id: "b15a", name: "Lounge TV — TCL 65C6KS-UK (65\" QD-Mini LED, 2025)", meta: "Chosen set. Mini-LED suits the bright south-facing lounge; Dolby Vision/Atmos, AirPlay 2, Google TV → HA. Entry-tier (likely 60Hz — fine for film + Steam Deck streaming). Confirm eARC + refresh rate.", cost: 529, costLabel: "~£529", url: "https://www.amazon.co.uk/s?k=TCL+65C6KS" },
       { id: "b16a", name: "Wall tablet — Kitchen", meta: "Samsung Tab A8/A9 secondhand", cost: 80, costLabel: "~£80" },
       { id: "b16b", name: "Kitchen tablet mount + USB outlet", cost: 35, costLabel: "~£35" },
       { id: "b16c", name: "Fully Kiosk Browser license", meta: "One-off, covers all tablets", cost: 6, costLabel: "~£6" },
