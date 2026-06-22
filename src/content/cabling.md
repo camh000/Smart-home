@@ -161,5 +161,5 @@ The following must be resolved before this package is priced or work begins. Ite
 - PoE doorbell location confirmed (typically front door / porch wall, mounted at standard doorbell height).
 - Lounge surround / Atmos speaker layout confirmed and chalked on wall before plasterboard (Section 7.2).
 - Coordination with electrical scope: head-end UPS socket, head-end ventilation, sockets at each Deco position, sockets at each voice-node position.
-- Coordination with HVAC / mechanical scope: any refrigerant pipe routes, condensate drains or comms cables for planned AC / heat-pump units to be roughed in during first fix while walls are open. These are not within this package but the routes share the same opportunity window.
+- Coordination with mechanical/ventilation scope: comms cables or power for any planned extractor fans, MVHR or night-purge window actuators to be roughed in during first fix while walls are open. (No air-conditioning is planned — see the plan's passive-cooling note.) These are not within this package but the routes share the same opportunity window.
 End of specification. This document is design intent issued for pricing. No dimension herein is to be used as a cable-cutting length; all runs are to be measured on site.
