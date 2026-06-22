@@ -242,6 +242,22 @@ export const BEHAVIOURS: Behaviour[] = [
     ],
   },
   {
+    id: "printer",
+    title: "3D printer minder",
+    phase: 4,
+    cost: "£0",
+    hardware: "Bambu + owned Meross plug",
+    summary: "The 3D printer folds into HA + Claude like everything else — progress, failure alerts, voice queries and a fire-safety auto-off.",
+    points: [
+      "HACS Bambu Lab integration: live progress, time remaining, nozzle/bed/chamber temps, AMS filament levels and the camera.",
+      "Proactive Claude: “print's done” (routed by presence), “print failed — spaghetti at 40%”, “AMS filament low”, “idle and hot for 2 hours”.",
+      "Voice: “how long left on the print?” / “what's it doing?”; pause/stop via the integration (Tier-2 confirm for stop — it bins the print).",
+      "Local AI failure detection — Bambu's built-in, or self-hosted Obico on Unraid (camera-based) that can auto-pause + alert.",
+      "Fire safety (the key bit): power-monitoring Meross plug auto-cuts power after print + cooldown, flags “finished hours ago but still drawing”, ties into the smoke-sensor zone.",
+      "Nice-to-haves: per-print energy cost, a “done” camera snapshot to your phone, auto timelapse.",
+    ],
+  },
+  {
     id: "focus",
     title: "Focus mode / phone mindfulness",
     phase: 3,

@@ -171,6 +171,16 @@ Routine scene buttons worth adding regardless of voice coverage:
 - Z-Wave stick — only if we buy Z-Wave kit later
 - Matter — supported natively by HA, no extra hardware
 
+### USB passthrough — getting the dongle to HA on Unraid
+
+HA runs in a container/VM on Unraid while the dongle is plugged into the box's USB — a standard setup that works fine, with three gotchas that bite if missed:
+
+- **Pass it through to HA:** for **HA in Docker**, add the device in the container's *Extra Parameters* (e.g. `--device=/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_…-if00-port0`); for **HA OS in a VM** (the smoother path — gets the Supervisor + add-ons like Zigbee2MQTT), tick the dongle in the VM's **USB Devices** list.
+- **🔌 Always use the stable `/dev/serial/by-id/…` path, never `/dev/ttyUSB0`** — the `ttyUSBx` number can change on reboot/replug and silently break Zigbee; the by-id path is pinned to that dongle.
+- **📡 Put the dongle on a 0.5–1 m USB extension lead, away from the box (and ideally a USB 2.0 port).** This is the single biggest Zigbee reliability fix: 2.4 GHz Zigbee gets hammered by USB 3.0 ports, NVMe/drives and the metal case right next to it. Dangling it away from the server dramatically cuts dropouts.
+- **💾 Back up the HA / Zigbee2MQTT config** (it's in the backup set) so the **network key + every device pairing survives a restore** — otherwise a rebuild means re-pairing all 30+ devices by hand.
+- Coordinator note: SkyConnect / ZBDongle-E are Silicon Labs — fine with ZHA, and with Zigbee2MQTT select the **ember** adapter. (The TI-based ZBDongle-**P** is the alternative; either works, just match the driver.)
+
 ## Lighting
 
 - **Existing 4× Govee H6008** — use in lounge for testing. Local control patchy; cloud API works as fallback.
@@ -1455,6 +1465,28 @@ The Unraid health section covers the box; also watch the **edges**: UCG-Max stat
 ### Privacy / compliance note (UK)
 
 - Face recognition of visitors + **ALPR** of plates + 30-day digests edge into **UK GDPR** territory once you process/retain footage of non-household members or the street beyond your boundary. Note the **domestic-purposes exemption limits**, add **recording signage**, and set a **retention + lawful-basis** line for ALPR and face data. (See also the Privacy section below.)
+
+## 3D printing (mounts & enclosures)
+
+For a build with this many sensors, cameras and DIY boards, a cheap 3D printer pays for itself — less as a strict "cheaper than buying brackets" sum, more because a lot of what's needed **can't be bought** and every DIY-electronics item needs a housing.
+
+- **What it makes:** mmWave/PIR/contact-sensor mounts and corner wedges, camera angle adapters + cable-gland covers, Voice PE / WiiM / tablet mounts and bezels, **enclosures for the ESP32 boards** (BT proxies, WLED, keg flow-meter, load cells), Shelly relay boxes, the OpenTherm Gateway case, the NFC dock, smart-mirror frame parts, and head-end cable management (combs, raceway clips, DIN clips). Huge free libraries (Printables / MakerWorld) already have models for this exact kit.
+- **Don't print:** load-bearing brackets (TV mounts — buy metal). Print housings, sensor mounts, bezels and cable management.
+- **Kit:** a **Bambu Lab A1 Mini (~£200-250)** — appliance-tier, near-zero tuning — plus **PETG** for anything near heat/radiators and **ASA** for the few outdoor/sunny camera mounts (PLA sags in heat/UV; PETG/ASA don't).
+- **Verdict:** ~£250 all-in, pays back across the dozens of mounts/enclosures in this plan and keeps earning afterwards. Phase 0 — useful from day one.
+
+### AI-assistant layer (HA + Claude)
+
+Once it's on the network the printer is just another entity, so it folds into the same HA + Claude layer as everything else:
+
+- **HA integration** — Bambu printers expose to HA (HACS **Bambu Lab** integration): live progress %, time remaining, stage, nozzle/bed/chamber temps, **AMS** filament type + levels, and the camera. HA knows exactly what it's doing.
+- **Proactive Claude** — "your print's done" (routed to desk/phone/voice by presence), "print failed — spaghetti at 40%", "AMS filament low — 8% left", "printer's been idle and hot for 2 hours." Same proactive rails as the washing-machine / keg triggers.
+- **Voice queries + control** — "how long left on the print?", "what's the printer doing?"; pause / stop / chamber-light via the integration (**Tier-2 confirm for stop** — it bins the print).
+- **Local AI failure detection** — Bambu's built-in first-layer/spaghetti detection, or self-host **Obico** on Unraid for camera-based AI failure detection that can **auto-pause + alert** (same local-AI theme as Frigate / CodeProject.AI).
+- **🔥 Safety (it's a heater — highest-value bit)** — put the printer on a **power-monitoring smart plug** (an owned Meross): auto-cut power a set time after the print finishes and cools, flag "drawing power but finished hours ago", raise over-current/anomaly alerts, and put it in the **smoke-sensor** zone. Printers are a genuine fire risk left running unattended — this is the part not to skip.
+- **Nice-to-haves** — per-print energy cost (via the plug), a "print done" camera snapshot to your phone, auto timelapse.
+
+Cost: **£0 software** (HACS integration + Obico are free) on an owned Meross plug. Phase 3-4, alongside the proactive layer.
 
 ## Privacy
 

@@ -56,6 +56,7 @@ export const PLAN_GROUPS: GroupDef[] = [
       "Pre-move-in wiring — additional considerations",
       "Resilience: power, backup & fallback",
       "Operations: network scheme, accounts & updates",
+      "3D printing (mounts & enclosures)",
       "Privacy",
     ],
   },

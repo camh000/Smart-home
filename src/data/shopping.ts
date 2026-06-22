@@ -25,6 +25,8 @@ export const SHOPPING: ShopPhase[] = [
       { id: "bp0b", name: "Sonoff ZBDongle-E", meta: "Start the Zigbee mesh now. Travels to Woodhouse Phase 1.", cost: 25, costLabel: "~£25", url: "https://thepihut.com/search?q=sonoff+zbdongle-e" },
       { id: "bp0c", name: "2× Innr Zigbee bulbs", meta: "For testbed. Migrate to Woodhouse with everything else.", cost: 30, costLabel: "~£30", search: "Innr smart bulb Zigbee E27" },
       { id: "bp0d", name: "Anthropic API credit", meta: "First month at testbed scale", cost: 10, costLabel: "~£5-10" },
+      { id: "bp0f", name: "3D printer (Bambu Lab A1 Mini)", meta: "Prints the bespoke mounts + DIY-board enclosures across the build. Appliance-tier, near-zero tuning.", cost: 230, costLabel: "~£200-250", search: "Bambu Lab A1 Mini" },
+      { id: "bp0g", name: "Filament — PETG + ASA", meta: "PETG for heat/radiator-adjacent parts; ASA for outdoor/sunny camera mounts (PLA sags). A few kg.", cost: 40, costLabel: "~£40", search: "PETG filament 1.75mm" },
       { id: "bp0e", name: "(optional) 2nd HA Voice PE", meta: "For multi-room handoff testing. Skip if budget tight.", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
     ],
   },
