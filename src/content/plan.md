@@ -107,6 +107,8 @@ The aim is a site-to-site **SD-WAN between Woodhouse Road and dad's place in Sel
 
 HA also watches the Unraid box itself, so the server that runs the whole house (HA, Frigate, Qdrant, Docker) flags problems before they bite. This is the "server" sibling of the PC monitoring (HASS.Agent) elsewhere in the plan, and it backstops the SD-WAN off-site backups — you want to catch a failing disk *before* you're relying on the backup.
 
+**Important caveat — the host can't monitor itself.** HA runs *on* Unraid (VM/container), and Glances/Scrutiny/the Unraid integration all run on that same box. So this layer only works **while Unraid + HA are up**. It's great for granular health *during* normal running (SMART, capacity, temps, parity), but it is **blind to its own failure**: if the array isn't started, the box loses power, or HA crashes, nothing here can tell you — the watcher is dead too. "Is it even up?" must be answered by an **independent, ideally off-site watchdog** — see "Watching the watcher" below.
+
 ### Stack (layered)
 
 | Tool | Runs on | Gives HA |
@@ -124,11 +126,22 @@ HA also watches the Unraid box itself, so the server that runs the whole house (
 - 🟢 **Parity check** started/finished, errors found
 - 🔌 **UPS on battery / low battery** → trigger clean shutdown + alert
 - 📦 **Container down** (Frigate, Qdrant, etc.) → notify + optional auto-restart
-- 📡 **Unraid unreachable** (ping) → notify
+
+(Note: "**Unraid/HA itself is down**" is deliberately **not** in this list — HA can't alert on its own death. That case is the external watchdog's job, below.)
 
 Delivery rides the same rails as everything else: phone push (HA Companion), desktop toast (HASS.Agent), and — once the proactive Claude service exists (phase 3) — spoken/written anomalies in plain English.
 
 **Exposure note:** keep these as **diagnostic sensors used by HA automations and the proactive service, but *not* exposed to Assist/Claude's tool list** — the entity-exposure strategy already says to skip diagnostic sensors so voice-turn prompts stay lean and fast. The proactive service can still read them directly when something's actually wrong; they just don't belong in every voice turn.
+
+### Watching the watcher — independent, off-site monitoring
+
+Because the in-HA monitoring above dies with the box, "is the house even up?" needs something **outside Unraid**. Three complementary layers, none of which depend on Woodhouse being healthy:
+
+- **Dead-man's-switch heartbeat (best single fix).** HA pings an external service every minute (**Healthchecks.io** — free tier, or self-hosted). If the pings *stop* for N minutes, the **external** service alerts you (email / SMS / Telegram / push). Because the alert fires on *absence* of signal, it catches **everything** — array stopped, power cut, network down, HA crashed — and needs no inbound access to your house.
+- **Off-site active probe at Selby.** Run **Uptime Kuma** on dad's box in Selby (it's already a peer over the SD-WAN) probing Woodhouse's HA, Unraid and gateway. Because Selby is a *separate site on separate power and internet*, it survives a total Woodhouse outage. Make it **mutual** — Woodhouse watches Selby too. This reuses the SD-WAN and pairs naturally with the off-site backups.
+- **Gateway-level alerting.** The **UCG-Max** is independent of HA: have UniFi alert when **Unraid drops off the LAN**, and UniFi's cloud notifies if the **gateway/WAN itself** dies. (And the second small UPS on the network gear means the gateway can still send that alert during a server-only outage.)
+
+Net effect: the in-HA layer gives you the *detail* while things run; the external watchdogs answer *"did it come back up?"* — the question HA structurally can't answer about itself.
 
 ## Voice coverage — rooms
 
@@ -1249,7 +1262,9 @@ Today only "a Qdrant volume backup" exists. That's not a backup strategy. Define
 
 ### Monitoring beyond the server
 
-The Unraid health section covers the box; also watch the **edges**: UCG-Max status, **SD-WAN tunnel up/down**, **WAN reachability**, and a **Claude-API error-rate** counter — all on the same alerting rails (push / toast / proactive Claude).
+The Unraid health section covers the box; also watch the **edges**: UCG-Max status, **SD-WAN tunnel up/down**, **WAN reachability**, and a **Claude-API error-rate** counter.
+
+**Split by who's alerting, though** — anything reported *by HA* (push / toast / proactive Claude) only works while HA is up, so it can't tell you HA/Unraid is down. That "is it even up?" question belongs to the **independent off-site watchdog** (Healthchecks dead-man's-switch + Uptime Kuma at Selby + gateway-level offline alerts) described in [Server health monitoring → "Watching the watcher"](#server-health-monitoring-unraid). Use HA's rails for *detail while running*; the external watchdog for *availability*.
 
 ## Operations: network scheme, accounts & updates
 

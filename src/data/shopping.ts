@@ -94,6 +94,8 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b29f", name: "Shelly EM + CT clamps (consumer unit)", meta: "Sparky install recommended", cost: 120, costLabel: "~£120" },
       { id: "b29r1", name: "Second UPS — network gear", meta: "Keeps UCG-Max + core switch (SD-WAN/Tailscale) up during a server shutdown", cost: 90, costLabel: "~£90" },
       { id: "b29r2", name: "Off-site encrypted backup to Selby", meta: "restic/borg — HA snapshots + Immich photo library + memory, client-side encrypted over the SD-WAN. Config only.", cost: 0, costLabel: "code only" },
+      { id: "b29r3", name: "Dead-man's-switch heartbeat (Healthchecks.io)", meta: "HA pings out every minute; external service alerts you if pings stop (catches array/power/HA-down). Free tier.", cost: 0, costLabel: "free" },
+      { id: "b29r4", name: "Uptime Kuma at Selby (off-site probe)", meta: "Runs on dad's box over the SD-WAN, probing Woodhouse HA/Unraid/gateway — survives a total Woodhouse outage. Mutual.", cost: 0, costLabel: "free" },
       { id: "b29g", name: "Proactive Claude service (custom Python)", meta: "~200 lines, FastAPI + HA webhook listener", cost: 0, costLabel: "code only" },
       { id: "b29h", name: "Frigate face recognition training", meta: "Photos of each person, ~30 min setup", cost: 0, costLabel: "free" },
       { id: "b29i", name: "Aqara FP2 — Master bedroom", meta: "In-bed vs dressing zones", cost: 65, costLabel: "~£65" },
