@@ -1553,7 +1553,7 @@ Fill in every remaining room so coverage is complete.
 
 The custom software brain, plus the comfort and resilience layers that build on full coverage.
 
-- **Blinds** — bay windows, conservatory, then remaining rooms
+- **Blinds** — bedrooms only is the funded baseline (master bay + bed 2/3, ≈5 motors); lounge bay, conservatory + other rooms are a bonus tier if budget allows
 - **Proactive Claude service** deployed (custom Python on Unraid)
 - **PC integration** — HASS.Agent on the gaming PC, pinned browser dashboard, optional custom Tauri overlay app
 - **Desk setup** — 34" ultrawide + dual-head KVM; game streaming office → lounge (Sunshine/Moonlight to the docked Steam Deck)
