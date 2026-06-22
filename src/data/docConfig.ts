@@ -31,6 +31,7 @@ export const PLAN_GROUPS: GroupDef[] = [
       "Cooling / AC (optional)",
       "CCTV + doorbell",
       "Audio / music",
+      "Game streaming (office → lounge)",
     ],
   },
   {
