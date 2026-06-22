@@ -416,7 +416,7 @@ Echoes are being sold on. Plex is the source of truth for music. Each room needs
 
 ### Lounge — AV receiver does it all
 
-Buying secondhand off FB Marketplace. AVR acts as both surround processor AND the lounge music endpoint (no WiiM needed here).
+Buying secondhand off FB Marketplace. AVR acts as both surround processor AND the lounge music endpoint (no WiiM needed here). **Ecosystem — decided: deal-led** — grab whichever of **Denon/Marantz (HEOS)** or **Yamaha (MusicCast)** turns up cheap and clean; both integrate well with HA, so let price/condition pick the brand rather than committing up front.
 
 **Target spec when hunting:**
 
@@ -509,7 +509,7 @@ Stream PC games from the **gaming PC (office, Bed 2)** to the **lounge**, played
 
 1. **Wire both ends — not Wi-Fi.** Gaming PC on Ethernet (one of the Bed 2 desk drops). **Steam Deck dock** on a **lounge Cat6 drop** — the dock's Gigabit port bypasses the Deck's weaker built-in Wi-Fi, which is the usual cause of stutter. (Reserve a lounge drop for the dock — see "Additions to cabling scope".)
 2. **Same VLAN for the PC and the Deck.** Steam Remote Play and Moonlight rely on local discovery (broadcast/mDNS); across VLANs it silently fails. Put both gaming endpoints on the **main/trusted VLAN together** (work laptop, IoT, cameras stay segmented) — captured in the Operations network scheme. Cross-VLAN is possible with mDNS reflection + opening the specific ports, but same-VLAN is the painless route.
-3. **Host stack:** **Steam Remote Play** (zero-setup, Steam games) or **Sunshine + Moonlight** (lower latency, non-Steam games, HDR, higher refresh; a little more setup). Sunshine can use a **virtual display**, so the PC streams headless even when the desk KVM is pointed at the work laptop.
+3. **Host stack — decided: Steam Remote Play** (zero-setup, built into Steam and the Deck). Sunshine + Moonlight stays the optional upgrade later if you want lower latency / HDR / non-Steam games (its virtual display also lets the PC stream headless while the desk KVM is on the work laptop).
 
 **Smart-home layer (the "lounge gaming" scene):** Deck docked → AVR on, TV/AVR switches to the Deck's HDMI input, lights to a gaming scene, Claude DND. **Wake-on-LAN** the gaming PC from HA ("fire up the gaming PC") before you sit down; it sleeps again after. The Deck is just another HDMI source alongside the Apple TV.
 
@@ -687,7 +687,7 @@ The office desk runs **two monitors** — one a **34" 21:9 ultrawide (3440×1440
 **Kit:**
 
 - **Monitor:** 34" **3440×1440** 21:9, **144-165Hz IPS** for work + gaming. Seek a **USB-C (~90W) input** (single cable to the laptop) and a **built-in KVM** (LG 34GP/34GS, Dell, Gigabyte M34WQ, MSI) — the monitor's own KVM can cover peripheral switching.
-- **KVM:** dual-head, **DisplayPort 1.4** (bandwidth for 3440×1440@144-165Hz), a **USB-C input** for the laptop (avoids DisplayLink), **USB 3.0** peripherals. Aten / TESmart / ConnectPRO / Level1Techs. Prefer one with **RS-232 / TCP control** so HA can switch it.
+- **KVM — decided: a basic dual-head KVM** (manual button/hotkey switch, no HA control). Still needs **DisplayPort 1.4** (bandwidth for 3440×1440@144-165Hz), a **USB-C input** for the laptop (avoids DisplayLink) and **USB 3.0** peripherals. Aten / TESmart / ConnectPRO. *(An RS-232/TCP HA-switchable model remains a possible future upgrade, but isn't needed.)*
 
 **Smart-home tie-ins:**
 
@@ -861,7 +861,7 @@ Outside those hours, at lunch, or away from the desk → silent; the phone's all
 - ➕ **Ambient desk light (the hero)** — a small LED/WLED that's **green while focused → amber → red** as phone-time climbs during a work block. Silent, glanceable, needs nothing on the laptop.
 - ➕ **NFC focus-dock** — a tag on a phone stand: tap to start a **Pomodoro sprint** (25/5); phone goes face-down, and lifting it before the timer is the nudge.
 - ♻️ **Auto-DND on the personal phone** during work blocks (HA Companion → Focus mode) — removes the *pull* so there's less to resist.
-- ♻️ **Soft active prod (optional)** — a gentle **office Voice PE chime** or a single "back to it" phone nudge; throttled and self-suppressing.
+- ♻️ **Active prods run on the escalation ladder** (see below) — a gentle Voice PE chime / phone toast first, getting firmer only if ignored; throttled and self-suppressing.
 - ♻️ **Weekly attention summary** — "phone-minutes per work hour," pickups, trend ("down to 14/hr from 22"). The energy-dashboard pattern aimed at attention.
 - ♻️ **Carrot, not just stick** — hit the focus target → a small win (a light flourish, a streak, evening mode a touch earlier — or cheekily "you've earned a pint" routed to the garage bar).
 
@@ -871,16 +871,21 @@ A self-imposed rule — no gaming on the clock — that the smart home can actua
 
 **Signals (during the fixed 09:00–17:30 weekday window, minus lunch):**
 
-- **HASS.Agent on the gaming PC** — it can go here (unlike the work laptop), reporting **foreground app** + **GPU load**, so "a game is *actually running*" is unambiguous (not just "PC is on" — avoids false positives from downloads/updates).
-- **KVM state** — the RS-232/TCP KVM tells HA when the desk is switched to the **gaming PC** instead of the work laptop.
+- **HASS.Agent on the gaming PC** — it can go here (unlike the work laptop), reporting **foreground app** + **GPU load**, so "a game is *actually running*" is unambiguous (not just "PC is on" — avoids false positives from downloads/updates). This is the primary signal (the chosen KVM is a basic manual one, so HA can't read its state).
 - **"Lounge gaming" scene / Steam Deck docked** — HA owns that scene, so it knows if you've wandered downstairs to stream.
 
-**Interventions (gentle → firm, your call):**
+**Interventions:** the work-hours guard, accountability light and weekly log all apply — but rather than a fixed firmness, they run on the **escalation ladder** below. The carrot still stands: a **clean work week** unlocks guilt-free evening/weekend gaming.
 
-- **Work-hours guard on the gaming triggers** — "fire up the gaming PC" (Wake-on-LAN) and the **lounge gaming scene** ask *"it's 2pm Tuesday — sure?"* or simply defer until 17:30. The KVM flipping to the gaming PC mid-workday raises a quiet flag.
-- **Accountability light** — the same desk LED goes a disapproving red if a game's running during work hours.
-- **Logged into the weekly focus summary** — "gaming minutes during work hours" sits alongside phone-time; carrot for a **clean work week** (guilt-free evening/weekend gaming unlocked).
-- **Hard mode (optional, not recommended)** — a smart-plug schedule could cut the gaming PC during work hours, but that's blunt (downloads, updates, headless streaming) — nudges + scene-gating are the kinder, smarter route.
+### Escalation ladder (decided)
+
+Rather than one fixed firmness, the nudge **escalates the longer you ignore it** — gentle first, firmer only if you keep going. Same ladder for both phone-scrolling and gaming-on-the-clock:
+
+1. **Subtle (immediate):** the accountability desk LED drifts **green → amber**. No sound, no message — just ambient.
+2. **Gentle prod (~10 min ignored):** LED **red** + a single quiet cue — a desktop/phone toast or a soft **office Voice PE chime** ("back to it?"). Throttled, self-suppressing.
+3. **Firm (still ignored):** a direct spoken/Claude message, and the **gaming triggers actively defer** — "fire up the gaming PC" / the lounge gaming scene refuse until 17:30 rather than just asking.
+4. **Hard (opt-in, only if you want it):** a final step — e.g. a smart-plug cutoff of the gaming PC for the rest of the work block. Off by default; there if you decide you need the stick.
+
+Escalation **resets** at lunch, at 17:30, and once you're back on task — it ratchets up *within* a lapse, never carries a grudge across the day.
 
 Same keep-it-kind rules apply: only ever fires in work context, data local and personal to you.
 
@@ -1602,7 +1607,7 @@ The aim: prove the full pipeline (voice → Claude → tool calls → response) 
 - [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
-- [ ] AVR target brand (Denon/Marantz vs Yamaha) — affects multi-room ecosystem
+- [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.
 - [ ] Lounge speaker positions chalked on wall before plastering (5.1 positions only)
 - [ ] Blind motor power: mains vs battery decision (deferred to contractor walk-through — but provision/conduit must be in place by then)
 - [ ] **Window actuator power approach**: battery (~£200/window, 6-12mo battery) vs mains-powered (~£400/window, needs 13A spurs in electrical scope) vs PoE (rare, needs Cat6 spec amendment)

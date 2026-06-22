@@ -233,7 +233,7 @@ export const BEHAVIOURS: Behaviour[] = [
     summary: "Stream the office gaming PC to a docked Steam Deck in the lounge, with HA setting the scene and waking the PC for you.",
     points: [
       "Both ends wired (gaming PC + lounge Deck dock on Gigabit) and on the same VLAN — discovery breaks across VLANs, and the dock's Ethernet beats the Deck's Wi-Fi.",
-      "Host stack: Steam Remote Play (zero-setup) or Sunshine + Moonlight (lower latency, HDR, non-Steam).",
+      "Host stack: Steam Remote Play (chosen — zero-setup); Sunshine + Moonlight an optional later upgrade for lower latency/HDR/non-Steam.",
       "“Lounge gaming” scene: Deck docked → AVR on, TV/AVR to the Deck's HDMI, lights to a gaming scene, Claude DND.",
       "Wake-on-LAN the gaming PC from HA (“fire up the gaming PC”) before you sit down; it sleeps again after.",
       "Sunshine virtual display lets the PC stream headless even when the desk KVM is on the work laptop.",
@@ -255,7 +255,7 @@ export const BEHAVIOURS: Behaviour[] = [
       "Ambient desk LED goes green → amber → red as phone-time climbs; silent and glanceable, needs nothing on the laptop.",
       "NFC focus-dock starts a Pomodoro sprint; auto-DND on the personal phone removes the pull.",
       "Weekly attention summary (phone-minutes per work hour); data stays local and personal to you. Carrot: hit the target → a small win.",
-      "No-gaming-on-the-clock guard: HASS.Agent on the gaming PC (foreground game + GPU load), KVM state and the lounge gaming scene are all work-hours-gated — nudge/defer rather than a hard block.",
+      "No-gaming-on-the-clock guard: HASS.Agent on the gaming PC (foreground game + GPU load) + the lounge gaming scene, work-hours-gated. Nudges escalate the longer you ignore them: amber LED → red + chime → firm message + gaming defers → optional hard cutoff.",
     ],
   },
   {

@@ -115,7 +115,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b29v", name: "Energy dashboards setup", meta: "Octopus Agile + National Grid carbon intensity", cost: 0, costLabel: "free" },
       { id: "b29w", name: "Focus mode — NFC tag + desk LED", meta: "Phone-mindfulness: NFC focus-dock + green→red accountability LED. Fixed 9–5:30 schedule, no work-laptop software needed.", cost: 15, costLabel: "~£12-17" },
       { id: "b29x", name: "34\" ultrawide monitor (3440×1440, 144Hz)", meta: "Office second screen. USB-C input + built-in KVM is a bonus. LG 34GP/34GS, Dell, Gigabyte M34WQ, MSI.", cost: 450, costLabel: "~£350-550" },
-      { id: "b29y", name: "Dual-head KVM (DisplayPort 1.4 + USB-C)", meta: "Both monitors switch between work laptop & gaming PC. DP1.4 for 3440×1440@144Hz; USB-C input avoids DisplayLink. RS-232/TCP = HA-switchable.", cost: 250, costLabel: "~£150-400" },
+      { id: "b29y", name: "Basic dual-head KVM (DP 1.4 + USB-C)", meta: "Manual switch between work laptop & gaming PC (no HA control — chosen). DP1.4 for 3440×1440@144Hz; USB-C input avoids DisplayLink. Confirm the laptop can drive 2 displays natively first.", cost: 180, costLabel: "~£120-250" },
       { id: "b29z", name: "Steam Deck dock — JSAUX (owned)", meta: "Already owned — has Ethernet. Wire it to a lounge Cat6 drop, same VLAN as the gaming PC.", cost: 0, costLabel: "owned" },
       { id: "b29z1", name: "Sunshine + Moonlight (game streaming)", meta: "Host on the gaming PC + client on the Steam Deck. Free, open-source.", cost: 0, costLabel: "free" },
     ],
