@@ -225,6 +225,22 @@ export const BEHAVIOURS: Behaviour[] = [
     ],
   },
   {
+    id: "focus",
+    title: "Focus mode / phone mindfulness",
+    phase: 3,
+    cost: "~£12-17",
+    hardware: "Office FP2 + phone + NFC/LED",
+    summary: "A gentle, opt-in nudge against the work-from-home phone doom-scroll — no software on the locked-down work laptop, no work-calendar access.",
+    points: [
+      "Work hours are a fixed weekday schedule (9:00–17:30) — the regime auto-arms at 9 and disarms at 5:30, off all weekend.",
+      "Lunch has a default (1–2pm) you only override by voice when it differs; no nagging during it.",
+      "Trigger: at the desk (mmWave) + in work hours + not lunch + personal phone screen-on for X minutes — substitutes for the missing PC agent and calendar.",
+      "Ambient desk LED goes green → amber → red as phone-time climbs; silent and glanceable, needs nothing on the laptop.",
+      "NFC focus-dock starts a Pomodoro sprint; auto-DND on the personal phone removes the pull.",
+      "Weekly attention summary (phone-minutes per work hour); data stays local and personal to you. Carrot: hit the target → a small win.",
+    ],
+  },
+  {
     id: "photo",
     title: "Photo digest",
     phase: 4,

@@ -791,6 +791,43 @@ The bar leans on the **fibre link** for Claude/HA, so give the garage a **local 
 
 Mostly software/scenes on existing kit. New bits, roughly: WLED (~£25), NFC tags (~£5), keg flow meter + ESP32 (~£25), load cells + HX711 (~£20-40), CO2 leak sensor (~£35), smart scale (~£20). **~£100-150 for the lot**; the kegerator and auto-pour machine are separate splurges. **Phase 4-5**, after the house core is in.
 
+## Focus mode / phone mindfulness
+
+A gentle, opt-in system to stop the work-from-home phone doom-scroll — built to treat *attention* the way the rest of the plan treats *energy*. **Nudges over blocks**: environment design and a soft cue beat willpower, and it only ever fires in genuine work context so it never feels like surveillance.
+
+### The constraints (and the no-install workarounds)
+
+The work laptop is locked down (no HASS.Agent) and HA can't see the work calendar. Neither matters — the signals are substituted:
+
+- **Work hours are fixed: a weekday schedule, 9:00–17:30 (Mon–Fri).** The focus regime **auto-arms at 9 and disarms at 5:30**, off all weekend. No daily input needed.
+- **Lunch is the only spoken bit** — and it has a **default (e.g. 1:00–2:00)** you only override when it differs: "lunch at 12:30 today." Most days, say nothing.
+- **No PC agent needed** — instead, the office **mmWave (FP2)** says *at desk*, and optionally the **work laptop's presence on Wi-Fi** (via the gateway / a ping tracker) is a rough *awake/working* proxy. No software on the work machine.
+- **Phone signal** — the HA Companion app on the *personal* phone reports screen-on / pickups (and can flip the phone into a Focus / DND).
+
+### The trigger
+
+> weekday **09:00–17:30** · **not** in the lunch hour · **at the desk** (mmWave) · *(optionally laptop online)* · and the **personal phone screen has been on for X minutes** → nudge.
+
+Outside those hours, at lunch, or away from the desk → silent; the phone's all yours.
+
+### Interventions (all dodge the locked-down work PC)
+
+- ➕ **Ambient desk light (the hero)** — a small LED/WLED that's **green while focused → amber → red** as phone-time climbs during a work block. Silent, glanceable, needs nothing on the laptop.
+- ➕ **NFC focus-dock** — a tag on a phone stand: tap to start a **Pomodoro sprint** (25/5); phone goes face-down, and lifting it before the timer is the nudge.
+- ♻️ **Auto-DND on the personal phone** during work blocks (HA Companion → Focus mode) — removes the *pull* so there's less to resist.
+- ♻️ **Soft active prod (optional)** — a gentle **office Voice PE chime** or a single "back to it" phone nudge; throttled and self-suppressing.
+- ♻️ **Weekly attention summary** — "phone-minutes per work hour," pickups, trend ("down to 14/hr from 22"). The energy-dashboard pattern aimed at attention.
+- ♻️ **Carrot, not just stick** — hit the focus target → a small win (a light flourish, a streak, evening mode a touch earlier — or cheekily "you've earned a pint" routed to the garage bar).
+
+### Keep-it-kind principles
+
+- **Only nudges in real work context** (the fixed schedule minus lunch, at the desk) — no nagging evenings, weekends, lunch or away-from-desk.
+- **Data stays local and personal** — your attention data lives on the local HA, tagged to you; Nova at the other desk doesn't see it. Not surveillance, a self-chosen nudge.
+
+### Cost
+
+New spend is just an **NFC tag (~£2)** and a **small desk LED (~£10-15)**. Everything else is config on the office kit (FP2, Voice PE, lighting, phone Companion) already in the plan. **Phase 3-4.**
+
 ## Signature behaviours
 
 The "JARVIS feels" layer. These combine the infrastructure (voice + presence + lighting + heating + audio + cameras + Claude) into specific automations that feel like an attentive housemate rather than a smart-home dashboard. Most depend on phase 2-3 kit being in place; few need new hardware.
