@@ -36,6 +36,7 @@ The whole-house Cat6 install is being procured separately under the **Woodhouse 
 - **4× Meross Matter Smart Plug Mini (13A, energy monitoring)** — Matter-native, local, no cloud required. Pair direct to HA via built-in Matter integration.
 - **2× Eltax C-205 floorstanders** — deploy as *rears* in the lounge surround setup
 - **Apple TV** — integrates with HA via the Apple TV + HomeKit Controller integrations. Becomes a media player entity Claude can control. See "Apple TV integration" below.
+- **2× TP-Link 9-port gigabit Easy Smart switches** — web-managed, 802.1Q VLAN-capable, non-PoE. Reused as VLAN-aware **access switches** (office desk, lounge AV stack, garage). See "Networking" below.
 - **Echo Show + Echo** — being sold on (~£60-100 offset)
 
 ## Technical integration
@@ -53,7 +54,13 @@ Headline points that affect this plan:
 
 The network root is the **UniFi Cloud Gateway Max (UCG-Max)**, gifted by dad. It sits in front of the Decos (demoted to APs), runs the full UniFi Network application with IDS/IPS, and handles the VLAN segmentation this plan relies on (IoT / voice / CCTV / guest / main). All five ports are 2.5GbE — give the **Unraid ↔ gateway link a 2.5G path** at the head-end so Frigate/HA traffic isn't bottlenecked behind the gigabit PoE switch.
 
-**No built-in PoE** → the 16-port PoE+ switch is **required** (powers cameras, doorbell, voice nodes). **No built-in WiFi** → the 3× Deco stay on as APs; a later swap to UniFi APs (U6/U7) is optional for single-pane management and better roaming.
+**No built-in PoE** → a PoE+ switch is **required** for the powered devices. **No built-in WiFi** → the 3× Deco stay on as APs; a later swap to UniFi APs (U6/U7) is optional for single-pane management and better roaming.
+
+### Switching layer
+
+- **Core PoE+ switch** (head-end, Bedroom 3) — feeds the PoE devices. In practice that's only the **4 cameras + doorbell** (the Voice PE units are USB-C powered, so their Cat6 carries data, not power). The 16-port in the shopping list is therefore mostly headroom — an 8-port PoE+ would technically cover the PoE load — but the extra ports and the option to run voice/AP data drops off it are worth keeping.
+- **2× TP-Link 9-port gigabit Easy Smart (owned)** — reused as **VLAN-aware access switches** where several non-PoE wired devices fan out off one drop: the **office desk** (two PCs + peripherals for Cam + Nova), the **lounge AV stack** (AVR, Apple TV, TV, console), and/or the **garage**. Configure 802.1Q on them (PVID + tagged/untagged) to match the UniFi VLAN IDs.
+- **Caveats:** these are **gigabit, not 2.5G** (keep the Unraid uplink and the CCTV/backup path on the gateway's 2.5G ports), and they're **not UniFi-managed** (they won't appear in the UniFi controller — configure once in TP-Link's web UI and leave them). Free kit, zero added cost, and they cut how many home-run drops the core switch has to terminate.
 
 ### Inter-site SD-WAN — the Selby link
 
@@ -63,6 +70,33 @@ The aim is a site-to-site **SD-WAN between Woodhouse Road and dad's place in Sel
 - **Woodhouse has a public dynamic IP** — that's the reachable endpoint. A static IP is **not** needed: the gateway reports its current WAN IP to UniFi's cloud, so the tunnel re-establishes automatically when the dynamic IP changes (no dynamic-DNS needed). Because our side is public, **CGNAT at the Selby end is fine** — that side dials out to us.
 - **Plan non-overlapping subnets** — the one real to-do. Woodhouse and Selby must use different ranges (e.g. `10.10.x` vs `10.20.x`) or the SD-WAN routes collide. Settle this alongside the VLAN scheme, across both sites.
 - **What it unlocks:** off-site backup is the headline — Qdrant memory store and Frigate footage backed up to dad's over the private link (and vice versa), plus remote support of each other's HA/Unraid/cameras. Complements the existing **Tailscale** (per-device overlay) with whole-subnet, gateway-to-gateway routing.
+
+## Server health monitoring (Unraid)
+
+HA also watches the Unraid box itself, so the server that runs the whole house (HA, Frigate, Qdrant, Docker) flags problems before they bite. This is the "server" sibling of the PC monitoring (HASS.Agent) elsewhere in the plan, and it backstops the SD-WAN off-site backups — you want to catch a failing disk *before* you're relying on the backup.
+
+### Stack (layered)
+
+| Tool | Runs on | Gives HA |
+|---|---|---|
+| **Glances** | Docker on Unraid | Built-in HA integration. CPU/RAM/load, per-disk + array/cache **usage & remaining capacity**, uptime, temps. |
+| **Scrutiny** | Docker on Unraid | Best-in-class **SMART** monitoring with *failure prediction* — warns on reallocated/pending sectors creeping up, not just pass/fail. Into HA via its API/MQTT. |
+| **Unraid integration** (HACS, via the Unraid **Connect GraphQL API**) | HA | Array started/stopped, **parity check status/progress**, per-disk + cache fill, disk temps/fans, **Docker container states**. |
+| **NUT** (Network UPS Tools) | Unraid + HA | Reads the head-end **UPS** — battery %, runtime, on-battery/low-battery events. Same UPS already in the plan; also drives clean-shutdown automation. |
+
+### Alerts it enables
+
+- 🔴 **SMART degrading** — "disk 3 has 12 reallocated sectors and climbing — replace soon" (Scrutiny prediction)
+- 🟠 **Cache/array filling** — "cache pool is 90% full" (classic Unraid gotcha that stalls the mover/Docker)
+- 🟠 **Disk temp** over threshold → notify / bump a fan
+- 🟢 **Parity check** started/finished, errors found
+- 🔌 **UPS on battery / low battery** → trigger clean shutdown + alert
+- 📦 **Container down** (Frigate, Qdrant, etc.) → notify + optional auto-restart
+- 📡 **Unraid unreachable** (ping) → notify
+
+Delivery rides the same rails as everything else: phone push (HA Companion), desktop toast (HASS.Agent), and — once the proactive Claude service exists (phase 3) — spoken/written anomalies in plain English.
+
+**Exposure note:** keep these as **diagnostic sensors used by HA automations and the proactive service, but *not* exposed to Assist/Claude's tool list** — the entity-exposure strategy already says to skip diagnostic sensors so voice-turn prompts stay lean and fast. The proactive service can still read them directly when something's actually wrong; they just don't belong in every voice turn.
 
 ## Voice coverage — rooms
 
