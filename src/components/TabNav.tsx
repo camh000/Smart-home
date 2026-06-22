@@ -15,6 +15,7 @@ export const TABS: TabDef[] = [
   { key: "floorplan", num: "04", label: "Floorplan" },
   { key: "calculator", num: "05", label: "Calculator" },
   { key: "shopping", num: "06", label: "Shopping List" },
+  { key: "cabling", num: "07", label: "Cabling Spec" },
 ];
 
 export function TabNav({

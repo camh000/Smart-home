@@ -71,6 +71,40 @@ export const PLAN_GROUPS: GroupDef[] = [
 // Behaviours tab, so it's excluded from the Plan to keep the Smart layer lean.
 export const PLAN_EXCLUDE = ["signature-behaviours"];
 
+export const CABLING_GROUPS: GroupDef[] = [
+  {
+    key: "scope",
+    label: "Scope & cable",
+    sections: ["1. Scope and contractual note", "2. Phasing", "3. Cable specification"],
+  },
+  {
+    key: "drops",
+    label: "Drops & comms",
+    sections: ["4. Topology and comms head-end", "5. Data drop schedule"],
+  },
+  {
+    key: "av",
+    label: "AV & audio",
+    sections: ["6. AV cabling (HDMI over structured cable)", "7. Audio cabling"],
+  },
+  {
+    key: "garage",
+    label: "Garage & acceptance",
+    sections: [
+      "8. Inter-building link to detached garage",
+      "9. Testing, labelling and acceptance",
+    ],
+  },
+  {
+    key: "materials",
+    label: "Materials & info",
+    sections: [
+      "10. Materials summary (passive only)",
+      "11. Information required before commencement",
+    ],
+  },
+];
+
 export const INTEGRATION_GROUPS: GroupDef[] = [
   {
     key: "overview",

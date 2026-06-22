@@ -49,15 +49,18 @@ function scrollToId(id: string, attempts = 24) {
 export function SiteShell({
   planDoc,
   integrationDoc,
+  cablingDoc,
   searchIndex,
 }: {
   planDoc: ParsedDoc;
   integrationDoc: ParsedDoc;
+  cablingDoc: ParsedDoc;
   searchIndex: SearchEntry[];
 }) {
   const [active, setActive] = useState("plan");
   const [planSub, setPlanSub] = useState(planDoc.subviews[0]?.key ?? "overview");
   const [intSub, setIntSub] = useState(integrationDoc.subviews[0]?.key ?? "overview");
+  const [cablingSub, setCablingSub] = useState(cablingDoc.subviews[0]?.key ?? "scope");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const pendingScroll = useRef<string | null>(null);
 
@@ -82,12 +85,14 @@ export function SiteShell({
       }
       tab = tab ?? active;
 
-      const curSub = tab === "plan" ? planSub : tab === "integration" ? intSub : undefined;
+      const curSub =
+        tab === "plan" ? planSub : tab === "integration" ? intSub : tab === "cabling" ? cablingSub : undefined;
       const sameView = tab === active && (subview === undefined || subview === curSub);
 
       setActive(tab);
       if (tab === "plan" && subview) setPlanSub(subview);
       if (tab === "integration" && subview) setIntSub(subview);
+      if (tab === "cabling" && subview) setCablingSub(subview);
 
       if (headingId) {
         if (sameView) scrollToId(headingId);
@@ -97,7 +102,7 @@ export function SiteShell({
       }
       setPaletteOpen(false);
     },
-    [active, planSub, intSub, locById],
+    [active, planSub, intSub, cablingSub, locById],
   );
 
   // Consume a pending cross-view scroll once the new content has rendered.
@@ -107,7 +112,7 @@ export function SiteShell({
       pendingScroll.current = null;
       scrollToId(id);
     }
-  }, [active, planSub, intSub]);
+  }, [active, planSub, intSub, cablingSub]);
 
   // Tab ↔ URL hash
   useEffect(() => {
@@ -169,6 +174,9 @@ export function SiteShell({
             )}
             {active === "integration" && (
               <LongDoc doc={integrationDoc} activeSubview={intSub} onSubviewChange={setIntSub} onNavigate={navigate} />
+            )}
+            {active === "cabling" && (
+              <LongDoc doc={cablingDoc} activeSubview={cablingSub} onSubviewChange={setCablingSub} onNavigate={navigate} />
             )}
             {active === "behaviours" && <Behaviours />}
             {active === "floorplan" && <Floorplan />}

@@ -81,6 +81,15 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["Aqara"], def: "Smart-home brand (sensors, locks, TRVs); many devices are HomeKit/Matter-native." },
   { terms: ["Frient"], def: "Danish brand of well-regarded Zigbee safety sensors (smoke / CO / leak)." },
   { terms: ["Octopus Agile"], def: "A UK electricity tariff with half-hourly prices you can schedule appliances around." },
+
+  // Cabling spec
+  { terms: ["Cat6"], def: "Category-6 twisted-pair network cable — the structured-cabling standard used throughout the house." },
+  { terms: ["patch panel"], def: "A rack panel where every cable run terminates, so drops can be patched to switches with short leads." },
+  { terms: ["keystone"], def: "The snap-in RJ45 socket module a cable terminates into at the wall plate." },
+  { terms: ["first fix"], def: "The build stage where cables are pulled and containment installed before the walls are closed up — the point of no return." },
+  { terms: ["second fix"], def: "The later stage where cables are terminated to sockets and patch panels once the walls are finished." },
+  { terms: ["fibre"], def: "Fibre-optic cable — used for the garage link to avoid electrical surge/earth issues between buildings." },
+  { terms: ["head-end"], def: "The central comms point (Bedroom 3) where every cable run terminates and the active kit lives." },
 ];
 
 interface Lookup {
