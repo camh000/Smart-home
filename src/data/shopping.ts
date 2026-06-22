@@ -1,0 +1,140 @@
+export interface ShopItem {
+  id: string;
+  name: string;
+  meta?: string;
+  cost: number; // numeric, for totals
+  costLabel: string; // display
+}
+export interface ShopPhase {
+  id: string;
+  title: string;
+  items: ShopItem[];
+}
+
+export const SHOPPING: ShopPhase[] = [
+  {
+    id: "0",
+    title: "Phase 0 — Pre-move testbed",
+    items: [
+      { id: "bp0a", name: "HA Voice PE — testbed", meta: "Living room of current home. Travels to Woodhouse Phase 1.", cost: 55, costLabel: "~£55" },
+      { id: "bp0b", name: "Sonoff ZBDongle-E", meta: "Start the Zigbee mesh now. Travels to Woodhouse Phase 1.", cost: 25, costLabel: "~£25" },
+      { id: "bp0c", name: "2× Innr Zigbee bulbs", meta: "For testbed. Migrate to Woodhouse with everything else.", cost: 30, costLabel: "~£30" },
+      { id: "bp0d", name: "Anthropic API credit", meta: "First month at testbed scale", cost: 10, costLabel: "~£5-10" },
+      { id: "bp0e", name: "(optional) 2nd HA Voice PE", meta: "For multi-room handoff testing. Skip if budget tight.", cost: 55, costLabel: "~£55" },
+    ],
+  },
+  {
+    id: "1",
+    title: "Phase 1 — Prove the pipeline (post-move)",
+    items: [
+      { id: "b0u", name: "UPS — head-end (1000-1500VA)", meta: "APC Back-UPS Pro, CyberPower CP1500, or Eaton 5E. Mandatory before Unraid first power-on.", cost: 175, costLabel: "~£150-200" },
+      { id: "b1", name: "Zigbee coordinator", meta: "SkyConnect or Sonoff ZBDongle-E", cost: 20, costLabel: "~£20" },
+      { id: "b2", name: "HA Voice PE — Kitchen", meta: "Wired Cat6 from head-end", cost: 55, costLabel: "~£55" },
+      { id: "b3", name: "HA Voice PE — Master Bedroom", meta: "Wired Cat6 from head-end", cost: 55, costLabel: "~£55" },
+      { id: "b4", name: "Coral USB TPU", meta: "For Frigate AI inference", cost: 60, costLabel: "~£60" },
+      { id: "b5", name: "Misc cables / patch leads / power", meta: "USB-C, Cat6 patches, plug-tops", cost: 30, costLabel: "~£30" },
+    ],
+  },
+  {
+    id: "2",
+    title: "Phase 2 — Core coverage",
+    items: [
+      { id: "b6", name: "HA Voice PE — Lounge", cost: 55, costLabel: "~£55" },
+      { id: "b7", name: "HA Voice PE — Garage", cost: 55, costLabel: "~£55" },
+      { id: "b8", name: "16-port PoE+ switch", meta: "Unifi USW-Lite-16-PoE or TP-Link TL-SG1218MP", cost: 200, costLabel: "~£200" },
+      { id: "b8a", name: "Frigate storage top-up (Unraid)", meta: "4TB HDD + 1TB SSD cache (if needed)", cost: 150, costLabel: "~£150" },
+      { id: "b9", name: "PoE camera — Front", meta: "Reolink RLC-810A or 811A", cost: 90, costLabel: "~£90" },
+      { id: "b10", name: "PoE camera — Rear (above conservatory)", cost: 90, costLabel: "~£90" },
+      { id: "b11", name: "PoE video doorbell", meta: "Reolink — front porch", cost: 110, costLabel: "~£110" },
+      { id: "b12", name: "Smart lock — Front door", meta: "Yale Assure 2 SL Touchscreen. Matter native, face-rec auto-unlock.", cost: 250, costLabel: "~£250" },
+      { id: "b12a", name: "Smart lock — Conservatory door", meta: "Aqara U100. Euro cylinder retrofit for hinged door.", cost: 170, costLabel: "~£170" },
+      { id: "b12b", name: "Smart lock — Dining French doors", meta: "Aqara A100 Pro or Nuki 4 Pro — smart Euro cylinder for multi-point door.", cost: 220, costLabel: "~£180-260" },
+      { id: "b13", name: "Lounge Zigbee bulbs / relays", meta: "Migrate from Govee testing", cost: 200, costLabel: "~£200" },
+      { id: "b14", name: "AVR (FB Marketplace)", meta: "Denon X3700H or Marantz SR6014", cost: 350, costLabel: "~£350" },
+      { id: "b15", name: "Lounge speakers — Front L/R + centre", meta: "Q Acoustics / Monitor Audio / KEF, secondhand", cost: 350, costLabel: "~£350" },
+      { id: "b16", name: "Subwoofer (used)", meta: "BK Electronics / SVS / REL", cost: 150, costLabel: "~£150" },
+      { id: "b16a", name: "Wall tablet — Kitchen", meta: "Samsung Tab A8/A9 secondhand", cost: 80, costLabel: "~£80" },
+      { id: "b16b", name: "Kitchen tablet mount + USB outlet", cost: 35, costLabel: "~£35" },
+      { id: "b16c", name: "Fully Kiosk Browser license", meta: "One-off, covers all tablets", cost: 6, costLabel: "~£6" },
+      { id: "b16d", name: "Aqara FP2 — Lounge", meta: "mmWave presence, multi-zone. HomeKit Controller integration.", cost: 65, costLabel: "~£65" },
+      { id: "b16e", name: "OpenTherm Gateway", meta: "Between boiler & master stat — modulating boiler control via HA", cost: 80, costLabel: "~£80" },
+      { id: "b16f", name: "5× Aqara E1 Zigbee TRVs", meta: "Master, bed 2, bed 3, landing, bathroom", cost: 200, costLabel: "~£200" },
+      { id: "b16g", name: "AC rough-in (4 positions)", meta: "Refrigerant pipes + comms + drain to master, lounge, bed 2, conservatory. Units bought later.", cost: 300, costLabel: "~£150-400" },
+      { id: "b16h", name: "AC outdoor unit power circuit", meta: "Dedicated 16A circuit to outdoor location — add to sparky's scope", cost: 0, costLabel: "in electrical" },
+    ],
+  },
+  {
+    id: "3",
+    title: "Phase 3 — Whole house",
+    items: [
+      { id: "b17", name: "HA Voice PE — Bedroom 2", cost: 55, costLabel: "~£55" },
+      { id: "b18", name: "HA Voice PE — Bedroom 3", cost: 55, costLabel: "~£55" },
+      { id: "b18a", name: "HA Voice PE — Conservatory", cost: 55, costLabel: "~£55" },
+      { id: "b20", name: "PoE camera — Side of house", cost: 90, costLabel: "~£90" },
+      { id: "b22", name: "Bay window blinds (6 motors)", meta: "Lounge + master bedroom, 3 panes each", cost: 900, costLabel: "~£900" },
+      { id: "b23", name: "Conservatory blinds", meta: "Style + count TBC", cost: 600, costLabel: "~£600" },
+      { id: "b24", name: "Other room blinds", meta: "Dining, kitchen, bedrooms 2/3", cost: 450, costLabel: "~£450" },
+      { id: "b25", name: "Remaining Zigbee lighting", meta: "Bulbs + relays for rest of house", cost: 300, costLabel: "~£300" },
+      { id: "b26", name: "Zigbee scene buttons (Aqara × 4)", meta: "Top of stairs, bedside, bottom of stairs", cost: 60, costLabel: "~£60" },
+      { id: "b27", name: "WiiM Mini × 6 (other rooms)", meta: "Kitchen, conservatory, bed 1, garage + spares", cost: 540, costLabel: "~£540" },
+      { id: "b28", name: "Powered speakers for non-lounge rooms", cost: 425, costLabel: "~£425" },
+      { id: "b29", name: "Motion / contact / presence sensors", cost: 200, costLabel: "~£200" },
+      { id: "b29a", name: "Wall tablet — Hall", meta: "Samsung Tab A8/A9 secondhand", cost: 80, costLabel: "~£80" },
+      { id: "b29a1", name: "Wall tablet — Lounge", meta: "AV control, scene selection, doorbell feed", cost: 80, costLabel: "~£80" },
+      { id: "b29b", name: "Wall tablet — Master bedroom", cost: 80, costLabel: "~£80" },
+      { id: "b29c", name: "Additional tablet mounts + USB outlets (3 sets)", cost: 105, costLabel: "~£105" },
+      { id: "b29d", name: "Smart mirror DIY (bathroom)", meta: "Tablet + two-way acrylic + frame", cost: 150, costLabel: "~£150" },
+      { id: "b29e", name: "Aqara wireless button — by smart mirror", cost: 15, costLabel: "~£15" },
+      { id: "b29f", name: "Shelly EM + CT clamps (consumer unit)", meta: "Sparky install recommended", cost: 120, costLabel: "~£120" },
+      { id: "b29g", name: "Proactive Claude service (custom Python)", meta: "~200 lines, FastAPI + HA webhook listener", cost: 0, costLabel: "code only" },
+      { id: "b29h", name: "Frigate face recognition training", meta: "Photos of each person, ~30 min setup", cost: 0, costLabel: "free" },
+      { id: "b29i", name: "Aqara FP2 — Master bedroom", meta: "In-bed vs dressing zones", cost: 65, costLabel: "~£65" },
+      { id: "b29i1", name: "Aqara FP1E — Bathroom", meta: "Lights stay on through shower", cost: 40, costLabel: "~£40" },
+      { id: "b29j", name: "Aqara FP1E — Office (Bed 3, optional)", cost: 40, costLabel: "~£40" },
+      { id: "b29l", name: "HASS.Agent install on PC", meta: "Windows tray app, exposes PC sensors to HA via MQTT", cost: 0, costLabel: "free" },
+      { id: "b29m", name: "Pinned browser dashboard config", meta: "Lovelace dashboard, pinned in corner of PC screen", cost: 0, costLabel: "free" },
+      { id: "b29n", name: "Custom Tauri desktop overlay app (optional)", meta: "~1-2 weekends dev. Doorbell pop-up, urgent Claude messages.", cost: 0, costLabel: "code only" },
+      { id: "b29o", name: "2× Shelly relays — UFH actuators", meta: "Lounge + dining zone control", cost: 40, costLabel: "~£40" },
+      { id: "b29p", name: "2× Aqara temp sensors — UFH rooms", cost: 30, costLabel: "~£30" },
+      { id: "b29q", name: "CO2/VOC sensors (5× IKEA Vindstyrka)", meta: "Lounge, bedrooms, kitchen, conservatory", cost: 200, costLabel: "~£200" },
+      { id: "b29r", name: "Driveway beam sensor", meta: "Aqara T1 outdoor or wired IR beam", cost: 40, costLabel: "~£40" },
+      { id: "b29s", name: "ALPR — CodeProject.AI (Docker on Unraid)", meta: "License plate recognition, free", cost: 0, costLabel: "free" },
+      { id: "b29t", name: "Adaptive Lighting (HACS)", meta: "Circadian lighting integration, free", cost: 0, costLabel: "free" },
+      { id: "b29u", name: "Google Calendar integration", meta: "Calendar-driven anticipation", cost: 0, costLabel: "free" },
+      { id: "b29v", name: "Energy dashboards setup", meta: "Octopus Agile + National Grid carbon intensity", cost: 0, costLabel: "free" },
+    ],
+  },
+  {
+    id: "4",
+    title: "Phase 4 — Signature behaviours & nice-to-haves",
+    items: [
+      { id: "b30", name: "Meross Matter plugs", meta: "Already owned — deploy as needed (lamp ✓, washer, immersion, bedroom)", cost: 0, costLabel: "owned" },
+      { id: "b31", name: "Additional Meross Matter plugs (4-pack)", meta: "Kettle, coffee, TV stack, more lamps", cost: 40, costLabel: "~£40" },
+      { id: "b31a", name: "Safety smart plugs — straighteners, iron, etc.", meta: "Aqara Zigbee or more Meross, ~3-4 units", cost: 60, costLabel: "~£60" },
+      { id: "b40", name: "Grocy install (Docker on Unraid)", meta: "Fridge inventory + meal planning", cost: 0, costLabel: "free" },
+      { id: "b41", name: "USB barcode scanner (optional)", meta: "For Grocy — by the fridge", cost: 15, costLabel: "~£15" },
+      { id: "b42", name: "Receipt OCR shortcut (phone)", meta: "Photo → HA → Claude vision → Grocy", cost: 0, costLabel: "free" },
+      { id: "b43", name: "Cooking mode automation", meta: "Voice trigger + lighting + recipe + timers", cost: 0, costLabel: "free" },
+      { id: "b44", name: "Delivery handling automations", meta: "Frigate + Claude doorbell speaker", cost: 0, costLabel: "free" },
+      { id: "b45", name: "Guest mode automation", cost: 0, costLabel: "free" },
+      { id: "b46", name: "Smart laundry workflow", meta: "Builds on smart plugs + proactive Claude", cost: 0, costLabel: "free" },
+      { id: "b47", name: "Photo digest automation", meta: "Daily/weekly highlights from Frigate", cost: 0, costLabel: "free" },
+      { id: "b48", name: "10× Xiaomi Mi Flora plant sensors", meta: "Soil moisture, light, temp, EC", cost: 180, costLabel: "~£180" },
+      { id: "b49", name: "Bluetooth Proxy ESP32", meta: "Reads BT plant sensors", cost: 20, costLabel: "~£20" },
+      { id: "b32", name: "Garden / outbuilding sensors", cost: 100, costLabel: "~£100" },
+      { id: "b34", name: "Garage door relay automation", meta: "If car-in-garage commitment made. Shelly wired across door opener input.", cost: 30, costLabel: "~£30" },
+    ],
+  },
+  {
+    id: "5",
+    title: "Phase 5 — Optional / when-installed",
+    items: [
+      { id: "b50", name: "OpenSprinkler (outdoor irrigation)", meta: "Only if irrigation installed", cost: 150, costLabel: "~£150" },
+      { id: "b51", name: "Garden moisture sensors (4-5 beds)", meta: "Aqara T1 outdoor or Ecowitt", cost: 80, costLabel: "~£80" },
+      { id: "b52", name: "Airthings View Plus (master bedroom)", meta: "Proper CO2 + radon + PM2.5 — optional premium", cost: 250, costLabel: "~£250" },
+      { id: "b53", name: "AC: master bedroom single-split (bare minimum)", meta: "~2.5-3.5 kW unit installed. Mitsubishi or LG via F-Gas installer.", cost: 900, costLabel: "~£900-1,500" },
+      { id: "b54", name: "AC: 3-head Daikin Comfora multi-split", meta: "Master + lounge + office (bed 2). Plain body, same internals as Stylish.", cost: 3800, costLabel: "~£3,800-5,200" },
+      { id: "b55", name: "AC: 4-head Daikin Stylish multi-split (premium)", meta: "Master + lounge + office + conservatory. Sleek wall units, ~19 dB.", cost: 5500, costLabel: "~£5,500-7,500" },
+    ],
+  },
+];
