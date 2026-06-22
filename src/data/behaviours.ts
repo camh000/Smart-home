@@ -225,6 +225,22 @@ export const BEHAVIOURS: Behaviour[] = [
     ],
   },
   {
+    id: "lounge-gaming",
+    title: "Lounge gaming (PC → Steam Deck)",
+    phase: 3,
+    cost: "~£40-80 dock",
+    hardware: "Gaming PC + Steam Deck dock",
+    summary: "Stream the office gaming PC to a docked Steam Deck in the lounge, with HA setting the scene and waking the PC for you.",
+    points: [
+      "Both ends wired (gaming PC + lounge Deck dock on Gigabit) and on the same VLAN — discovery breaks across VLANs, and the dock's Ethernet beats the Deck's Wi-Fi.",
+      "Host stack: Steam Remote Play (zero-setup) or Sunshine + Moonlight (lower latency, HDR, non-Steam).",
+      "“Lounge gaming” scene: Deck docked → AVR on, TV/AVR to the Deck's HDMI, lights to a gaming scene, Claude DND.",
+      "Wake-on-LAN the gaming PC from HA (“fire up the gaming PC”) before you sit down; it sleeps again after.",
+      "Sunshine virtual display lets the PC stream headless even when the desk KVM is on the work laptop.",
+      "The PC runs hard while you play downstairs — adds heat to the office (an AC-priority room).",
+    ],
+  },
+  {
     id: "focus",
     title: "Focus mode / phone mindfulness",
     phase: 3,

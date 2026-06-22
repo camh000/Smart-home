@@ -490,6 +490,18 @@ Apple TV (already owned) sits in the lounge as the main TV-and-film source. Two 
 - Keyboard input via HA is fiddly — still want the Siri remote for passwords / search
 - AirPlay 2 from Plex → Apple TV works great; can be used as a Plex client even where the native Apple TV Plex app isn't ideal
 
+## Game streaming (office → lounge)
+
+Stream PC games from the **gaming PC (office, Bed 2)** to the **lounge**, played on a **docked Steam Deck**. This is a *latency* problem, not a bandwidth one — a wired Gigabit LAN handles it with room to spare (1080p60 ≈ 20-30 Mbps, 4K60 < 100 Mbps; the bottleneck is jitter, which wired removes). Three things make it reliable:
+
+1. **Wire both ends — not Wi-Fi.** Gaming PC on Ethernet (one of the Bed 2 desk drops). **Steam Deck dock** on a **lounge Cat6 drop** — the dock's Gigabit port bypasses the Deck's weaker built-in Wi-Fi, which is the usual cause of stutter. (Reserve a lounge drop for the dock — see "Additions to cabling scope".)
+2. **Same VLAN for the PC and the Deck.** Steam Remote Play and Moonlight rely on local discovery (broadcast/mDNS); across VLANs it silently fails. Put both gaming endpoints on the **main/trusted VLAN together** (work laptop, IoT, cameras stay segmented) — captured in the Operations network scheme. Cross-VLAN is possible with mDNS reflection + opening the specific ports, but same-VLAN is the painless route.
+3. **Host stack:** **Steam Remote Play** (zero-setup, Steam games) or **Sunshine + Moonlight** (lower latency, non-Steam games, HDR, higher refresh; a little more setup). Sunshine can use a **virtual display**, so the PC streams headless even when the desk KVM is pointed at the work laptop.
+
+**Smart-home layer (the "lounge gaming" scene):** Deck docked → AVR on, TV/AVR switches to the Deck's HDMI input, lights to a gaming scene, Claude DND. **Wake-on-LAN** the gaming PC from HA ("fire up the gaming PC") before you sit down; it sleeps again after. The Deck is just another HDMI source alongside the Apple TV.
+
+**Note:** the PC runs hard while you game in the lounge, adding heat to the office — reinforcing Bed 2 as an AC-priority room. **Cost:** a Steam Deck dock (~£40-80) if not owned; everything else is the cabling already in scope + free host software. **Phase 3.**
+
 ## Displays &amp; touch panels
 
 Wall-mounted Android tablets and a DIY smart mirror — the visual layer that ties everything together. All running HA dashboards via Fully Kiosk Browser.
@@ -1390,6 +1402,7 @@ The Unraid health section covers the box; also watch the **edges**: UCG-Max stat
 ### Network & IP scheme + as-built docs
 
 - **Define the VLAN/IP scheme now** (IoT / voice / CCTV / guest / main), **non-overlapping with Selby** (e.g. `10.10.x` here, `10.20.x` there) — it's a prerequisite for the SD-WAN, guest isolation and the camera egress-blocking the privacy plan relies on.
+- **🎮 Keep the gaming PC and the Steam Deck on the *same* VLAN** (the main/trusted one). Game-stream discovery (Steam Remote Play / Moonlight) uses broadcast/mDNS and silently breaks across VLANs — so don't split the office gaming PC from the lounge Deck dock. If they must be segmented, you'll need an **mDNS reflector** + the specific Remote Play/Moonlight ports opened on the UCG-Max. Bake this into the scheme so the segmentation doesn't quietly kill streaming. (See "Game streaming (office → lounge)".)
 - Keep **as-built documentation**: a **patch-panel port map**, a **device/IP inventory**, and the VLAN plan. Cheap to do as you go, painful to reconstruct later. (The "friendly names" convention is good; this is the infrastructure equivalent.)
 
 ### Accounts, credentials & access
