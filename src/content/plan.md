@@ -500,7 +500,7 @@ Stream PC games from the **gaming PC (office, Bed 2)** to the **lounge**, played
 
 **Smart-home layer (the "lounge gaming" scene):** Deck docked → AVR on, TV/AVR switches to the Deck's HDMI input, lights to a gaming scene, Claude DND. **Wake-on-LAN** the gaming PC from HA ("fire up the gaming PC") before you sit down; it sleeps again after. The Deck is just another HDMI source alongside the Apple TV.
 
-**Note:** the PC runs hard while you game in the lounge, adding heat to the office — reinforcing Bed 2 as an AC-priority room. **Cost:** a Steam Deck dock (~£40-80) if not owned; everything else is the cabling already in scope + free host software. **Phase 3.**
+**Note:** the PC runs hard while you game in the lounge, adding heat to the office — reinforcing Bed 2 as an AC-priority room. **Cost: ~£0** — the **JSAUX dock (Ethernet) is already owned**, the lounge Cat6 is in scope, and the host software (Steam Remote Play / Sunshine + Moonlight) is free. **Phase 3.**
 
 ## Displays &amp; touch panels
 
@@ -851,6 +851,25 @@ Outside those hours, at lunch, or away from the desk → silent; the phone's all
 - ♻️ **Soft active prod (optional)** — a gentle **office Voice PE chime** or a single "back to it" phone nudge; throttled and self-suppressing.
 - ♻️ **Weekly attention summary** — "phone-minutes per work hour," pickups, trend ("down to 14/hr from 22"). The energy-dashboard pattern aimed at attention.
 - ♻️ **Carrot, not just stick** — hit the focus target → a small win (a light flourish, a streak, evening mode a touch earlier — or cheekily "you've earned a pint" routed to the garage bar).
+
+### No gaming during work hours
+
+A self-imposed rule — no gaming on the clock — that the smart home can actually help keep. **Easier to detect than the phone**, because the gaming kit is *yours*, not locked down:
+
+**Signals (during the fixed 09:00–17:30 weekday window, minus lunch):**
+
+- **HASS.Agent on the gaming PC** — it can go here (unlike the work laptop), reporting **foreground app** + **GPU load**, so "a game is *actually running*" is unambiguous (not just "PC is on" — avoids false positives from downloads/updates).
+- **KVM state** — the RS-232/TCP KVM tells HA when the desk is switched to the **gaming PC** instead of the work laptop.
+- **"Lounge gaming" scene / Steam Deck docked** — HA owns that scene, so it knows if you've wandered downstairs to stream.
+
+**Interventions (gentle → firm, your call):**
+
+- **Work-hours guard on the gaming triggers** — "fire up the gaming PC" (Wake-on-LAN) and the **lounge gaming scene** ask *"it's 2pm Tuesday — sure?"* or simply defer until 17:30. The KVM flipping to the gaming PC mid-workday raises a quiet flag.
+- **Accountability light** — the same desk LED goes a disapproving red if a game's running during work hours.
+- **Logged into the weekly focus summary** — "gaming minutes during work hours" sits alongside phone-time; carrot for a **clean work week** (guilt-free evening/weekend gaming unlocked).
+- **Hard mode (optional, not recommended)** — a smart-plug schedule could cut the gaming PC during work hours, but that's blunt (downloads, updates, headless streaming) — nudges + scene-gating are the kinder, smarter route.
+
+Same keep-it-kind rules apply: only ever fires in work context, data local and personal to you.
 
 ### Keep-it-kind principles
 
