@@ -7,18 +7,12 @@ import { AnimatedNumber } from "./AnimatedNumber";
 
 const STORAGE_KEY = "wh-shop-state-v1";
 
-const NO_BUY = ["free", "owned", "code only", "in electrical"];
-
-/** Explicit link if given; otherwise an Amazon UK search for purchasable items. */
+/** A link only shows for items with an explicit URL or a curated search term —
+ *  bundles, secondhand finds and free/config items get no (useless) link. */
 function buyUrl(it: ShopItem): string | null {
   if (it.url) return it.url;
-  if (it.cost <= 0 || NO_BUY.some((n) => it.costLabel.toLowerCase().includes(n))) return null;
-  const q = it.name
-    .split(" — ")[0]
-    .split(" (")[0]
-    .replace(/^\d+×\s*/, "")
-    .trim();
-  return `https://www.amazon.co.uk/s?k=${encodeURIComponent(q)}`;
+  if (it.search) return `https://www.amazon.co.uk/s?k=${encodeURIComponent(it.search)}`;
+  return null;
 }
 
 export function ShoppingList() {
