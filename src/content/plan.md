@@ -447,16 +447,15 @@ Buying secondhand off FB Marketplace. AVR acts as both surround processor AND th
 
 **Marketplace strategy:** saved searches, collection-only filter, test every channel before paying, push cones gently (should move freely, no scraping).
 
-### Lounge TV — TCL 65" QD-Mini LED
+### Lounge TV — TCL 65C6KS (65" QD-Mini LED, 2025)
 
-The lounge display. A **QD-Mini LED** (Quantum Dot + Mini-LED backlight) is genuinely the *right* panel for this room: the lounge is **south-facing with a bay window catching afternoon sun**, and Mini-LED gets far brighter and shrugs off glare where **OLED** would wash out (and risks burn-in on static dashboards). Pair it with the bay blinds for film nights.
+The lounge display — the chosen set is the **TCL 65C6KS-UK** (C6K series, 2025), ~**£529**. A **QD-Mini LED** (Quantum Dot + Mini-LED backlight) is genuinely the *right* panel for this room: the lounge is **south-facing with a bay window catching afternoon sun**, and Mini-LED gets far brighter and shrugs off glare where **OLED** would wash out (and risks burn-in on static dashboards). Pair it with the bay blinds for film nights. Dolby Vision + Atmos, **AirPlay 2** (Plex casts straight to it), Google TV, Alexa/hands-free.
 
-- **Gaming-ready** — TCL's QD-Mini LED C-series typically has **HDMI 2.1** (4K@120/144Hz), **VRR/FreeSync**, **ALLM** + a low-lag **Game Mode**, which the **lounge Steam Deck streaming** (and any future console) will use.
-- **Audio path:** connect to the 5.1 AVR over **HDMI eARC** so the TV's own apps still play through the surround system; route Apple TV + the Steam Deck dock *into the AVR* so it does the switching.
-- **HA control:** TCL runs **Google TV** → HA's **Android TV / Google Cast** integration gives power, volume, app launch, playback state and "what's playing"; **HDMI-CEC** (via the AVR) handles power/input in scenes. Drives **cinema mode**, **auto-dim on play / restore on pause**, **doorbell feed cast to the TV**, and **lounge gaming → Game Mode**.
+- **Gaming — fine for this use.** The C6K is TCL's *entry* QD-Mini LED, so it's likely a **60Hz** panel (the 120/144Hz + full VRR is on the dearer C7K/C8K). That's **perfectly adequate here**: Apple TV/film is 24-60fps and **Steam Deck streaming tops out ~60fps**, with **ALLM/Game Mode** for low lag. Only a future *directly-connected* console/PC wanting 4K120 would want a step-up model. *(Confirm the listed refresh rate so you know what you're getting.)*
+- **Audio path:** connect to the 5.1 AVR over **HDMI eARC** so the TV's own apps still play through the surround system; route Apple TV + the Steam Deck dock *into the AVR* so it does the switching. *(Confirm the C6K has an eARC port — most do.)*
+- **HA control:** TCL runs **Google TV** → HA's **Android TV / Google Cast** integration gives power, volume, app launch, playback state and "what's playing"; **HDMI-CEC** handles power/input in scenes. Drives **cinema mode**, **auto-dim on play / restore on pause**, **doorbell feed cast to the TV**, and **lounge gaming → Game Mode**.
 - **Reliability note:** Android TVs can be flaky to *wake from standby* over the network — lean on **CEC through the AVR** in the cinema scene rather than network power-on. And keep the **Apple TV as the primary source**, treating TCL's Google TV (ads, occasional lag, update lifespan) as a backup — as the plan already has it.
-- **Check before buying:** the exact UK model (TCL's C7/C8/C9-series vary a lot year to year — RTINGS/reviews for local-dimming/blooming and full-bandwidth **HDMI 2.1** ports), and note it's a **VA panel** (narrower viewing angles than OLED — fine straight-on from the sofa, worth a thought if seating fans wide).
-- **Cost:** ~£600-900 for a 65" depending on series/year.
+- **Trade-offs to expect (entry-tier):** fewer local-dimming zones / lower peak brightness than the dearer models (still great in a bright room, just not reference HDR), and it's a **VA panel** (narrower viewing angles than OLED — fine straight-on from the sofa, worth a thought if seating fans wide across the bay).
 
 ### Other rooms — WiiM Mini endpoints
 
@@ -488,7 +487,10 @@ Apple TV (already owned) sits in the lounge as the main TV-and-film source. Two 
 
 **What it unlocks:**
 
-- **"Movie" scene** orchestration — AVR on, Apple TV powers on, Plex launches, lights dim, blinds close. Single voice command.
+- **One-touch: just turn on the Apple TV → everything follows.** No more powering the TV, soundbar/AVR and Apple TV separately. Two layers make this bulletproof:
+  - **Base layer — HDMI-CEC ("one-touch play"):** waking the Apple TV tells the TV to power on + switch to its input and the AVR (over ARC/eARC) to power on. This works *today* on the current setup — enable CEC on the TV (Anynet+/SimpLink/Bravia Sync/etc.), enable it on the soundbar via **HDMI-ARC** (not optical), and on the Apple TV turn on Settings → Remotes and Devices → Home Theater Control → **"Control TVs and Receivers."**
+  - **Reliable layer — HA:** the Apple TV integration sees it turn on and runs the cinema scene — TV on, correct input, AVR on, optional lights/blinds — and corrects anything CEC fluffs. Reverse on idle: everything powers down.
+- **"Movie" scene** orchestration — AVR on, Apple TV powers on, Plex launches, lights dim, blinds close. Triggered by the Apple TV waking *or* a single voice command.
 - **"What's playing?"** — Claude can query state and tell you (artist, episode, time remaining)
 - **Auto-pause on doorbell** — TV pauses, camera feed appears on kitchen/hall tablets or on the TV itself
 - **Auto-dim on play / restore on pause** — lighting follows playback state
