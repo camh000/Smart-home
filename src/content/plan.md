@@ -651,6 +651,27 @@ All software: **£0**. HASS.Agent (~10 min setup per PC) + pinned browser dashbo
 
 Belongs in **phase 3** — after proactive Claude service exists. Without proactive, PC integration is just "doorbell pops up", which is fine but not the Stark vision.
 
+### Desk setup — dual monitors + KVM (office, Bed 2)
+
+The office desk runs **two monitors** — one a **34" 21:9 ultrawide (3440×1440)** — shared between the **work laptop** and the **gaming PC** through a **KVM**, so either source can drive the pair (keyboard/mouse/webcam follow).
+
+**The critical buy-time check (locked-down-laptop trap again):** a dual-monitor KVM only works if *each* source can actually output two displays. The gaming PC does this natively (2× DisplayPort). The **work laptop** outputs over **USB-C (DP Alt Mode)** and many corporate laptops only reliably drive **one** external display that way — two often needs **DisplayLink**, whose **driver can't be installed** on a locked-down machine. So:
+
+- **Confirm the work laptop can run two external displays natively (DP Alt Mode + MST), no drivers.** If yes → a true dual-head KVM gives both monitors on either source. If no → fall back to *laptop drives the ultrawide only, gaming PC drives both*, and make the ultrawide the shared/primary.
+
+**Kit:**
+
+- **Monitor:** 34" **3440×1440** 21:9, **144-165Hz IPS** for work + gaming. Seek a **USB-C (~90W) input** (single cable to the laptop) and a **built-in KVM** (LG 34GP/34GS, Dell, Gigabyte M34WQ, MSI) — the monitor's own KVM can cover peripheral switching.
+- **KVM:** dual-head, **DisplayPort 1.4** (bandwidth for 3440×1440@144-165Hz), a **USB-C input** for the laptop (avoids DisplayLink), **USB 3.0** peripherals. Aten / TESmart / ConnectPRO / Level1Techs. Prefer one with **RS-232 / TCP control** so HA can switch it.
+
+**Smart-home tie-ins:**
+
+- **HA-switchable desk** — a network/RS-232 KVM (or its button wired to a Zigbee/Shelly relay) lets you say *"switch the desk to the gaming PC"*; the **9:00 work scene** (see Focus mode) can auto-flip it to the laptop.
+- **Works with lounge game-streaming** — when streaming to the docked Steam Deck, the KVM stays on the laptop and the gaming PC streams **headless via a Sunshine virtual display**.
+- **Heat/power** — ultrawide + gaming PC add desk load and heat, reinforcing Bed 2 as an AC-priority room and a candidate for a smart-plug "desk off when away" routine.
+
+**Cost:** ~£350-550 for the ultrawide + ~£150-400 for a good dual-head DP 1.4 KVM (or less if the monitor's built-in KVM suffices). **Phase 3-4.**
+
 ## Smart plug deployment
 
 4× Meross Matter plugs already owned. Each one turns a dumb appliance into something Claude can see, control, and react to. Three jobs a plug can do:
