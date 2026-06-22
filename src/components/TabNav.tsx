@@ -20,13 +20,15 @@ export const TABS: TabDef[] = [
 export function TabNav({
   active,
   onChange,
+  onSearch,
 }: {
   active: string;
   onChange: (key: string) => void;
+  onSearch: () => void;
 }) {
   return (
     <div className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2.5 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <nav className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 py-2.5 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map((t) => {
           const isActive = active === t.key;
           return (
@@ -55,6 +57,20 @@ export function TabNav({
             </button>
           );
         })}
+        <button
+          onClick={onSearch}
+          aria-label="Search"
+          className="ml-auto flex shrink-0 items-center gap-2 rounded-full border border-line bg-surface px-3 py-2 text-[12.5px] text-muted transition-colors hover:border-line-strong hover:text-ink"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          <span className="hidden sm:inline">Search</span>
+          <kbd className="hidden rounded border border-line bg-paper px-1 font-mono text-[10px] sm:inline">
+            ⌘K
+          </kbd>
+        </button>
       </nav>
     </div>
   );
