@@ -1,15 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Hero } from "./Hero";
 import { TabNav, TABS } from "./TabNav";
-import { Markdown } from "./Markdown";
+import { LongDoc } from "./LongDoc";
+import type { NavTarget } from "./Markdown";
 import { Floorplan } from "./Floorplan";
 import { Calculator } from "./Calculator";
 import { ShoppingList } from "./ShoppingList";
 import { Behaviours } from "./Behaviours";
 import { BackToTop } from "./BackToTop";
+import { CommandPalette } from "./CommandPalette";
+import type { ParsedDoc, SearchEntry } from "@/lib/doc";
 
 const INTROS: Record<string, { meta: string; title: string; lead: string }> = {
   behaviours: {
@@ -34,21 +37,79 @@ const INTROS: Record<string, { meta: string; title: string; lead: string }> = {
   },
 };
 
+function scrollToId(id: string, attempts = 24) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  if (attempts > 0) setTimeout(() => scrollToId(id, attempts - 1), 30);
+}
+
 export function SiteShell({
-  planMd,
-  integrationMd,
+  planDoc,
+  integrationDoc,
+  searchIndex,
 }: {
-  planMd: string;
-  integrationMd: string;
+  planDoc: ParsedDoc;
+  integrationDoc: ParsedDoc;
+  searchIndex: SearchEntry[];
 }) {
   const [active, setActive] = useState("plan");
+  const [planSub, setPlanSub] = useState(planDoc.subviews[0]?.key ?? "overview");
+  const [intSub, setIntSub] = useState(integrationDoc.subviews[0]?.key ?? "overview");
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const pendingScroll = useRef<string | null>(null);
 
-  const change = useCallback((key: string) => {
-    setActive(key);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  const locById = useMemo(() => {
+    const m = new Map<string, { tab: string; subview?: string }>();
+    for (const e of searchIndex) {
+      if (e.headingId && !m.has(e.headingId)) m.set(e.headingId, { tab: e.tab, subview: e.subview });
+    }
+    return m;
+  }, [searchIndex]);
 
-  // Sync tab to the URL hash so links/refreshes land on the right view.
+  const navigate = useCallback(
+    (target: NavTarget) => {
+      let tab = target.tab;
+      let subview: string | undefined;
+      const headingId = target.headingId;
+
+      if (headingId && locById.has(headingId)) {
+        const loc = locById.get(headingId)!;
+        tab = loc.tab;
+        subview = loc.subview;
+      }
+      tab = tab ?? active;
+
+      const curSub = tab === "plan" ? planSub : tab === "integration" ? intSub : undefined;
+      const sameView = tab === active && (subview === undefined || subview === curSub);
+
+      setActive(tab);
+      if (tab === "plan" && subview) setPlanSub(subview);
+      if (tab === "integration" && subview) setIntSub(subview);
+
+      if (headingId) {
+        if (sameView) scrollToId(headingId);
+        else pendingScroll.current = headingId;
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      setPaletteOpen(false);
+    },
+    [active, planSub, intSub, locById],
+  );
+
+  // Consume a pending cross-view scroll once the new content has rendered.
+  useEffect(() => {
+    if (pendingScroll.current) {
+      const id = pendingScroll.current;
+      pendingScroll.current = null;
+      scrollToId(id);
+    }
+  }, [active, planSub, intSub]);
+
+  // Tab ↔ URL hash
   useEffect(() => {
     const fromHash = window.location.hash.replace("#tab-", "");
     if (TABS.some((t) => t.key === fromHash)) setActive(fromHash);
@@ -57,27 +118,40 @@ export function SiteShell({
     history.replaceState(null, "", `#tab-${active}`);
   }, [active]);
 
-  const navigateDoc = useCallback(
-    (doc: "plan" | "integration") => change(doc),
-    [change],
-  );
+  // ⌘K / Ctrl-K / "/" opens search
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      } else if (
+        e.key === "/" &&
+        !["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName)
+      ) {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <>
       <Hero />
-      <TabNav active={active} onChange={change} />
+      <TabNav active={active} onChange={(key) => navigate({ tab: key })} onSearch={() => setPaletteOpen(true)} />
 
-      <main className="mx-auto max-w-6xl px-6 pb-28 pt-10">
+      <main className="mx-auto max-w-6xl px-6 pb-28 pt-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={active}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.32, ease: [0.21, 0.6, 0.35, 1] as const }}
+            transition={{ duration: 0.3, ease: [0.21, 0.6, 0.35, 1] as const }}
           >
             {INTROS[active] && (
-              <div className="max-w-2xl">
+              <div className="max-w-2xl pt-2">
                 <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
                   {INTROS[active].meta}
                 </div>
@@ -91,14 +165,10 @@ export function SiteShell({
             )}
 
             {active === "plan" && (
-              <article className="max-w-3xl">
-                <Markdown source={planMd} onNavigateDoc={navigateDoc} />
-              </article>
+              <LongDoc doc={planDoc} activeSubview={planSub} onSubviewChange={setPlanSub} onNavigate={navigate} />
             )}
             {active === "integration" && (
-              <article className="max-w-3xl">
-                <Markdown source={integrationMd} onNavigateDoc={navigateDoc} />
-              </article>
+              <LongDoc doc={integrationDoc} activeSubview={intSub} onSubviewChange={setIntSub} onNavigate={navigate} />
             )}
             {active === "behaviours" && <Behaviours />}
             {active === "floorplan" && <Floorplan />}
@@ -117,6 +187,12 @@ export function SiteShell({
         </div>
       </footer>
 
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        index={searchIndex}
+        onNavigate={navigate}
+      />
       <BackToTop />
     </>
   );

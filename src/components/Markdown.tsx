@@ -4,14 +4,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ReactNode } from "react";
 import { Children, isValidElement } from "react";
+import { slugify } from "@/lib/doc";
 
-/** GitHub-compatible heading slug so in-doc anchor links resolve. */
-function slugify(node: ReactNode): string {
-  return textOf(node)
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-");
+export interface NavTarget {
+  tab?: string;
+  headingId?: string;
 }
 
 function textOf(node: ReactNode): string {
@@ -25,25 +22,26 @@ function textOf(node: ReactNode): string {
   return Children.toArray(node).map(textOf).join("");
 }
 
+const slugOf = (children: ReactNode) => slugify(textOf(children));
+
 export function Markdown({
   source,
-  onNavigateDoc,
+  onNavigate,
 }: {
   source: string;
-  onNavigateDoc?: (doc: "plan" | "integration") => void;
+  onNavigate?: (target: NavTarget) => void;
 }) {
   return (
     <div className="prose-doc">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          h1: ({ children }) => <h1 id={slugify(children)}>{children}</h1>,
-          h2: ({ children }) => <h2 id={slugify(children)}>{children}</h2>,
-          h3: ({ children }) => <h3 id={slugify(children)}>{children}</h3>,
-          h4: ({ children }) => <h4 id={slugify(children)}>{children}</h4>,
+          h1: ({ children }) => <h1 id={slugOf(children)}>{children}</h1>,
+          h2: ({ children }) => <h2 id={slugOf(children)}>{children}</h2>,
+          h3: ({ children }) => <h3 id={slugOf(children)}>{children}</h3>,
+          h4: ({ children }) => <h4 id={slugOf(children)}>{children}</h4>,
           a: ({ href, children }) => {
             const url = href ?? "";
-            // Cross-document links between the two source docs → switch tab.
             if (url.includes("claude_ha_integration")) {
               const hash = url.split("#")[1];
               return (
@@ -51,14 +49,7 @@ export function Markdown({
                   href={hash ? `#${hash}` : "#"}
                   onClick={(e) => {
                     e.preventDefault();
-                    onNavigateDoc?.("integration");
-                    if (hash) {
-                      requestAnimationFrame(() => {
-                        document
-                          .getElementById(hash)
-                          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-                      });
-                    }
+                    onNavigate?.({ tab: "integration", headingId: hash });
                   }}
                 >
                   {children}
@@ -71,7 +62,7 @@ export function Markdown({
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    onNavigateDoc?.("plan");
+                    onNavigate?.({ tab: "plan" });
                   }}
                 >
                   {children}
@@ -79,7 +70,17 @@ export function Markdown({
               );
             }
             if (url.startsWith("#")) {
-              return <a href={url}>{children}</a>;
+              return (
+                <a
+                  href={url}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigate?.({ headingId: url.slice(1) });
+                  }}
+                >
+                  {children}
+                </a>
+              );
             }
             return (
               <a href={url} target="_blank" rel="noreferrer noopener">
