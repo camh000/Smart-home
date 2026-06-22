@@ -744,6 +744,53 @@ If any are planned, cable runs (12V/24V DC) need adding to the cabling scope **n
 
 **Cheaper alternative for most rooms:** smart extractor fans + CO2/humidity sensors. ~£100 per fan. Automates ventilation without motorising windows.
 
+## Garage bar
+
+The garage already gets a Voice PE, a WiiM + rugged speaker, Zigbee lighting, an exterior camera and the fibre link — so a bar is mostly **scenes + a few cheap sensors + Claude's personality** layered on kit that's already going in. *(Effort tags: ♻️ reuses planned kit · ➕ cheap add · 🔧 weekend project · 🚀 showpiece.)*
+
+### Signature moments (build these six first)
+
+1. **"The usual?"** ♻️ — voice-ID + presence + RAG memory: walk in → "Evening — pour you the usual?", with per-person drink/music/lighting prefs. The most *JARVIS-bar* moment, near-zero new kit.
+2. **Keg flow-meter leaderboard** 🔧 — a hall-effect flow meter on the beer line → ESP32 → HA tracks pints poured, **keg % remaining** ("keg's at 15% — order a refill?") and *who* poured what. Gamified pint leaderboard.
+3. **Claude bartender** ♻️ — a spirits/mixers inventory (Grocy) + "what can I make with what's in?" → Claude suggests a cocktail, **reads the recipe aloud step-by-step**, scales quantities, and does **"bartender's choice"** (invents one from stock and names it).
+4. **Camera dart auto-scoring + pub-quiz host** 🔧/♻️ — reuse **CodeProject.AI** (already in the plan for ALPR) to score darts; Claude calls scores and keeps a league table. "Claude, start a pub quiz" → he runs rounds and keeps score with **Zigbee buttons as buzzers**.
+5. **Goal-reactive team-colour WLED** ➕ — "put the match on"; a live-scores API flashes the bar's **WLED** in team colours on a goal. The party trick everyone remembers.
+6. **NFC jukebox coasters** ➕ — cheap NFC tags in coasters/tokens; tap one on a reader to queue that song. Physical song requests for pennies a tag.
+
+### Ambience & audio
+
+- **"Open the bar" / "last orders" / "closing time" scenes** ♻️ — one phrase sets lights, back-bar bottle lighting, neon sign, music, heater and the TV/projector. An **"Open / Closed" status** mirrors bar-mode onto the house tablets so everyone knows it's live.
+- **WLED behind the bar** ➕ (ESP32 + addressable strip, ~£25) — under-counter glow, bottle backlighting, shelf wash; music-reactive, holiday/team colour themes.
+- **DJ Claude** ♻️ — "play something 90s", "read the room", "play everywhere" to sync the bar with the house for parties; conversation-aware ducking (reuse the cinema-mode trick).
+
+### Drinks tech
+
+- **Bar-fridge / kegerator temp control + door-left-open alert** ➕ (Inkbird/Shelly + contact sensor).
+- **Load-cell bottle inventory** 🚀 — load cells (HX711 + ESP32) under the spirits shelf weigh each bottle, so HA *knows how full the gin is* and warns when it's low.
+- **Auto-cocktail machine** 🚀 — peristaltic pumps + ESP32 (OpenBar/Bartendro style): "Claude, make a negroni." The ultimate stretch.
+- ⚠️ **CO2 safety** — a keg CO2 cylinder in an enclosed garage needs a **CO2 leak sensor** (extend the plan's CO2 sensing here). Genuine safety item, not optional.
+
+### Presence, games & banter
+
+- **Mate recognition** ♻️ — Frigate face-rec on the garage cam → "Mark's here," his playlist starts, his tab opens. **Headcount scenes** via mmWave (1 = chill; 4+ = party mode). **Tab economy + ribbing** — Claude tracks rounds and banters "that's your round, Cam."
+- **Sports mode / pub quiz / darts** — see signature moments 4 & 5.
+
+### Proactive & practical
+
+- **Proactive bartender** ♻️ — "Friday 5pm — open the bar?"; "Mark's 10 min out — start bar mode?"; "keg's low and the gin's nearly out, you're hosting Saturday — list updated." Opt-in **responsible pacing** tied to the calendar ("early start tomorrow — last one?").
+- **Pre-warm for a session** ♻️ — set a bar night by voice/calendar → "bar's warming, ready in 20" (gives the cold detached garage a purpose-built answer).
+- **Auto close-up** ♻️ — last person leaves + empty 15 min → everything off, heater off, **confirm garage locked**, Claude posts the night's stats (pints, top song, who came). Alert if the garage opens at odd hours.
+- **Bridge to the house** ♻️ — route the **house doorbell + intercom** ("dinner's ready") to the bar (you won't hear them out there), and **path-light the route** house→garage at night.
+- **Bar-night memory** ♻️ — Claude logs each session to RAG and produces a camera **highlight reel**; "remember the night we…" actually works.
+
+### Resilience note
+
+The bar leans on the **fibre link** for Claude/HA, so give the garage a **local fallback** — a few Zigbee buttons/scenes that work even if the tunnel drops — so the bar doesn't go dark mid-round. (Same dependency-loop thinking as the rest of the plan.)
+
+### Cost
+
+Mostly software/scenes on existing kit. New bits, roughly: WLED (~£25), NFC tags (~£5), keg flow meter + ESP32 (~£25), load cells + HX711 (~£20-40), CO2 leak sensor (~£35), smart scale (~£20). **~£100-150 for the lot**; the kegerator and auto-pour machine are separate splurges. **Phase 4-5**, after the house core is in.
+
 ## Signature behaviours
 
 The "JARVIS feels" layer. These combine the infrastructure (voice + presence + lighting + heating + audio + cameras + Claude) into specific automations that feel like an attentive housemate rather than a smart-home dashboard. Most depend on phase 2-3 kit being in place; few need new hardware.

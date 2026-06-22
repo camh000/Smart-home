@@ -133,6 +133,12 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b49", name: "Bluetooth Proxy ESP32", meta: "Reads BT plant sensors", cost: 20, costLabel: "~£20" },
       { id: "b32", name: "Garden / outbuilding sensors", cost: 100, costLabel: "~£100" },
       { id: "b34", name: "Garage door relay automation", meta: "If car-in-garage commitment made. Shelly wired across door opener input.", cost: 30, costLabel: "~£30" },
+      { id: "bar1", name: "Garage bar — WLED kit (ESP32 + strip)", meta: "Back-bar lighting + scenes + goal-reactive flashes", cost: 25, costLabel: "~£25" },
+      { id: "bar2", name: "NFC jukebox tags (pack)", meta: "Coaster/token song requests — tap to queue", cost: 5, costLabel: "~£5" },
+      { id: "bar3", name: "Keg flow meter + ESP32", meta: "Pours, keg % remaining, per-person leaderboard", cost: 25, costLabel: "~£25" },
+      { id: "bar4", name: "Load cells + HX711 (bottle inventory)", meta: "Weigh spirit bottles — know when the gin's low", cost: 30, costLabel: "~£20-40" },
+      { id: "bar5", name: "Bar-fridge temp controller + contact sensor", meta: "Inkbird/Shelly + door-left-open alert", cost: 30, costLabel: "~£30" },
+      { id: "bar6", name: "CO2 leak sensor (if keg CO2 cylinder)", meta: "Enclosed-garage safety — not optional with a CO2 keg", cost: 35, costLabel: "~£35" },
     ],
   },
   {
