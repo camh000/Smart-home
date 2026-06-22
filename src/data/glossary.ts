@@ -34,6 +34,13 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["WiiM Mini", "WiiM Pro", "WiiM"], def: "Compact network audio streamer (AirPlay/Chromecast/Spotify/DLNA) that HA can control." },
   { terms: ["AVR"], def: "AV receiver — the home-cinema amplifier that drives surround speakers and switches HDMI." },
   { terms: ["eARC"], def: "Enhanced Audio Return Channel — sends the TV's audio back to the AVR over one HDMI cable." },
+  { terms: ["QD-Mini LED", "Mini-LED"], def: "A TV backlight of thousands of tiny LEDs + Quantum Dots — very bright with deep local-dimming contrast; great in bright rooms." },
+  { terms: ["OLED"], def: "A TV panel where each pixel makes its own light — perfect blacks, but dimmer than Mini-LED and can burn-in on static images." },
+  { terms: ["HDMI 2.1"], def: "The HDMI version that carries 4K@120Hz, VRR and ALLM — the gaming-friendly features." },
+  { terms: ["VRR"], def: "Variable Refresh Rate — the TV syncs to the source's frame rate to remove tearing/stutter in games." },
+  { terms: ["ALLM"], def: "Auto Low Latency Mode — the TV auto-switches to its low-lag Game Mode when a console/PC is detected." },
+  { terms: ["HDMI-CEC", "CEC"], def: "HDMI control signalling — lets one device power on/switch others (e.g. HA/AVR turning the TV on and selecting an input)." },
+  { terms: ["Google TV", "Android TV"], def: "Google's smart-TV platform (on TCL here) — HA controls it for power, volume, apps and playback state." },
   { terms: ["Plex"], def: "Self-hosted media server for your films and music." },
 
   // Networking
