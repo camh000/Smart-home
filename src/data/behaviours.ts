@@ -238,6 +238,7 @@ export const BEHAVIOURS: Behaviour[] = [
       "Wake-on-LAN the gaming PC from HA (“fire up the gaming PC”) before you sit down; it sleeps again after.",
       "Sunshine virtual display lets the PC stream headless even when the desk KVM is on the work laptop.",
       "The PC runs hard while you play downstairs — adds heat to the office (an AC-priority room).",
+      "Work-hours guarded: during the 9–5:30 weekday window the scene + Wake-on-LAN defer or ask “sure?” (see Focus mode — no gaming on the clock).",
     ],
   },
   {
@@ -254,6 +255,7 @@ export const BEHAVIOURS: Behaviour[] = [
       "Ambient desk LED goes green → amber → red as phone-time climbs; silent and glanceable, needs nothing on the laptop.",
       "NFC focus-dock starts a Pomodoro sprint; auto-DND on the personal phone removes the pull.",
       "Weekly attention summary (phone-minutes per work hour); data stays local and personal to you. Carrot: hit the target → a small win.",
+      "No-gaming-on-the-clock guard: HASS.Agent on the gaming PC (foreground game + GPU load), KVM state and the lounge gaming scene are all work-hours-gated — nudge/defer rather than a hard block.",
     ],
   },
   {
