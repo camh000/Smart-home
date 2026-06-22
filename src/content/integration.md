@@ -52,7 +52,7 @@ HA supports multiple agents per pipeline, so routing between them is feasible.
 The setup runs in two complementary modes:
 
 - **Reactive** (phase 1+) — user speaks, Claude responds. Built on HA's built-in Anthropic integration. Everything else in this doc applies to this mode.
-- **Proactive** (phase 3+) — Claude initiates. Volunteers info, warns about anomalies, addresses people by name. Built on a custom Python service running on Unraid because HA's built-in integration is reactive-only.
+- **Proactive** (phase 5+) — Claude initiates. Volunteers info, warns about anomalies, addresses people by name. Built on a custom Python service running on Unraid because HA's built-in integration is reactive-only.
 
 ## Proactive Claude — custom service architecture
 
@@ -110,7 +110,7 @@ Output channels available:
 
 - **Voice PE TTS** — primary, room-specific
 - **Wall tablets** — kitchen, hall, optional master
-- **PC desktop overlay** — via HASS.Agent or custom Tauri app (phase 3+)
+- **PC desktop overlay** — via HASS.Agent or custom Tauri app (phase 5+)
 - **Phone push** — via HA Companion app
 - **Smart mirror** — bathroom (Aqara button-driven, but can also receive proactive)
 
@@ -130,13 +130,13 @@ Frigate has built-in face recognition (and optional CompreFace integration for m
 
 **Uses:** "Cam just arrived" (front door cam), camera-driven welcome scenes, security context ("unknown person at the gate").
 
-### Tier 3 — Voice biometrics (paid SDK, phase 5+, optional)
+### Tier 3 — Voice biometrics (paid SDK, phase 6+, optional)
 
 Picovoice Eagle or similar. Identifies the speaker from their voice signature.
 
 **Uses:** per-person responses without needing phone proximity.
 
-### Per-room presence — Aqara mmWave (phase 2+)
+### Per-room presence — Aqara mmWave (phase 3+)
 
 Not "who" but "where". Aqara FP2 (multi-zone) and FP1E (single zone) detect breathing-level micro-movement, so they correctly report occupancy when someone is sitting still on a sofa, reading, or in the shower.
 
@@ -144,7 +144,7 @@ Integrated via HA's **HomeKit Controller** — no cloud, no Aqara hub needed. Bo
 
 **Combined inference:** "Cam's phone is home + lounge FP2 reports sofa occupied + last front-door face recognition was Cam 2 minutes ago" → strong confidence Cam is in the lounge. Proactive Claude can route TTS to the lounge Voice PE and address him by name.
 
-### PC activity — HASS.Agent (phase 3+)
+### PC activity — HASS.Agent (phase 5+)
 
 Another presence signal worth knowing about. **HASS.Agent** runs on Windows and exposes ~30 sensors to HA via MQTT: active/idle/locked, focused window, webcam/mic in use, etc. Tells HA "the PC is being used" — combined with the office mmWave, gives a high-confidence "Cam's at his desk" signal.
 
@@ -291,7 +291,7 @@ Use **friendly names** in HA — Claude works much better with `kitchen_ceiling_
 - [x] ~~Conversational memory~~ → **resolved: full RAG from phase 1.** Jump path. See Memory architecture section below.
 - [x] ~~Confirmation enforcement at the tool layer: locks~~ → **resolved: phase 1 task** (see Tier 2 above + Phase 1 checklist). Heating/alarms remain prompt-based, hardened in phase 2+.
 - [x] ~~Multi-step / clarification turns~~ → **resolved naturally by the RAG memory layer** ("set a timer" → "for how long?" — the memory wrapper holds the open intent across turns). **🔁 Dependency-loop caveat:** don't make *safety-critical* multi-turn confirmation depend on the full Qdrant/Python RAG stack — if that service is down, "yes" loses its antecedent and either fails or (worse) attaches to the wrong intent. Hold the **short-term conversational buffer in HA itself** (a lightweight last-N-turns store), so "shall I unlock the front door?" / "yes" still resolves correctly during a memory-service outage. RAG is for *long-term* recall; the open-intent buffer that gates Tier-2 actions must survive without it.
-- [ ] Per-user voice ID — relevant for per-person responses without phone proximity. Picovoice Eagle, ~£100/year. Worth phase 3 not phase 5 given two cohabitants want personalised behaviour
+- [ ] Per-user voice ID — relevant for per-person responses without phone proximity. Picovoice Eagle, ~£100/year. Worth phase 5 not phase 6 given two cohabitants want personalised behaviour
 - [x] ~~Fallback when Claude API is slow/down~~ → **resolved: Phase-1 deliverable** (see plan → Resilience → Graceful degradation). Timeout → HA's built-in local intents; the fallback must cover **lights, goodnight, and a confirmed unlock** at minimum, and explicitly decide whether the local path is allowed to perform Tier-2 actions or defers to the physical key.
 - [ ] Rate limit handling for the proactive service — bounded queue, throttle classes per trigger type, drop trivia first
 
@@ -308,7 +308,7 @@ The conversational buffer above is the floor — useful for "yes do that" but wo
 | Vector DB | **Qdrant** (Docker on Unraid) | Best perf/memory ratio for domestic scale. Mature Python client. | ~100MB RAM idle |
 | Embedding model | **bge-small-en-v1.5** via Ollama | CPU-only, ~80MB model, ~50ms per embed | ~200MB RAM loaded |
 | Structured store | **HA helpers + custom SQLite table** | HA already has SQLite. Custom table for memory schema. | Negligible |
-| Orchestration | **Custom Python service** | The same proactive Claude service from phase 3. Memory layer ≈ 200-300 LOC. | — |
+| Orchestration | **Custom Python service** | The same proactive Claude service from phase 5. Memory layer ≈ 200-300 LOC. | — |
 
 Total footprint on Unraid: ~400MB RAM and <1GB storage even after years. Effectively free.
 
@@ -349,7 +349,7 @@ Latency added: barely perceptible.
 
 Every memory is tagged by person: `cam` / `nova` / `shared` / `private-cam` / `private-nova`.
 
-At query time, voice ID (Picovoice Eagle, phase 3) determines whose memories surface:
+At query time, voice ID (Picovoice Eagle, phase 5) determines whose memories surface:
 
 - Cam's private memories only retrieved during Cam's conversations
 - Shared memories visible to both

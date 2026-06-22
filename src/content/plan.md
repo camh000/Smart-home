@@ -129,7 +129,7 @@ HA also watches the Unraid box itself, so the server that runs the whole house (
 
 (Note: "**Unraid/HA itself is down**" is deliberately **not** in this list — HA can't alert on its own death. That case is the external watchdog's job, below.)
 
-Delivery rides the same rails as everything else: phone push (HA Companion), desktop toast (HASS.Agent), and — once the proactive Claude service exists (phase 3) — spoken/written anomalies in plain English.
+Delivery rides the same rails as everything else: phone push (HA Companion), desktop toast (HASS.Agent), and — once the proactive Claude service exists (phase 5) — spoken/written anomalies in plain English.
 
 **Exposure note:** keep these as **diagnostic sensors used by HA automations and the proactive service, but *not* exposed to Assist/Claude's tool list** — the entity-exposure strategy already says to skip diagnostic sensors so voice-turn prompts stay lean and fast. The proactive service can still read them directly when something's actually wrong; they just don't belong in every voice turn.
 
@@ -164,6 +164,26 @@ Routine scene buttons worth adding regardless of voice coverage:
 - Top of stairs (goodnight → all lights off downstairs, lock doors)
 - Bottom of stairs (good morning → kitchen/hall lights on)
 - Bedside (sleep → bedroom off, lock check)
+
+### Is Voice PE good enough? — hardware confidence + fallback
+
+**Verdict: yes, it's the right call — but voice quality lives in the *backend pipeline*, not the puck.** The HA Voice PE (~£59) is purpose-built for exactly this: local wake word (microWakeWord), ESPHome-native, deep HA integration, and a hardware mute/dial/button for privacy. Crucially it carries an **XMOS XU316** doing acoustic echo cancellation + beamforming, so it still hears you while its own speaker is talking (barge-in works) — something the cheap ESP32 DIY satellites can't really do. There's no clearly-better *local voice puck* on the market right now; it's current best-in-class for this job.
+
+**Where it can disappoint (and why it's usually not the hardware):**
+
+- **Far-field in a big/noisy room** — it's a 2-mic array, not the 3–6 mics in an Echo/Nest. The **south-facing lounge with media playing** is the hardest test. This is the one genuine hardware limit.
+- **STT accuracy + latency** — dominated by which Whisper model runs on the Unraid box, not the puck. A small quantised model is fast but fumbles names/accents; a bigger one is accurate but needs GPU to stay quick.
+- **LLM in the loop** — if every utterance hits Ollama/Claude you'll feel 2–4 s lag. Simple commands ("lights on") must resolve via HA's **local intent matching in <1 s** and never touch the LLM.
+- **Tiny onboard speaker** — fine for confirmations/timers, useless for music or room-filling TTS. Not a problem here: route TTS responses to the ceiling speakers.
+
+**Fallback ladder (cheapest → most drastic):**
+
+1. **Tune the backend first** — give Whisper the GPU (faster-whisper / whisper.cpp), keep the LLM out of the fast path, route TTS to ceiling audio. Fixes most "it's bad" complaints with no new hardware.
+2. **Drop to HA Cloud (Nabu Casa) STT/TTS** — much higher accuracy, small latency, and it funds HA. Costs a privacy trade-off and ~£65/yr, and can be enabled **per room** rather than all-or-nothing.
+3. **One bad room only?** Add a **Wyoming satellite on a Raspberry Pi + 4-mic ReSpeaker array** for that room — better far-field, less tidy. Keep Voice PE everywhere else.
+4. **Last resort** — bridge an existing Echo/Nest via HA. Works, but it's cloud-bound and the opposite of the local-first ethos — only if all else fails.
+
+**🛒 De-risking move: buy ONE first, not the full set.** Put it in the lounge (worst-case acoustics) with media playing and test wake-word reliability + recognition before committing to room-wide coverage. ~£59 to de-risk the whole voice layer — and it fits the phased rollout anyway.
 
 ## Hub & radios (Unraid box)
 
@@ -286,8 +306,8 @@ Plus the boiler itself, which is in the building budget separately.
 ### Phasing
 
 - **During build:** boiler installed with OpenTherm support; UFH installed with manifold + actuators in lounge + dining
-- **Phase 2:** OTGW + 5× TRVs deployed, HA controls boiler + upstairs heating
-- **Phase 3:** UFH zone control wired in (Shelly + sensors), per-zone Generic Thermostats configured in HA
+- **Phase 3:** OTGW + 5× TRVs deployed, HA controls boiler + upstairs heating
+- **Phase 5:** UFH zone control wired in (Shelly + sensors), per-zone Generic Thermostats configured in HA
 
 ## Cooling (no AC — passive only)
 
@@ -454,7 +474,7 @@ Stream PC games from the **gaming PC (office, Bed 2)** to the **lounge**, played
 
 **Smart-home layer (the "lounge gaming" scene):** Deck docked → AVR on, TV/AVR switches to the Deck's HDMI input, lights to a gaming scene, Claude DND. **Wake-on-LAN** the gaming PC from HA ("fire up the gaming PC") before you sit down; it sleeps again after. The Deck is just another HDMI source alongside the Apple TV.
 
-**Note:** the PC runs hard while you game in the lounge, adding heat to the office — so the office wants decent ventilation / a fan. **Cost: ~£0** — the **JSAUX dock (Ethernet) is already owned**, the lounge Cat6 is in scope, and the host software (Steam Remote Play / Sunshine + Moonlight) is free. **Phase 3.**
+**Note:** the PC runs hard while you game in the lounge, adding heat to the office — so the office wants decent ventilation / a fan. **Cost: ~£0** — the **JSAUX dock (Ethernet) is already owned**, the lounge Cat6 is in scope, and the host software (Steam Remote Play / Sunshine + Moonlight) is free. **Phase 5.**
 
 ## Displays &amp; touch panels
 
@@ -615,7 +635,7 @@ The proactive service learns where to deliver notifications based on context:
 
 All software: **£0**. HASS.Agent (~10 min setup per PC) + pinned browser dashboard (HA Lovelace time) + optional custom Tauri app (~1-2 weekends dev time).
 
-Belongs in **phase 3** — after proactive Claude service exists. Without proactive, PC integration is just "doorbell pops up", which is fine but not the Stark vision.
+Belongs in **phase 5** — after proactive Claude service exists. Without proactive, PC integration is just "doorbell pops up", which is fine but not the Stark vision.
 
 ### Desk setup — dual monitors + KVM (office, Bed 2)
 
@@ -636,7 +656,7 @@ The office desk runs **two monitors** — one a **34" 21:9 ultrawide (3440×1440
 - **Works with lounge game-streaming** — when streaming to the docked Steam Deck, the KVM stays on the laptop and the gaming PC streams **headless via a Sunshine virtual display**.
 - **Heat/power** — ultrawide + gaming PC add desk load and heat, so the office wants good ventilation / a fan, and it's a candidate for a smart-plug "desk off when away" routine.
 
-**Cost:** ~£350-550 for the ultrawide + ~£150-400 for a good dual-head DP 1.4 KVM (or less if the monitor's built-in KVM suffices). **Phase 3-4.**
+**Cost:** ~£350-550 for the ultrawide + ~£150-400 for a good dual-head DP 1.4 KVM (or less if the monitor's built-in KVM suffices). **Phase 5.**
 
 ## Smart plug deployment
 
@@ -698,7 +718,7 @@ In rough order of impact-per-pound:
 
 ### Proactive triggers each placement enables
 
-Tied to the proactive Claude service (phase 3+):
+Tied to the proactive Claude service (phase 5+):
 
 | Appliance | Trigger | Possible output |
 |---|---|---|
@@ -776,7 +796,7 @@ The bar leans on the **fibre link** for Claude/HA, so give the garage a **local 
 
 ### Cost
 
-Mostly software/scenes on existing kit. New bits, roughly: WLED (~£25), NFC tags (~£5), keg flow meter + ESP32 (~£25), load cells + HX711 (~£20-40), CO2 leak sensor (~£35), smart scale (~£20). **~£100-150 for the lot**; the kegerator and auto-pour machine are separate splurges. **Phase 4-5**, after the house core is in.
+Mostly software/scenes on existing kit. New bits, roughly: WLED (~£25), NFC tags (~£5), keg flow meter + ESP32 (~£25), load cells + HX711 (~£20-40), CO2 leak sensor (~£35), smart scale (~£20). **~£100-150 for the lot**; the kegerator and auto-pour machine are separate splurges. **Phase 6**, after the house core is in.
 
 ## Focus mode / phone mindfulness
 
@@ -837,11 +857,11 @@ Same keep-it-kind rules apply: only ever fires in work context, data local and p
 
 ### Cost
 
-New spend is just an **NFC tag (~£2)** and a **small desk LED (~£10-15)**. Everything else is config on the office kit (FP2, Voice PE, lighting, phone Companion) already in the plan. **Phase 3-4.**
+New spend is just an **NFC tag (~£2)** and a **small desk LED (~£10-15)**. Everything else is config on the office kit (FP2, Voice PE, lighting, phone Companion) already in the plan. **Phase 5.**
 
 ## Signature behaviours
 
-The "JARVIS feels" layer. These combine the infrastructure (voice + presence + lighting + heating + audio + cameras + Claude) into specific automations that feel like an attentive housemate rather than a smart-home dashboard. Most depend on phase 2-3 kit being in place; few need new hardware.
+The "JARVIS feels" layer. These combine the infrastructure (voice + presence + lighting + heating + audio + cameras + Claude) into specific automations that feel like an attentive housemate rather than a smart-home dashboard. Most depend on phase 2-5 kit being in place; few need new hardware.
 
 ### Cinema mode plus
 
@@ -865,7 +885,7 @@ Triggers: voice ("movie time"), button, or auto-detected when Plex/Apple TV star
 
 **End:** auto on media-end or "stop cinema mode" → restores previous state.
 
-Hardware: existing. Cost: **£0**. Phase 3.
+Hardware: existing. Cost: **£0**. Phase 5.
 
 ### Whole-house intercom
 
@@ -890,7 +910,7 @@ Hardware: existing. Cost: **£0**. Phase 3.
 - Hold a Zigbee button → push-to-talk → records and plays in chosen room
 - Genuinely useful for "can you bring a drink up?" without shouting
 
-Cost: **£0** (custom Python in the proactive service). Phase 3.
+Cost: **£0** (custom Python in the proactive service). Phase 5.
 
 ### Cooking mode + fridge inventory + meal planning
 
@@ -941,7 +961,7 @@ Weekly flow (Saturday morning):
 
 Voice: "show me Saturday's meal plan", "swap Tuesday's", "what's for dinner?"
 
-Cost: **£0** software, £15 optional barcode scanner. Real cost is setup time (2-4 evenings to populate Grocy + dial in the meal plan prompt). Pays back continuously. Phase 4.
+Cost: **£0** software, £15 optional barcode scanner. Real cost is setup time (2-4 evenings to populate Grocy + dial in the meal plan prompt). Pays back continuously. Phase 6.
 
 ### Face-recognised doorbell with Claude responses
 
@@ -971,7 +991,7 @@ Doorbell becomes contextual rather than dumb.
 - Same unknown face 3+ times this month → flagged as "frequent unknown"
 - Useful for noticing surveillance patterns
 
-Cost: **£0** (existing kit). Phase 3.
+Cost: **£0** (existing kit). Phase 5.
 
 ### Delivery handling
 
@@ -1001,7 +1021,7 @@ Frigate detects person + parcel-shaped object + sometimes vehicle (mail van, Ama
 - Package placed, no follow-up "collected" within hours → flagged
 - Stranger taking package who isn't a known household member → alert
 
-Cost: **£0**. Phase 3-4.
+Cost: **£0**. Phase 5.
 
 ### Circadian lighting
 
@@ -1030,7 +1050,7 @@ Auto-shifts colour temperature through the day to match natural rhythm.
 
 Tech: HACS Adaptive Lighting integration (free).
 
-Cost: **£0**. All planned bulbs/relays already support colour temp. Phase 2.
+Cost: **£0**. All planned bulbs/relays already support colour temp. Phase 3.
 
 ### Per-room CO2 + VOC monitoring
 
@@ -1054,7 +1074,7 @@ Cheap, high-impact on how you feel.
 
 People sleep noticeably better with proper ventilation. CO2 over 1000ppm during sleep is associated with grogginess.
 
-Cost: **~£200-280** for 5-7 rooms with Vindstyrkas. Optional +£250 Airthings master. Phase 3.
+Cost: **~£200-280** for 5-7 rooms with Vindstyrkas. Optional +£250 Airthings master. Phase 5.
 
 ### Driveway sensor
 
@@ -1081,7 +1101,7 @@ Two approaches, ideally combined.
 - Unknown car → snapshot, alert, higher-rate recording
 - Repeat unknown plate (3+ times) → flagged as potential pattern
 
-Cost: **~£30-40 beam** + free ALPR. Phase 3.
+Cost: **~£30-40 beam** + free ALPR. Phase 5.
 
 ### Smart irrigation + plant care
 
@@ -1117,7 +1137,7 @@ Cost:
 - Outdoor irrigation: **+£150-300**
 - Combined: ~£350-500
 
-Phase 4 (indoor); phase 5 (outdoor, if installed).
+Phase 6 (indoor); phase 7 (outdoor, if installed).
 
 ### Guest mode
 
@@ -1135,7 +1155,7 @@ Triggers: voice ("guests coming Friday for 3 nights"), calendar event tagged "gu
 
 **Auto-disables** when guests' phone presence leaves AND date passes.
 
-Cost: **£0**. Phase 4.
+Cost: **£0**. Phase 6.
 
 ### Smart laundry workflow
 
@@ -1162,7 +1182,7 @@ Smart plugs on washer + dryer (existing Meross owned).
 - Tracks frequency: "haven't done a wash in 10 days, things piling up?"
 - Day-of-week pattern: "usually Sunday — want to start one?"
 
-Cost: existing kit. Phase 4 with smart plug deployment.
+Cost: existing kit. Phase 6 with smart plug deployment.
 
 ### Energy + cost dashboards
 
@@ -1194,7 +1214,7 @@ Beyond raw Shelly EM numbers — actual useful insights.
 
 If on Octopus Agile, this combo can save £100-300/year by auto-scheduling high-load appliances to cheapest slots.
 
-Cost: **£0** software (Shelly EM already in plan, APIs free). Phase 3.
+Cost: **£0** software (Shelly EM already in plan, APIs free). Phase 5.
 
 ### Calendar-driven anticipation
 
@@ -1229,7 +1249,7 @@ Google Calendar integration (built into HA, free).
 
 - "Dentist 2pm tomorrow" → 90-min reminder with drive time
 
-Cost: **£0**. Phase 3 with proactive Claude service.
+Cost: **£0**. Phase 5 with proactive Claude service.
 
 ### Photo digest
 
@@ -1257,7 +1277,7 @@ Daily/weekly summary of "what happened around the house" using Frigate snapshots
 
 Privacy filter: option to exclude specific cameras (none planned in private spaces anyway).
 
-Cost: **£0** — existing kit + light Claude API usage for captions. Phase 4.
+Cost: **£0** — existing kit + light Claude API usage for captions. Phase 6.
 
 ### Cost summary — signature behaviours hardware
 
@@ -1278,21 +1298,21 @@ Everything else is software/configuration time. Ongoing Claude API maybe +£2-3/
 
 | Behaviour | Phase | Hardware needed? |
 |---|---|---|
-| Circadian lighting | 2 | No (existing bulbs) |
-| Cinema mode plus | 3 | No (existing) |
-| Whole-house intercom | 3 | No |
-| Face-recognised doorbell | 3 | No (Frigate + doorbell) |
-| Driveway sensor | 3 | Beam (~£40) |
-| CO2/VOC monitoring | 3 | Sensors (~£200-280) |
-| Energy + cost dashboards | 3 | No (Shelly EM in plan) |
-| Calendar-driven anticipation | 3 | No |
-| Cooking mode + Grocy + meal plan | 4 | Optional barcode scanner |
-| Smart laundry workflow | 4 | No (smart plugs in plan) |
-| Delivery handling | 4 | No |
-| Guest mode | 4 | No |
-| Photo digest | 4 | No |
-| Indoor plant care | 4 | Sensors (~£200) |
-| Outdoor irrigation | 5 (if installed) | OpenSprinkler (~£150) |
+| Circadian lighting | 3 | No (existing bulbs) |
+| Cinema mode plus | 5 | No (existing) |
+| Whole-house intercom | 5 | No |
+| Face-recognised doorbell | 5 | No (Frigate + doorbell) |
+| Driveway sensor | 5 | Beam (~£40) |
+| CO2/VOC monitoring | 5 | Sensors (~£200-280) |
+| Energy + cost dashboards | 5 | No (Shelly EM in plan) |
+| Calendar-driven anticipation | 5 | No |
+| Cooking mode + Grocy + meal plan | 6 | Optional barcode scanner |
+| Smart laundry workflow | 6 | No (smart plugs in plan) |
+| Delivery handling | 6 | No |
+| Guest mode | 6 | No |
+| Photo digest | 6 | No |
+| Indoor plant care | 6 | Sensors (~£200) |
+| Outdoor irrigation | 7 (if installed) | OpenSprinkler (~£150) |
 
 ## Additions to cabling scope (NOT in current spec)
 
@@ -1416,7 +1436,7 @@ Once it's on the network the printer is just another entity, so it folds into th
 - **🔥 Safety (it's a heater — highest-value bit)** — put the printer on a **power-monitoring smart plug** (an owned Meross): auto-cut power a set time after the print finishes and cools, flag "drawing power but finished hours ago", raise over-current/anomaly alerts, and put it in the **smoke-sensor** zone. Printers are a genuine fire risk left running unattended — this is the part not to skip.
 - **Nice-to-haves** — per-print energy cost (via the plug), a "print done" camera snapshot to your phone, auto timelapse.
 
-Cost: **£0 software** (HACS integration + Obico are free) on an owned Meross plug. Phase 3-4, alongside the proactive layer.
+Cost: **£0 software** (HACS integration + Obico are free) on an owned Meross plug. Phase 5, alongside the proactive layer.
 
 ## Privacy
 
@@ -1493,45 +1513,73 @@ The aim: prove the full pipeline (voice → Claude → tool calls → response) 
 - Wake word + STT + TTS + scene control working end to end
 - **Memory layer** in place — Qdrant + RAG direct (jump path chosen, see [Memory architecture](./claude_ha_integration.md#memory-architecture-rag--structured))
 
-### Phase 2 — Core coverage
+### Phase 2 — Security, entry & safety
 
-- Add lounge, garage voice nodes
-- PoE switch + first 2-3 cameras (front + back)
-- Doorbell
-- Front door lock
-- Lounge lighting upgrade to Zigbee
-- **First wall tablet** (kitchen)
+The "make the house safe and watched" layer — everything that wants the PoE backbone in first.
+
+- **PoE switch** + first 2-3 cameras (front + rear)
+- PoE video **doorbell**
+- **Smart locks on all three entries** — front door, conservatory door, dining French doors
+- **Frigate storage setup** — dedicated Unraid share, SSD cache, sized for 4 cameras
 - **Face recognition** set up in Frigate (free, just train it)
 - **Phone presence** via HA Companion app on all phones
-- **Frigate storage setup** — dedicated Unraid share, SSD cache, sized for 4 cameras
-- **First Aqara FP2** (lounge) — proves mmWave concept
+- **Life-safety sensors** — Zigbee smoke + CO alarms, water-leak sensors, motorised mains stopcock (auto-shut on a confirmed leak)
+
+### Phase 3 — Living-space coverage & comfort
+
+Turn the main living areas into proper smart spaces.
+
+- Add **lounge + garage voice nodes**
+- **Lounge lighting** upgrade to Zigbee
+- **Lounge AV** — AVR (secondhand), 5.1 speakers + sub, the TCL 65" QD-Mini LED TV
+- **First wall tablet** (kitchen)
+- **First Aqara FP2** (lounge) — proves the mmWave concept
 - **Heating control online** — OpenTherm Gateway, 5× Aqara E1 TRVs on upstairs radiators
 
-### Phase 3 — Whole house
+### Phase 4 — Whole-house coverage
 
-- Remaining bedroom voice nodes
-- Remaining cameras
-- Back door lock
-- Blinds (start with bays or conservatory)
-- Scene buttons on landing
-- Motion sensors, contact sensors, presence detection
-- **Remaining wall tablets** (hall + optional bedroom)
-- **Smart mirror** in bathroom (DIY)
-- **Scene buttons** next to mirror, plus more around the house
+Fill in every remaining room so coverage is complete.
+
+- Remaining **bedroom + conservatory voice nodes**
+- Remaining **cameras** (side of house)
+- **Multi-room audio** — WiiM endpoints + powered speakers in the other rooms
+- **Scene buttons** on landing + bedside
+- Motion / contact / presence sensors
+- **Remaining wall tablets** (lounge, hall, master bedroom)
+- **Second FP2** (master bedroom), FP1E (bathroom), optional FP1E (office)
+- Remaining Zigbee lighting across the house
+
+### Phase 5 — Automation brain, comfort & resilience
+
+The custom software brain, plus the comfort and resilience layers that build on full coverage.
+
+- **Blinds** — bay windows, conservatory, then remaining rooms
 - **Proactive Claude service** deployed (custom Python on Unraid)
-- **Energy monitoring** via Shelly EM on consumer unit
-- **Second FP2** (master bedroom), optional FP1E (office)
-- **PC integration** — HASS.Agent on Windows PC, pinned browser dashboard, optional custom Tauri overlay app
+- **PC integration** — HASS.Agent on the gaming PC, pinned browser dashboard, optional custom Tauri overlay app
+- **Desk setup** — 34" ultrawide + dual-head KVM; game streaming office → lounge (Sunshine/Moonlight to the docked Steam Deck)
+- **Focus mode** — NFC focus-dock + green→red accountability LED
+- **Energy monitoring** via Shelly EM on the consumer unit
 - **UFH zone control** — Shelly relays on lounge + dining actuators, Aqara temp sensors, HA Generic Thermostats configured
+- **Air quality** — CO2/VOC sensors (feeds night-purge ventilation + comfort)
+- **Smart mirror** in bathroom (DIY) + scene buttons next to it and around the house
+- **Resilience** — second UPS for network gear, off-site encrypted backup to Selby, dead-man's-switch heartbeat, off-site Uptime Kuma probe
+- Driveway beam + ALPR, adaptive lighting, calendar + energy dashboards
 
-### Phase 4 — Extras
+### Phase 6 — Extras & signature behaviours
 
-- Smart plugs for dumb appliances
+- Smart plugs for dumb appliances (+ safety plugs for straighteners/iron)
+- Grocy inventory + cooking / delivery / guest / laundry automations, photo digest
 - Robot vacuum integration
-- Garden / outbuilding sensors
-- **Garage door automation** (if car-in-garage commitment is made)
+- Garden / outbuilding + plant sensors
+- **Garage bar** — WLED, NFC jukebox, keg flow + bottle inventory, bar-fridge + CO2 safety
+- **Garage door automation** (if the car-in-garage commitment is made)
 - Voice biometrics (optional, Picovoice Eagle or similar)
-- Window motors (only if scope decided in phase 1 and cable provision made)
+- Window motors (only if scope decided early and cable provision made)
+
+### Phase 7 — Optional / when-installed
+
+- Outdoor irrigation (OpenSprinkler) + garden moisture sensors
+- Premium air quality (Airthings View Plus, master bedroom)
 
 ## Open questions
 
@@ -1569,6 +1617,7 @@ The aim: prove the full pipeline (voice → Claude → tool calls → response) 
 - [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
+- [ ] **Voice PE — confirm lounge performance before buying the full set.** Test one unit in the lounge with media playing (worst-case acoustics); decide STT route (local Whisper+GPU vs HA Cloud) off the back of it. See "Is Voice PE good enough?" above.
 - [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.
 - [ ] Lounge speaker positions chalked on wall before plastering (5.1 positions only)
 - [ ] Blind motor power: mains vs battery decision (deferred to contractor walk-through — but provision/conduit must be in place by then)
@@ -1576,7 +1625,7 @@ The aim: prove the full pipeline (voice → Claude → tool calls → response) 
 - [ ] **Window types confirmed** on site survey for motor compatibility (casement/tilt-and-turn straightforward; sash + bay sections need specialist actuators)
 - [ ] Second front-of-house camera on opposite corner? *(My rec: skip — central front + doorbell already cover entry)*
 - [ ] Conservatory blind count and style (thermal/pleated vs standard roller) — affects budget significantly
-- [ ] Car-in-garage decision (affects garage door automation in phase 4)
+- [ ] Car-in-garage decision (affects garage door automation in phase 6)
 - [ ] Boiler model confirmed with OpenTherm support — Vaillant ecoTEC plus / Worcester Greenstar / Ideal Vogue / Viessmann Vitodens
 - [ ] UFH manifold spec — confirm 2 separate zones (lounge + dining) at install
 - [ ] Conservatory heating — included in UFH (third zone), separate rad, or electric panel?
