@@ -28,6 +28,7 @@ export const ROOMS: Room[] = [
     items: [
       { cat: "voice", label: "Voice node", detail: "HA Voice PE — main listening position. Wired Cat6." },
       { cat: "speaker", label: "Audio", detail: "AVR + 5.1 surround (Atmos not in scope). Eltax C-205 as rears. Front L/R + centre TBC (secondhand hunt). Apple TV plugs into AVR for film/Plex." },
+      { cat: "display", label: "TV — TCL 65\" QD-Mini LED", detail: "Main lounge display. Mini-LED suits the bright south-facing room (brighter + no burn-in vs OLED). HDMI 2.1 / VRR / Game Mode for the lounge Steam Deck streaming; eARC to the AVR. HA control via the Android TV / Google Cast integration + CEC; drives cinema mode, auto-dim, doorbell-feed-to-TV. Apple TV stays the primary source." },
       { cat: "blind", label: "Bay window blinds", detail: "3 motors (narrow-wide-narrow). Power decision deferred — provision to all 3 heads." },
       { cat: "window", label: "Bay window actuator", detail: "Motorised opening on the openable bay section (typically the centre). Battery or mains TBD with the rest of the window-motor scope." },
       { cat: "light", label: "Zigbee lighting", detail: "Migrate existing 4× Govee H6008 here for phase 1 testing. Will become full Zigbee zone." },
