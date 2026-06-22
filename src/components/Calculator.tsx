@@ -169,7 +169,7 @@ export function Calculator() {
                 <AnimatedNumber value={grand} />
               </div>
               <p className="mt-1 text-[12px] text-paper/55">
-                Excludes AC units unless selected · secondhand hunts often beat these.
+                Indicative only · secondhand hunts often beat these.
               </p>
             </div>
             <div className="space-y-2.5 px-6 py-5">

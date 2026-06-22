@@ -202,7 +202,7 @@ Build these as HA scripts/scenes so Claude can call them as single tools:
 | "good morning" | Gradual sunrise lights, kitchen on, blinds up |
 | "away" | Everything off, locks on, cameras armed |
 | "I'm cold" | Heating +1°C (Tier 2, asks first) |
-| "I'm hot" | Fans on / AC if installed |
+| "I'm hot" | Fans on, blinds to shade, night-purge if cool outside |
 | "party" | Colour-cycle in living areas |
 
 System prompt instruction: *"When a vague command matches a predefined scene, use it. If the request is unclear and no scene matches, ask one short clarifying question."*
