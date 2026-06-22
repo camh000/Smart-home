@@ -290,9 +290,9 @@ Use **friendly names** in HA — Claude works much better with `kitchen_ceiling_
 
 - [x] ~~Conversational memory~~ → **resolved: full RAG from phase 1.** Jump path. See Memory architecture section below.
 - [x] ~~Confirmation enforcement at the tool layer: locks~~ → **resolved: phase 1 task** (see Tier 2 above + Phase 1 checklist). Heating/alarms remain prompt-based, hardened in phase 2+.
-- [x] ~~Multi-step / clarification turns~~ → **resolved naturally by the RAG memory layer** ("set a timer" → "for how long?" — the memory wrapper holds the open intent across turns).
+- [x] ~~Multi-step / clarification turns~~ → **resolved naturally by the RAG memory layer** ("set a timer" → "for how long?" — the memory wrapper holds the open intent across turns). **🔁 Dependency-loop caveat:** don't make *safety-critical* multi-turn confirmation depend on the full Qdrant/Python RAG stack — if that service is down, "yes" loses its antecedent and either fails or (worse) attaches to the wrong intent. Hold the **short-term conversational buffer in HA itself** (a lightweight last-N-turns store), so "shall I unlock the front door?" / "yes" still resolves correctly during a memory-service outage. RAG is for *long-term* recall; the open-intent buffer that gates Tier-2 actions must survive without it.
 - [ ] Per-user voice ID — relevant for per-person responses without phone proximity. Picovoice Eagle, ~£100/year. Worth phase 3 not phase 5 given two cohabitants want personalised behaviour
-- [ ] Fallback when Claude API is slow/down: timeout → local intent matching (HA's built-in basic agent) as backup. Define which scenes/scripts the fallback must cover (lights and goodnight at minimum).
+- [x] ~~Fallback when Claude API is slow/down~~ → **resolved: Phase-1 deliverable** (see plan → Resilience → Graceful degradation). Timeout → HA's built-in local intents; the fallback must cover **lights, goodnight, and a confirmed unlock** at minimum, and explicitly decide whether the local path is allowed to perform Tier-2 actions or defers to the physical key.
 - [ ] Rate limit handling for the proactive service — bounded queue, throttle classes per trigger type, drop trivia first
 
 ## Memory architecture (RAG + structured)
