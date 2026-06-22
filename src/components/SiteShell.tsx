@@ -18,7 +18,7 @@ const INTROS: Record<string, { meta: string; title: string; lead: string }> = {
   behaviours: {
     meta: "The JARVIS factor",
     title: "Signature behaviours",
-    lead: "Where the infrastructure stops being a dashboard and starts feeling like an attentive housemate. Tap a card to expand. Most need only phase 2–3 kit already in the plan.",
+    lead: "Where the infrastructure stops being a dashboard and starts feeling like an attentive housemate. Tap a card to expand. Most need only phase 2–5 kit already in the plan.",
   },
   floorplan: {
     meta: "Room by room",
