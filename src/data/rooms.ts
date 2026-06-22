@@ -34,6 +34,7 @@ export const ROOMS: Room[] = [
       { cat: "display", label: "Wall tablet — phase 3", detail: "AV control, scene selection, doorbell feed, ambient info while watching TV." },
       { cat: "heat", label: "Wet UFH zone", detail: "One of two UFH zones (lounge + dining). Shelly relay on manifold actuator + Aqara temp sensor + HA Generic Thermostat. Driven by mmWave presence + person preferences." },
       { cat: "camera", label: "Front camera (external)", detail: "Mounted high above bay — covers porch, bays, driveway." },
+      { cat: "camera", label: "Driveway-side camera (external)", detail: "House-mounted on the driveway elevation, looking down the side passage toward the garage. The 4th confirmed PoE camera (there's no passage on the opposite side). Pairs with the above-garage camera for bidirectional driveway coverage." },
     ],
   },
   {

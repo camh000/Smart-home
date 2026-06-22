@@ -4,6 +4,9 @@ export interface ShopItem {
   meta?: string;
   cost: number; // numeric, for totals
   costLabel: string; // display
+  /** Explicit UK buy link. If omitted, the list auto-builds an Amazon UK
+   *  search link for any item with a real cost. */
+  url?: string;
 }
 export interface ShopPhase {
   id: string;
@@ -16,8 +19,8 @@ export const SHOPPING: ShopPhase[] = [
     id: "0",
     title: "Phase 0 — Pre-move testbed",
     items: [
-      { id: "bp0a", name: "HA Voice PE — testbed", meta: "Living room of current home. Travels to Woodhouse Phase 1.", cost: 55, costLabel: "~£55" },
-      { id: "bp0b", name: "Sonoff ZBDongle-E", meta: "Start the Zigbee mesh now. Travels to Woodhouse Phase 1.", cost: 25, costLabel: "~£25" },
+      { id: "bp0a", name: "HA Voice PE — testbed", meta: "Living room of current home. Travels to Woodhouse Phase 1.", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
+      { id: "bp0b", name: "Sonoff ZBDongle-E", meta: "Start the Zigbee mesh now. Travels to Woodhouse Phase 1.", cost: 25, costLabel: "~£25", url: "https://thepihut.com/search?q=sonoff+zbdongle-e" },
       { id: "bp0c", name: "2× Innr Zigbee bulbs", meta: "For testbed. Migrate to Woodhouse with everything else.", cost: 30, costLabel: "~£30" },
       { id: "bp0d", name: "Anthropic API credit", meta: "First month at testbed scale", cost: 10, costLabel: "~£5-10" },
       { id: "bp0e", name: "(optional) 2nd HA Voice PE", meta: "For multi-room handoff testing. Skip if budget tight.", cost: 55, costLabel: "~£55" },
@@ -29,9 +32,9 @@ export const SHOPPING: ShopPhase[] = [
     items: [
       { id: "b0u", name: "UPS — head-end (1000-1500VA)", meta: "APC Back-UPS Pro, CyberPower CP1500, or Eaton 5E. Mandatory before Unraid first power-on.", cost: 175, costLabel: "~£150-200" },
       { id: "b1", name: "Zigbee coordinator", meta: "SkyConnect or Sonoff ZBDongle-E", cost: 20, costLabel: "~£20" },
-      { id: "b2", name: "HA Voice PE — Kitchen", meta: "Wired Cat6 from head-end", cost: 55, costLabel: "~£55" },
-      { id: "b3", name: "HA Voice PE — Master Bedroom", meta: "Wired Cat6 from head-end", cost: 55, costLabel: "~£55" },
-      { id: "b4", name: "Coral USB TPU", meta: "For Frigate AI inference", cost: 60, costLabel: "~£60" },
+      { id: "b2", name: "HA Voice PE — Kitchen", meta: "Wi-Fi + USB-C (no Ethernet) — needs a nearby socket", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
+      { id: "b3", name: "HA Voice PE — Master Bedroom", meta: "Wi-Fi + USB-C (no Ethernet) — needs a nearby socket", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
+      { id: "b4", name: "Coral USB TPU (optional)", meta: "For Frigate AI inference — optional, OpenVINO/iGPU is the free fallback", cost: 60, costLabel: "~£60", url: "https://thepihut.com/search?q=coral+usb+accelerator" },
       { id: "b5", name: "Misc cables / patch leads / power", meta: "USB-C, Cat6 patches, plug-tops", cost: 30, costLabel: "~£30" },
     ],
   },
@@ -59,6 +62,9 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b16d", name: "Aqara FP2 — Lounge", meta: "mmWave presence, multi-zone. HomeKit Controller integration.", cost: 65, costLabel: "~£65" },
       { id: "b16e", name: "OpenTherm Gateway", meta: "Between boiler & master stat — modulating boiler control via HA", cost: 80, costLabel: "~£80" },
       { id: "b16f", name: "5× Aqara E1 Zigbee TRVs", meta: "Master, bed 2, bed 3, landing, bathroom", cost: 200, costLabel: "~£200" },
+      { id: "b16s1", name: "Zigbee smoke + CO alarms (×3)", meta: "Life safety — Frient/Heiman, still function as standalone alarms", cost: 120, costLabel: "~£120" },
+      { id: "b16s2", name: "Zigbee water-leak sensors (×4)", meta: "UFH manifold, boiler, under sinks, behind washer/dishwasher", cost: 60, costLabel: "~£60" },
+      { id: "b16s3", name: "Motorised stopcock / mains water valve", meta: "Auto-shut on confirmed leak — highest-ROI safety device", cost: 90, costLabel: "~£90" },
       { id: "b16g", name: "AC rough-in (4 positions)", meta: "Refrigerant pipes + comms + drain to master, lounge, bed 2, conservatory. Units bought later.", cost: 300, costLabel: "~£150-400" },
       { id: "b16h", name: "AC outdoor unit power circuit", meta: "Dedicated 16A circuit to outdoor location — add to sparky's scope", cost: 0, costLabel: "in electrical" },
     ],
@@ -86,6 +92,8 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b29d", name: "Smart mirror DIY (bathroom)", meta: "Tablet + two-way acrylic + frame", cost: 150, costLabel: "~£150" },
       { id: "b29e", name: "Aqara wireless button — by smart mirror", cost: 15, costLabel: "~£15" },
       { id: "b29f", name: "Shelly EM + CT clamps (consumer unit)", meta: "Sparky install recommended", cost: 120, costLabel: "~£120" },
+      { id: "b29r1", name: "Second UPS — network gear", meta: "Keeps UCG-Max + core switch (SD-WAN/Tailscale) up during a server shutdown", cost: 90, costLabel: "~£90" },
+      { id: "b29r2", name: "Off-site encrypted backup to Selby", meta: "restic/borg — HA snapshots + Immich photo library + memory, client-side encrypted over the SD-WAN. Config only.", cost: 0, costLabel: "code only" },
       { id: "b29g", name: "Proactive Claude service (custom Python)", meta: "~200 lines, FastAPI + HA webhook listener", cost: 0, costLabel: "code only" },
       { id: "b29h", name: "Frigate face recognition training", meta: "Photos of each person, ~30 min setup", cost: 0, costLabel: "free" },
       { id: "b29i", name: "Aqara FP2 — Master bedroom", meta: "In-bed vs dressing zones", cost: 65, costLabel: "~£65" },

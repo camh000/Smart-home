@@ -194,11 +194,12 @@ export const CALC_GROUPS: CalcGroup[] = [
       {
         key: "blinds",
         label: "Motorisation scope",
+        sub: "Baseline is bedrooms only; the rest is bonus",
         options: [
           { value: 0, label: "Skip — manual blinds" },
-          { value: 900, label: "Bays only (lounge + master, 6 motors)" },
-          { value: 1300, label: "Bays + bedrooms 2/3" },
-          { value: 1900, label: "Bays + bedrooms + standard conservatory" },
+          { value: 700, label: "Bedrooms only (master bay + bed 2/3) — baseline" },
+          { value: 1600, label: "Bedrooms + lounge bay" },
+          { value: 2200, label: "Bedrooms + lounge bay + conservatory" },
           { value: 2800, label: "Whole house — standard rollers" },
           { value: 3400, label: "Whole house — incl. thermal conservatory" },
         ],
@@ -350,16 +351,16 @@ export type CalcState = Record<string, number>;
 export const PRESETS: Record<string, CalcState> = {
   minimal: {
     avr: 275, speakers: 200, atmos: 0, sub: 100, wiim: 270, powered: 200, "audio-misc": 80,
-    poe: 100, "cam-count": 3, "cam-tier": 70, doorbell: 110, "cctv-misc": 40,
-    light: 300, locks: 250, blinds: 900,
+    poe: 100, "cam-count": 4, "cam-tier": 70, doorbell: 110, "cctv-misc": 40,
+    light: 300, locks: 250, blinds: 700,
     voice: 220, buttons: 0, sensors: 100,
     tablets: 80, "tablet-mounts": 70, mirror: 0, mmwave: 65, energy: 0, garage: 0,
     windows: 200, cooling: 0,
   },
   balanced: {
     avr: 350, speakers: 350, atmos: 0, sub: 150, wiim: 540, powered: 425, "audio-misc": 120,
-    poe: 200, "cam-count": 3, "cam-tier": 90, doorbell: 110, "cctv-misc": 80,
-    light: 500, locks: 590, blinds: 2800,
+    poe: 200, "cam-count": 4, "cam-tier": 90, doorbell: 110, "cctv-misc": 80,
+    light: 500, locks: 590, blinds: 700,
     voice: 275, buttons: 60, sensors: 200,
     tablets: 320, "tablet-mounts": 140, mirror: 150, mmwave: 250, energy: 120, garage: 0,
     windows: 1800, cooling: 300,
