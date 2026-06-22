@@ -30,7 +30,7 @@ The whole-house Cat6 install is being procured separately under the **Woodhouse 
 ## Existing kit to reuse
 
 - **Unraid server** — handles NVR, recordings, Home Assistant, Docker containers
-- **UniFi gateway** (gift from dad, model TBC) — becomes the network root. Replaces Deco-as-gateway role. Decos demote to AP-only mode behind it.
+- **UniFi Cloud Gateway Max (UCG-Max)** (gift from dad) — becomes the network root. Replaces Deco-as-gateway role. Decos demote to AP-only mode behind it. 5× 2.5GbE (1 WAN + 4 LAN), no built-in PoE (so the PoE switch stays in scope), no built-in WiFi (so the Decos stay as APs), full UniFi Network with IDS/IPS and VLANs. Runs **Site Magic SD-WAN** — the basis for the Selby inter-site link (see "Networking" below).
 - **3× TP-Link Deco XE75** mesh, wired backhaul to router — repurposed as access points only once UniFi is in place
 - **4× Govee H6008 bulbs** — keep, use in lounge for early testing
 - **4× Meross Matter Smart Plug Mini (13A, energy monitoring)** — Matter-native, local, no cloud required. Pair direct to HA via built-in Matter integration.
@@ -48,6 +48,21 @@ Headline points that affect this plan:
 - Frigate runs alongside HA on Unraid for CCTV
 - Claude is the conversation/reasoning layer via HA's built-in Anthropic integration
 - API cost is negligible (~£5-10/month tiered)
+
+## Networking — gateway & inter-site SD-WAN
+
+The network root is the **UniFi Cloud Gateway Max (UCG-Max)**, gifted by dad. It sits in front of the Decos (demoted to APs), runs the full UniFi Network application with IDS/IPS, and handles the VLAN segmentation this plan relies on (IoT / voice / CCTV / guest / main). All five ports are 2.5GbE — give the **Unraid ↔ gateway link a 2.5G path** at the head-end so Frigate/HA traffic isn't bottlenecked behind the gigabit PoE switch.
+
+**No built-in PoE** → the 16-port PoE+ switch is **required** (powers cameras, doorbell, voice nodes). **No built-in WiFi** → the 3× Deco stay on as APs; a later swap to UniFi APs (U6/U7) is optional for single-pane management and better roaming.
+
+### Inter-site SD-WAN — the Selby link
+
+The aim is a site-to-site **SD-WAN between Woodhouse Road and dad's place in Selby**, using UniFi's **Site Magic** (one-click site-to-site SD-WAN between two UniFi gateways — automatic tunnel setup, route exchange and WAN failover, managed from a single UniFi account).
+
+- **Both ends are UniFi** — UCG-Max here, an existing UniFi gateway in Selby — so Site Magic meshes them in a couple of clicks once both sites are under one UniFi account.
+- **Woodhouse has a public dynamic IP** — that's the reachable endpoint. A static IP is **not** needed: the gateway reports its current WAN IP to UniFi's cloud, so the tunnel re-establishes automatically when the dynamic IP changes (no dynamic-DNS needed). Because our side is public, **CGNAT at the Selby end is fine** — that side dials out to us.
+- **Plan non-overlapping subnets** — the one real to-do. Woodhouse and Selby must use different ranges (e.g. `10.10.x` vs `10.20.x`) or the SD-WAN routes collide. Settle this alongside the VLAN scheme, across both sites.
+- **What it unlocks:** off-site backup is the headline — Qdrant memory store and Frigate footage backed up to dad's over the private link (and vice versa), plus remote support of each other's HA/Unraid/cameras. Complements the existing **Tailscale** (per-device overlay) with whole-subnet, gateway-to-gateway routing.
 
 ## Voice coverage — rooms
 
@@ -1266,8 +1281,9 @@ The aim: prove the full pipeline (voice → Claude → tool calls → response) 
 **Still open — needs deciding soon:**
 
 - [ ] UPS model and sizing confirmed before head-end commissioning
-- [ ] VLAN scheme defined (IoT / voice / CCTV / guest / main) — implementation now easy with UniFi gateway, just needs the scheme designed
-- [ ] **UniFi gateway model confirmed** from dad — determines whether the 16-port PoE switch stays in shopping list (if UDM-SE: built-in PoE, switch optional) and whether WiFi situation simplifies (if UDR: built-in WiFi, Decos may eventually retire)
+- [ ] VLAN scheme defined (IoT / voice / CCTV / guest / main) — implementation now easy with the UCG-Max, just needs the scheme designed. **Must be planned across both sites** (Woodhouse + Selby) with non-overlapping subnets so the Site Magic SD-WAN routes don't collide — e.g. `10.10.x` here, `10.20.x` in Selby.
+- [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
+- [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
 - [ ] AVR target brand (Denon/Marantz vs Yamaha) — affects multi-room ecosystem
 - [ ] Lounge speaker positions chalked on wall before plastering (5.1 positions only)
