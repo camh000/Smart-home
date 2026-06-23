@@ -40,6 +40,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b3", name: "HA Voice PE — Master Bedroom", meta: "Wi-Fi + USB-C (no Ethernet) — needs a nearby socket", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
       { id: "b4", name: "Coral USB TPU (optional)", meta: "For Frigate AI inference — optional, OpenVINO/iGPU is the free fallback", cost: 60, costLabel: "~£60", url: "https://thepihut.com/search?q=coral+usb+accelerator" },
       { id: "b5", name: "Misc cables / patch leads / power", meta: "USB-C, Cat6 patches, plug-tops", cost: 30, costLabel: "~£30" },
+      { id: "b5a", name: "Break-glass console — cheap monitor + wireless KB/mouse", meta: "Stashed at the head-end for direct Unraid access when the network/web UI is down. Match the board's video out; keyboard is the essential bit.", cost: 20, costLabel: "~£20", search: "wireless keyboard mouse combo" },
     ],
   },
   {
