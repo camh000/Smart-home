@@ -20,9 +20,9 @@ Roughly the entire *software* brain plus every device already owned can go in to
 - **Home Assistant** itself — the foundation.
 - **Full RAG memory layer** (the phase-1 "jump path"): **Qdrant** + **Ollama** (bge-small / nomic-embed) + the custom Python wrapper. Pure software, no hardware.
 - **Frigate** — install/configure now (CPU/OpenVINO detection, no Coral needed; test with a phone-as-IP-camera) so it's ready when cameras arrive.
-- **Grocy** — stand it up and start populating inventory.
+- **Grocy** ✅ **container up** — now populate inventory; the Claude meal-plan + receipt-OCR layer lands later with the proactive service (Phase 5–6).
 - **Mosquitto MQTT** broker.
-- **Unraid health monitoring** — **Glances + Scrutiny → HA**, immediately useful on the current box (SMART, capacity, temps, containers).
+- **Unraid health monitoring** — **Glances + Scrutiny → HA**, immediately useful on the current box (SMART, capacity, temps, containers). **Scrutiny ✅ container up** — next: point its notifications at HA (API/MQTT, or Shoutrrr → ntfy/HA webhook) and set the SMART thresholds so a climbing reallocated-sector count actually pings you. Remember it shares the **self-monitoring blind spot** (it's on the box it watches) — the off-site watchdog still does the "is it even up?" job.
 
 **Owned devices, integrated today:**
 
