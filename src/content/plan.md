@@ -45,7 +45,7 @@ Roughly the entire *software* brain plus every device already owned can go in to
 
 1. **Basics + phones** — set home location/units and accounts, then install the **HA Companion app** on both phones. Instant **Tier-1 presence** + push notifications + a mobile dashboard, zero extra kit.
 2. **HACS** — install the Home Assistant Community Store now; you'll need it for Adaptive Lighting, the Unraid integration, Grocy and more.
-3. **Easy owned-device wins** (≈5 min each, makes it feel alive): **Meross plugs** via Matter, the **4× Govee bulbs**, the **Apple TV** media player.
+3. **Easy owned-device wins**: **Meross plugs** (via Matter) and the **Apple TV** media player are near-instant. The **4× Govee bulbs** need a bit more — Govee's free **cloud API key** (Govee app → *Apply for API Key*) + the official **Govee** integration; the local **Govee Light Local** integration only works if the bulb exposes **LAN Control**, which the H6008 likely doesn't.
 4. **Wire in what you've already stood up** — the **Glances** + **Unraid** (HACS) integrations to surface Scrutiny/SMART/capacity in HA, the **Grocy** integration, and the **Mosquitto MQTT** broker add-on (backbone for HASS.Agent + future Zigbee).
 5. **PC sensors** — **HASS.Agent** on the gaming PC (activity/presence; the foundation for the focus + no-gaming-during-work guards later).
 6. **One real automation** so it earns its keep — a "cosy" scene, a presence notification, or "washing's done" off a Meross plug's power-drop. The dopamine that keeps you building.
@@ -213,7 +213,7 @@ HA runs in a container/VM on Unraid while the dongle is plugged into the box's U
 
 ## Lighting
 
-- **Existing 4× Govee H6008** — use in lounge for testing. Local control patchy; cloud API works as fallback.
+- **Existing 4× Govee H6008** — use in lounge for testing. Local control patchy: the official **Govee Light Local** integration needs the model to expose **LAN Control** (the H6008 likely doesn't), so the reliable route is the official **Govee cloud** integration with a free API key from the Govee app. Cloud + rate-limited but fine for scenes — which is exactly why future lighting goes **Zigbee** (local, instant), not more Govee.
 - **Future bulbs** — Zigbee (Hue, Innr, Ikea Tradfri) or Matter, not WiFi
 - **Switched fittings** — Shelly or Aqara Zigbee relays behind the switch where pendant fittings aren't worth replacing
 
