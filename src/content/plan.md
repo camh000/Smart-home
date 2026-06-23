@@ -354,6 +354,22 @@ Revisit only if a summer in the house actually proves it's needed — but with n
 - *Optional later: garage interior camera for workshop/storage*
 - *Considered and skipped: second front-of-house camera on the opposite corner. Adds redundant coverage but introduces a blind spot directly below it; central front camera + doorbell cover the entry already.*
 
+### Night vision &amp; face recognition — the honest version
+
+Detecting a *person* at night is easy; recognising *who* they are is a different, harder problem, and it's worth being clear-eyed about it (it underpins the doorbell greetings **and** the alarm's known-vs-stranger logic).
+
+- **Standard IR night vision is monochrome** and tends to **wash out / blur faces** (skin and glasses bounce IR; moving subjects blur on the longer night exposures). Brilliant for "a person is here," poor for face *recognition*.
+- **Recognition needs pixels on the face** — roughly **80-100px between the eyes**. A wide perimeter camera covering the whole driveway won't get that on a face at distance, day *or* night.
+- **So the doorbell is the real face-rec point** — close (~1 m), the subject is stationary, and it's the use case that matters ("who's at the door"). That's exactly where the contextual-greeting feature lives, so the design already leans the right way.
+
+**To get usable night identification where you want it:**
+
+1. **Light the scene on night motion (the smart-home win):** HA flips the **porch / driveway / security lights** on when the beam, mmWave or camera detects motion after dark → a **full-colour, lit** image instead of grainy IR, *and* a deterrent. Cheap, and pure synergy with kit already in the plan.
+2. **Use a white-light / colour-night-vision camera at the front/porch** — a **spotlight** model or a low-light **colour-night-vision** sensor (e.g. Reolink ColorX / f1.0) gives full-colour night footage. Worth it for the *one* camera you most want to ID faces from.
+3. Mount that front/entry camera at a **face-height approach angle**, not just a high wide shot, if identity matters there.
+
+**Verdict:** person *detection* (and the alarm trigger) work at night everywhere; face *recognition* (identity) is reliable only **close + lit** — the doorbell and a well-lit porch — **not** a distant IR perimeter cam at 2am. Treat night face-ID as a bonus on the perimeter, a dependable feature at the door.
+
 ### Storage sizing (Unraid)
 
 Frigate records continuously to a short-term buffer, then keeps anything where AI detected a person/car/etc. for the longer event window. You get "rewindable last 48h" plus "every meaningful event for 30 days" without storing 24/7 4K forever. The design is a **two-tier store**: the hot 48h lives on the **SSD cache** (which absorbs the constant write load), and the long tail ages onto the **HDD array** via Unraid's mover.
@@ -653,7 +669,7 @@ Spot on — once the presence layer is in, you've effectively built a **video-ve
 **The kit already does the sensing:**
 
 - **mmWave (FP2/FP1E)** + **PIR motion** + **door/window contacts** — interior + perimeter detection.
-- **PoE cameras + Frigate** — person/car *detection* (not just "motion") + **face recognition** (household vs stranger).
+- **PoE cameras + Frigate** — person/car *detection* (not just "motion") + **face recognition** (household vs stranger). *Detection triggers reliably day or night; face-ID at night only works close + lit (doorbell / a light-on-motion porch) — see "Night vision & face recognition".*
 - **Driveway beam + ALPR** — perimeter + known/unknown plates. **Smart locks** — entry state + tamper. **Phone presence** — who's home. **Voice PEs** — sirens + two-way talk.
 
 **The brain — [Alarmo](https://github.com/nielsfaber/alarmo) (HACS):** a full alarm panel in HA — arm modes, entry/exit delays, per-mode sensor groups, code/NFC/phone arming, notifications.
