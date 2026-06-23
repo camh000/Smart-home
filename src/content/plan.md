@@ -496,6 +496,23 @@ The lounge display — the chosen set is the **TCL 65C6KS-UK** (C6K series, 2025
 - **Reliability note:** Android TVs can be flaky to *wake from standby* over the network — lean on **CEC through the AVR** in the cinema scene rather than network power-on. And keep the **Apple TV as the primary source**, treating TCL's Google TV (ads, occasional lag, update lifespan) as a backup — as the plan already has it.
 - **Trade-offs to expect (entry-tier):** fewer local-dimming zones / lower peak brightness than the dearer models (still great in a bright room, just not reference HDR), and it's a **VA panel** (narrower viewing angles than OLED — fine straight-on from the sofa, worth a thought if seating fans wide across the bay).
 
+### Cinema immersion — lighting & ambiance
+
+Cinema *mode* already choreographs the room (AVR up, Apple TV wake, lights to 5%, bay blinds close, pause-aware lighting — see the Cinema mode behaviour). To make it *feel* like a cinema, layer in ambiance kit, cheap → wow:
+
+- **TV bias light (do this first, ~£25).** An addressable **WLED** strip behind the TV — a wall glow that cuts eye-strain and makes the picture pop (same trick as the garage-bar WLED). Drops to a deep dim glow in cinema mode.
+- **🌟 Screen-sync ("Ambilight") — the wow factor.** The backlight (+ optional wall-wash strips) **extends the on-screen colours onto the wall in real time**. Three routes:
+  - **DIY/local — HyperHDR + an HDMI USB capture + ESP32/Pi + addressable strip (~£60-90).** Fully local, fits the DIY/HA ethos. ⚠️ It captures the *source* HDMI and cheap 4K capture chokes on **Dolby Vision** — exactly what the Apple TV (primary source) outputs; budget for capable capture or accept SDR sync.
+  - **Turnkey — Hue Play HDMI Sync Box + gradient strip/Play bars (~£250-300).** Best experience, passes 4K Dolby Vision, HA-controllable.
+  - **Cheap turnkey — Govee/Lytmi HDMI sync kit (~£70-100).** Ambilight-clone; less local but effective.
+- **Cove / perimeter wash** — addressable strip in coving, behind the sofa or along the floor for an indirect colour wash (deep blue/purple cinema scene). Decoration-time install.
+- **🌌 Star ceiling (stretch)** — fibre-optic or LED-twinkle ceiling; the big wow, done while the room's being decorated.
+- **🔊 Tactile bass shaker (optional)** — a transducer under the sofa (ButtKicker etc.) off the AVR's LFE → you *feel* explosions. Niche but pure cinema.
+- **The choreography is the real magic (free).** Make cinema mode *theatrical* — lights **fade** over 3-5s like a real screening, bias light rises, blinds close, a beat of black, *then* play. Sequencing on owned kit sells it more than any gadget.
+- **Ultimate path:** a **projector + motorised screen** is true cinema *scale* — a "someday" stretch, a different setup from the 65" TV, not instead of it.
+
+**Cost:** bias strip ~£25; screen-sync ~£70 (DIY) to ~£300 (Hue); bass shaker ~£60-120; star ceiling DIY ~£40-100. **Phase 3** with the lounge AV (the extras can follow later).
+
 ### Other rooms — WiiM Mini endpoints
 
 Each room gets a WiiM Mini (~£90) plugged into a powered speaker. Supports AirPlay 2, Chromecast, Spotify Connect, DLNA, Plex casting. HA controls them directly.
