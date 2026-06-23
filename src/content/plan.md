@@ -345,31 +345,55 @@ Revisit only if a summer in the house actually proves it's needed — but with n
 
 ### Storage sizing (Unraid)
 
-Frigate records continuously to a short-term buffer, then keeps anything where AI detected a person/car/etc. indefinitely. You get "rewindable last day" plus "every meaningful event for 30+ days" without storing 24/7 4K forever.
+Frigate records continuously to a short-term buffer, then keeps anything where AI detected a person/car/etc. for the longer event window. You get "rewindable last 48h" plus "every meaningful event for 30 days" without storing 24/7 4K forever. The design is a **two-tier store**: the hot 48h lives on the **SSD cache** (which absorbs the constant write load), and the long tail ages onto the **HDD array** via Unraid's mover.
 
-**Sizing for 4× 4K cameras + doorbell, Frigate event mode + 48hr buffer:**
+**Sizing for 4× 4K cameras + doorbell, 48h continuous + 30-day events:**
 
-| Item | Approx |
-|---|---|
-| 48hr continuous buffer | ~250-350 GB |
-| 30 days of detected events | ~600 GB - 1.5 TB |
-| Snapshots, thumbnails, database | ~50 GB |
-| **Total reasonable allocation** | **~1-2 TB** |
+| Item | Approx | Lives on |
+|---|---|---|
+| 48h continuous buffer | ~250-350 GB | SSD cache |
+| Snapshots, thumbnails, **database** | ~50 GB | SSD cache |
+| 30 days of detected events | ~600 GB - 1.5 TB | HDD array |
+| **Total** | **~1-2 TB** | split |
 
-Bump to **3-4 TB** for 60+ days retention, 6 cameras, or longer continuous buffer.
+Bump the array side to **3-4 TB** for 60+ days retention, 6 cameras, or a longer continuous buffer.
 
-**Unraid setup:**
+#### How Frigate actually splits continuous vs events (one folder, not two)
 
-- Dedicated share (e.g. `/mnt/user/frigate`) — not mixed with media
-- **SSD cache pool** for active recording (~£60-80 for 1TB). Frigate writes constantly; SSD massively extends HDD life and reduces noise. Long-term retention moves to array via Unraid's mover.
-- **Don't put recordings on parity-protected drives** — recordings are replaceable, parity costs a drive. Set the share to unprotected or cache-only spilling to unprotected disk.
-- Keep completely separate from Plex/media share — CCTV writes 24/7 and would spin up media drives constantly otherwise.
+The thing that trips people up: Frigate does **not** have separate "continuous" and "events" folders you can point at different disks. There's **one recordings directory**, and *retention rules* decide how long each segment survives:
 
-**Top-up cost if Unraid is currently tight:**
+- `record.retain.days: 2` + `mode: all` → keep **everything** for 48h (true continuous)
+- `record.alerts.retain.days: 30` / `record.detections.retain.days: 30` → keep the segments that **overlap a detection** for 30 days
 
-- 4TB HDD (used Red/Ironwolf): ~£60-100
-- 1TB SSD cache: ~£60-80
-- **Total: ~£120-180**
+So you can't tell Frigate "continuous → cache, events → array." Instead you tier the **whole share** physically with Unraid, and the retention rules do the splitting. The neat consequence: after 48h the *only* footage Frigate hasn't pruned is event-associated — so what physically ages onto the array **is**, in effect, your 30-day event archive. Frigate just sees one path; the cache↔array move happens underneath it.
+
+#### Tier 1 — SSD cache (the hot 48h)
+
+- **The existing 1TB M.2 NVMe is plenty** — the hot tier is only ~300-400 GB, so it sits about a third full. **No second SSD is needed for capacity.**
+- Unraid pools can hold **multiple devices** (btrfs or ZFS): a **mirror** (RAID1, redundancy, usable = smaller drive), a **stripe** (RAID0, capacity + speed, no redundancy), or just a second **separate pool**.
+- **Decision — share vs dedicate:** if that 1TB also hosts appdata/dockers/VMs, you *can* still use it (Mover Tuning rules are per-share, so Frigate is scoped without touching anything else). The tidier option is a cheap **2nd NVMe as a dedicated Frigate pool** — not for space, but to isolate the 24/7 write wear and I/O contention from the containers. Optional.
+- Use a **decent-endurance (TLC) SSD** — 4 cameras continuous is ~20+ TB written/year; fine for TLC, hard on cheap QLC.
+- **Keep Frigate's database (`/config`) on the SSD** — it does lots of tiny writes; never let the mover drag it onto a spinning disk.
+
+#### The mover
+
+- The **stock Unraid mover empties the whole cache** to the array on a schedule — it won't hold "exactly 48h."
+- Install the **Mover Tuning** plugin and set *"move files older than 2 days"* on the frigate share, so the hot window stays on SSD and only the aged event footage spills to the array.
+
+#### Tier 2 — HDD array (the 30-day events) — *the actual constraint*
+
+This is where the month of events lands, and it's the tight bit: **the \*arr apps churn new media onto the array constantly, so free space bounces between ~0.5-2 TB.** Two problems if CCTV shares the media disks: the media drives never get to spin down (CCTV writes 24/7), and CCTV competes with media for that shrinking free space.
+
+So the new drive should be **dedicated to CCTV**, not thrown into the general media pool. Two ways to do it:
+
+- **🟢 Recommended — a dedicated *unprotected* CCTV disk** (its own pool / unassigned device, outside the parity array): no parity write-penalty, fully isolated from the media churn, and since CCTV footage is **replaceable** you're not wasting a parity slot protecting it. Matches the long-standing rule below.
+- **Add it to the array + pin the frigate share to that one disk** (share → *Included disk(s)*): also expands your **media** capacity, but CCTV then shares parity (write penalty) and that disk spins 24/7. Pick this only if you also want the media headroom.
+
+Either way: **don't mix CCTV into the Plex/media share** — keep the media drives able to spin down.
+
+> **Standing rule:** recordings are replaceable; parity costs a whole drive. Prefer CCTV on **unprotected** storage (dedicated disk or cache-only spilling to an unprotected disk), not the parity array.
+
+**What to buy:** the **1TB NVMe cache is already owned** and sufficient, so the only real spend is a **dedicated CCTV HDD** — a 4-8TB used Red/Ironwolf (~£90-160) covers 30 days comfortably with room to grow. (A 2nd NVMe for a dedicated cache pool is optional, ~£60-80.)
 
 ## Audio / music
 
@@ -1638,6 +1662,7 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
+- [ ] **CCTV HDD — dedicated unprotected disk vs array expansion.** New Frigate drive: a dedicated unprotected CCTV disk (isolated, no parity penalty, recommended) or add it to the array + pin the frigate share (also expands media capacity). See "Storage sizing (Unraid)". The 1TB NVMe cache is already owned and sufficient.
 - [ ] **Voice PE — confirm lounge performance before buying the full set.** Test one unit in the lounge with media playing (worst-case acoustics); decide STT route (local Whisper+GPU vs HA Cloud) off the back of it. See "Is Voice PE good enough?" above.
 - [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.
 - [ ] Lounge speaker positions chalked on wall before plastering (5.1 positions only)
