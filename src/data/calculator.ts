@@ -194,14 +194,14 @@ export const CALC_GROUPS: CalcGroup[] = [
       {
         key: "blinds",
         label: "Motorisation scope",
-        sub: "Baseline is bedrooms only; the rest is bonus",
+        sub: "Baseline is the master-bedroom bay only; the rest is bonus",
         options: [
           { value: 0, label: "Skip — manual blinds" },
-          { value: 700, label: "Bedrooms only (master bay + bed 2/3) — baseline" },
-          { value: 1600, label: "Bedrooms + lounge bay" },
-          { value: 2200, label: "Bedrooms + lounge bay + conservatory" },
-          { value: 2800, label: "Whole house — standard rollers" },
-          { value: 3400, label: "Whole house — incl. thermal conservatory" },
+          { value: 450, label: "Master-bedroom bay only — baseline" },
+          { value: 900, label: "+ lounge bay" },
+          { value: 1500, label: "+ lounge bay + conservatory" },
+          { value: 2200, label: "Whole house (+ other bedrooms, dining, kitchen)" },
+          { value: 2800, label: "Whole house — incl. thermal conservatory" },
         ],
       },
     ],
@@ -333,7 +333,7 @@ export const PRESETS: Record<string, CalcState> = {
   minimal: {
     avr: 275, speakers: 200, atmos: 0, sub: 100, wiim: 270, powered: 200, "audio-misc": 80,
     poe: 100, "cam-count": 4, "cam-tier": 70, doorbell: 110, "cctv-misc": 40,
-    light: 300, locks: 250, blinds: 700,
+    light: 300, locks: 250, blinds: 450,
     voice: 220, buttons: 0, sensors: 100,
     tablets: 80, "tablet-mounts": 70, mirror: 0, mmwave: 65, energy: 0, garage: 0,
     windows: 200,
@@ -341,7 +341,7 @@ export const PRESETS: Record<string, CalcState> = {
   balanced: {
     avr: 350, speakers: 350, atmos: 0, sub: 150, wiim: 540, powered: 425, "audio-misc": 120,
     poe: 200, "cam-count": 4, "cam-tier": 90, doorbell: 110, "cctv-misc": 80,
-    light: 500, locks: 590, blinds: 700,
+    light: 500, locks: 590, blinds: 450,
     voice: 275, buttons: 60, sensors: 200,
     tablets: 320, "tablet-mounts": 140, mirror: 150, mmwave: 250, energy: 120, garage: 0,
     windows: 1800,
@@ -349,7 +349,7 @@ export const PRESETS: Record<string, CalcState> = {
   generous: {
     avr: 475, speakers: 600, atmos: 500, sub: 220, wiim: 540, powered: 600, "audio-misc": 150,
     poe: 300, "cam-count": 4, "cam-tier": 130, doorbell: 110, "cctv-misc": 200,
-    light: 700, locks: 680, blinds: 3400,
+    light: 700, locks: 680, blinds: 2800,
     voice: 275, buttons: 120, sensors: 300,
     tablets: 320, "tablet-mounts": 160, mirror: 200, mmwave: 250, energy: 120, garage: 30,
     windows: 2800,

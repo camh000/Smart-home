@@ -230,16 +230,16 @@ Approx zones to cover: dining, kitchen, conservatory, lounge, hall, porch, landi
 
 ## Blinds
 
-**Baseline scope: bedroom blinds only.** That's the priority — motorise the three bedrooms (master, bed 2, bed 3) and treat everything else as a *bonus tier if budget allows*. This keeps the blinds line small and certain rather than a £2-3k whole-house commitment.
+**Baseline scope: the master-bedroom bay only.** The one funded motorised blind is the 3-pane **bay in the master bedroom** — everything else (the other bedrooms, lounge bay, conservatory, dining/kitchen) is a *bonus tier if budget allows*. Keeps the blinds line small and certain rather than a £2-3k whole-house commitment.
 
-- **Baseline (do this):** bedrooms — master, bed 2, bed 3. The master bay is 3 panes (3 motors); bed 2/3 are single windows. ≈ 5 motors, ~£700.
+- **Baseline (do this):** master-bedroom **bay** — 3 panes (3 motors), ~£450.
 - **Bonus tier 1 (if money comes in):** lounge bay (showpiece, 3 panes/motors).
-- **Bonus tier 2:** conservatory (5-7 panels — heat/glare; biggest single swing in cost) + dining/kitchen.
+- **Bonus tier 2:** conservatory (5-7 panels — heat/glare; biggest single swing in cost) + dining/kitchen + the **other bedrooms** (bed 2/3, single windows).
 - **Note — motors vs openings:** count blinds in *motors* (one per pane → bays inflate the motor count) not windows. Blind motors (shading) are a **separate** device from any window-vent actuators (ventilation) in the optional Window-motors section — the two budget lines are not double-counting.
 - Retrofit existing: SwitchBot Blind Tilt or Aqara Roller Shade Driver E1
 - New install: IKEA Fyrtur (Zigbee) or Matter-over-Thread
 
-Cabling note: because the *option* on the bonus tiers is only preserved while walls are open, still pull low-voltage DC / draw-string to **every** potential blind head now (see "Additions to cabling scope") even though only the bedrooms are funded today.
+Cabling note: because the *option* on the bonus tiers is only preserved while walls are open, still pull low-voltage DC / draw-string to **every** potential blind head now (see "Additions to cabling scope") even though only the master-bedroom bay is funded today.
 
 ## Safety sensors (smoke, CO, water leak)
 
@@ -1614,7 +1614,7 @@ Fill in every remaining room so coverage is complete.
 
 The custom software brain, plus the comfort and resilience layers that build on full coverage.
 
-- **Blinds** — bedrooms only is the funded baseline (master bay + bed 2/3, ≈5 motors); lounge bay, conservatory + other rooms are a bonus tier if budget allows
+- **Blinds** — the master-bedroom bay is the funded baseline (3 motors); everything else (other bedrooms, lounge bay, conservatory, dining/kitchen) is a bonus tier if budget allows
 - **Proactive Claude service** deployed (custom Python on Unraid)
 - **PC integration** — HASS.Agent on the gaming PC, pinned browser dashboard, optional custom Tauri overlay app
 - **Desk setup** — 34" ultrawide + dual-head KVM; game streaming office → lounge (Sunshine/Moonlight to the docked Steam Deck)
@@ -1741,10 +1741,10 @@ The build is **4 cameras + doorbell** (front, rear, driveway-side, above-garage)
 |---|---|
 | Zigbee bulbs / relays — ~14 zones (mix of Hue/Innr/Shelly/Aqara) | £400-700 |
 | 3× smart locks (front + conservatory + dining) | £400-500 |
-| Motorised blinds — **baseline: bedrooms only** (master bay 3 + bed 2/3 ≈ 5 motors) | £700 |
-| Motorised blinds — *bonus, if budget allows* (lounge bay, conservatory, dining, kitchen) | +£1,500-2,700 |
+| Motorised blinds — **baseline: master-bedroom bay only** (3 motors) | £450 |
+| Motorised blinds — *bonus, if budget allows* (other bedrooms, lounge bay, conservatory, dining, kitchen) | +£1,750-2,950 |
 | Sensors, buttons, misc Zigbee tat | £150-250 |
-| **Lighting/locks/blinds total (baseline)** | **~£1,650-2,150** |
+| **Lighting/locks/blinds total (baseline)** | **~£1,400-1,900** |
 | **Lighting/locks/blinds total (with all blind bonuses)** | **~£3,150-4,850** |
 
 ### Heating &amp; climate
