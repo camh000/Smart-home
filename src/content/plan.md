@@ -17,7 +17,7 @@ Roughly the entire *software* brain plus every device already owned can go in to
 
 **The brain — free Docker/VM on the existing Unraid:**
 
-- **Home Assistant** itself — the foundation.
+- **Home Assistant** ✅ **up** (fresh install) — the foundation. Empty is exactly the right starting state; see **"First moves on the empty box"** below for the order to bolt things on.
 - **Full RAG memory layer** (the phase-1 "jump path"): **Qdrant** + **Ollama** (bge-small / nomic-embed) + the custom Python wrapper. Pure software, no hardware.
 - **Frigate** — install/configure now (CPU/OpenVINO detection, no Coral needed; test with a phone-as-IP-camera) so it's ready when cameras arrive.
 - **Grocy** ✅ **container up** — now populate inventory; the Claude meal-plan + receipt-OCR layer lands later with the proactive service (Phase 5–6).
@@ -40,6 +40,16 @@ Roughly the entire *software* brain plus every device already owned can go in to
 **Network — when the UCG-Max lands (it's a gift, £0):** set it as root, Decos as APs, the 2× TP-Link switches as VLAN access switches, define the VLAN scheme, and bring up **Site Magic SD-WAN to Selby** with the off-site backups below.
 
 **The one caveat:** using **Claude** as the brain is pay-per-use (fractions of a penny per request). For a *strict* £0 prototype, use HA's built-in **local conversation agent** first, then swap Claude in once a few pennies are acceptable.
+
+**First moves on the empty box (in order):** HA's up but bare — here's the sequence that builds momentum fastest, easy wins before big rocks.
+
+1. **Basics + phones** — set home location/units and accounts, then install the **HA Companion app** on both phones. Instant **Tier-1 presence** + push notifications + a mobile dashboard, zero extra kit.
+2. **HACS** — install the Home Assistant Community Store now; you'll need it for Adaptive Lighting, the Unraid integration, Grocy and more.
+3. **Easy owned-device wins** (≈5 min each, makes it feel alive): **Meross plugs** via Matter, the **4× Govee bulbs**, the **Apple TV** media player.
+4. **Wire in what you've already stood up** — the **Glances** + **Unraid** (HACS) integrations to surface Scrutiny/SMART/capacity in HA, the **Grocy** integration, and the **Mosquitto MQTT** broker add-on (backbone for HASS.Agent + future Zigbee).
+5. **PC sensors** — **HASS.Agent** on the gaming PC (activity/presence; the foundation for the focus + no-gaming-during-work guards later).
+6. **One real automation** so it earns its keep — a "cosy" scene, a presence notification, or "washing's done" off a Meross plug's power-drop. The dopamine that keeps you building.
+7. **Then the big rocks** — the **Anthropic/Claude integration + RAG memory** (the brain) and the **voice pipeline** (openWakeWord + Whisper + Piper, with Assist on a phone as the satellite). These are the Phase-1 proof; tackle them once the easy wins are bedded in.
 
 **First things that actually cost money:** a **Zigbee coordinator dongle (~£20)** — the single gate that unlocks all Zigbee kit — then a **Voice PE (~£55)** for hands-free room voice.
 
