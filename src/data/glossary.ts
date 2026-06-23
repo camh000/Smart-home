@@ -17,6 +17,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["URN"], def: "Unique Reference Number — issued to an approved monitored alarm; UK police generally only auto-respond to alarms that have one. DIY systems don't." },
   { terms: ["NSI", "SSAIB"], def: "The UK approval bodies for professional alarm installers; insurers that require an alarm often mean an NSI/SSAIB-approved one." },
   { terms: ["anti-snap cylinder", "TS007", "Sold Secure Diamond", "SS312", "lock snapping"], def: "A euro-cylinder lock rated to resist 'snapping' (the seconds-long #1 UK break-in method). Look for TS007 3-star or Sold Secure Diamond (SS312)." },
+  { terms: ["emergency & escape", "emergency and escape", "emergency function"], def: "A euro cylinder that lets you turn the key from one side even when a key or thumb-turn is engaged on the other — needed so a retrofit smart lock (Nuki/Aqara U200) doesn't stop your outside key working." },
+  { terms: ["retrofit smart lock"], def: "A smart lock that mounts over your existing thumb-turn and motorises it, keeping the original cylinder and key — vs a replacement lock that swaps the whole cylinder." },
   { terms: ["glass-break sensor"], def: "An acoustic sensor that hears a window being smashed — catching break-ins that door/window contact sensors (which only detect opening) miss." },
   { terms: ["occupancy simulation", "presence simulation"], def: "Randomising lights/TV/blinds while you're away so an empty house looks lived-in — a strong, free burglary deterrent." },
   { terms: ["duress code"], def: "A PIN that appears to disarm the alarm normally but silently sends an alert — for when you're forced to open up." },
