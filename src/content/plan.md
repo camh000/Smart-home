@@ -646,6 +646,43 @@ Combined inference: "Cam's phone says he's home + lounge is occupied + last face
 - 1× FP1E (office, optional): ~£40
 - **Total: ~£200-220**
 
+## Alarm &amp; security
+
+Spot on — once the presence layer is in, you've effectively built a **video-verified, presence-aware intruder alarm** for the price of a free HACS add-on. The sensors bought for comfort earn their keep twice.
+
+**The kit already does the sensing:**
+
+- **mmWave (FP2/FP1E)** + **PIR motion** + **door/window contacts** — interior + perimeter detection.
+- **PoE cameras + Frigate** — person/car *detection* (not just "motion") + **face recognition** (household vs stranger).
+- **Driveway beam + ALPR** — perimeter + known/unknown plates. **Smart locks** — entry state + tamper. **Phone presence** — who's home. **Voice PEs** — sirens + two-way talk.
+
+**The brain — [Alarmo](https://github.com/nielsfaber/alarmo) (HACS):** a full alarm panel in HA — arm modes, entry/exit delays, per-mode sensor groups, code/NFC/phone arming, notifications.
+
+- **Armed Away:** everything live, entry/exit delay on your usual door.
+- **Armed Home/Night:** perimeter only (contacts + outdoor cameras) — interior motion off so you can move around.
+- **Disarmed:** normal automation.
+
+**Why it can beat a cheap alarm — sensor fusion + Claude:**
+
+- A lone PIR trip = ignored; PIR **+** door contact **+** Frigate *person* **+** unknown face at 3am = real. Claude reasons across signals → **far fewer false alarms** (pets, curtains, sun) than a dumb PIR box.
+- **Video-verified:** every trigger ships with a snapshot/clip — the thing that makes an alarm credible.
+- **Presence auto-arm:** all phones leave + no mmWave → auto-arm. Never "forgot to set it." Auto-disarm on a known phone / recognised face / NFC tag.
+
+**Response — escalation ladder (matches the nudge style):**
+
+1. **Quiet:** log + snapshot + push ("person in the hall, 2:14am — photo attached").
+2. **Challenge:** Claude speaks through the nearest Voice PE / doorbell ("You're being recorded, the owners are alerted").
+3. **Full:** siren + strobe, all lights to 100%, cameras record, push to **all phones + Dad in Selby** over the SD-WAN — human redundancy a lone DIY alarm otherwise lacks.
+
+**Be honest about the limits vs a professionally monitored system:**
+
+- **No ARC / URN / guaranteed police response.** It alerts *you* (and Dad); it doesn't dispatch police. UK forces generally only auto-respond to approved-ARC-monitored systems with video verification. This is a deterrent + evidence + notification system, not a response contract.
+- **Insurance:** if your policy *requires* an alarm it may specify an **NSI/SSAIB-approved installed** one — a DIY HA alarm might not satisfy it. **Check the policy** before relying on it.
+- **The self-monitoring blind spot (again):** it runs on Unraid — cut the power or broadband and a naive setup goes dark. Mitigate: the **UPS** (planned) rides out power cuts, **4G/LTE WAN failover** on the gateway gets alerts out if broadband's cut, the **Selby Uptime-Kuma watchdog** notices Woodhouse going dark, and **battery Zigbee sensors** survive mains loss. **Wired PoE cameras** can't be Wi-Fi-jammed.
+- **Visible deterrent:** add a real **siren/strobe + bell box** on the wall — burglars avoid a house that *looks* alarmed; they can't see your software.
+
+**To make it a proper alarm, add:** Alarmo (free), a **Zigbee indoor siren** (~£25), an **external sounder/bell box + strobe** (~£30-50), a door **keypad** (Zigbee ~£25) or arm via tablet/NFC/phone, and **4G failover** on the gateway. Everything else is already in the plan. **Phase 4-5** — it switches on once the sensors + cameras are in and the proactive brain exists.
+
 ## PC integration
 
 The PC becomes both an input layer (presence/activity) and an output surface (desktop overlay, doorbell pop-ups, ambient info). Both directions matter for the JARVIS feeling.
@@ -1678,6 +1715,7 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
+- [ ] **Home insurance — does the policy require an *approved* (NSI/SSAIB) monitored alarm?** If so, the DIY HA/Alarmo system may not satisfy it on its own. Check before relying on it as *the* alarm. See "Alarm & security".
 - [x] ~~CCTV HDD — dedicated unprotected disk vs array expansion~~ → **resolved: one 8-12 TB disk into the array, shared media + CCTV.** Reserve the camera slice with Minimum-Free-Space fences (Unraid media shares + the \*arr apps, ~1.5-2 TB) so media can't starve Frigate; pin the frigate share to the disk. See "Storage sizing (Unraid)". 1TB NVMe cache already owned.
 - [ ] **Voice PE — confirm lounge performance before buying the full set.** Test one unit in the lounge with media playing (worst-case acoustics); decide STT route (local Whisper+GPU vs HA Cloud) off the back of it. See "Is Voice PE good enough?" above.
 - [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.

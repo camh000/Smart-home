@@ -10,6 +10,10 @@ export const GLOSSARY: GlossaryEntry[] = [
   // Core software / server
   { terms: ["Unraid"], def: "The NAS/server operating system hosting Home Assistant, Frigate, Docker containers and storage." },
   { terms: ["Frigate"], def: "Open-source local NVR (camera recorder) with AI object detection; runs in Docker on Unraid." },
+  { terms: ["Alarmo"], def: "A free Home Assistant add-on (via HACS) that turns HA into a full alarm panel — arm/disarm modes, entry/exit delays, sensor grouping and code arming." },
+  { terms: ["ARC"], def: "Alarm Receiving Centre — the staffed monitoring station a professional alarm signals to, which can request police response. A DIY HA alarm has none." },
+  { terms: ["URN"], def: "Unique Reference Number — issued to an approved monitored alarm; UK police generally only auto-respond to alarms that have one. DIY systems don't." },
+  { terms: ["NSI", "SSAIB"], def: "The UK approval bodies for professional alarm installers; insurers that require an alarm often mean an NSI/SSAIB-approved one." },
   { terms: ["Qdrant"], def: "Open-source vector database — stores conversation/memory embeddings for fast similarity search." },
   { terms: ["Ollama"], def: "Runs local AI models (here, the small text-embedding model) on your own hardware." },
   { terms: ["Grocy"], def: "Self-hosted household & grocery inventory / chore manager." },

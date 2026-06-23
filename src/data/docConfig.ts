@@ -41,6 +41,7 @@ export const PLAN_GROUPS: GroupDef[] = [
       "Displays & touch panels",
       "Proactive automation",
       "Per-room presence (Aqara mmWave)",
+      "Alarm & security",
       "PC integration",
       "Smart plug deployment",
       "Optional: Window motors",
