@@ -204,9 +204,9 @@ Routine scene buttons worth adding regardless of voice coverage:
 
 ### USB passthrough — getting the dongle to HA on Unraid
 
-HA runs in a container/VM on Unraid while the dongle is plugged into the box's USB — a standard setup that works fine, with three gotchas that bite if missed:
+**HA runs in a Docker container on Unraid** (confirmed deployment) — so it's the `--device` route below, and there's **no Supervisor/add-on store**: Mosquitto, govee2mqtt, the Matter Server and (later) Zigbee2MQTT all run as their **own Unraid containers**, and **backups are manual** — keep the HA config dir in the off-site backup set. The dongle plugs into the box's USB; standard setup, three gotchas that bite if missed:
 
-- **Pass it through to HA:** for **HA in Docker**, add the device in the container's *Extra Parameters* (e.g. `--device=/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_…-if00-port0`); for **HA OS in a VM** (the smoother path — gets the Supervisor + add-ons like Zigbee2MQTT), tick the dongle in the VM's **USB Devices** list.
+- **Pass it through to HA (Docker route):** add the dongle in the container's *Extra Parameters* (e.g. `--device=/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_…-if00-port0`). *(The HA-OS-in-a-VM alternative — ticking the dongle in the VM's USB Devices, which would also get the Supervisor + add-ons — isn't in play, since HA runs in Docker here.)*
 - **🔌 Always use the stable `/dev/serial/by-id/…` path, never `/dev/ttyUSB0`** — the `ttyUSBx` number can change on reboot/replug and silently break Zigbee; the by-id path is pinned to that dongle.
 - **📡 Put the dongle on a 0.5–1 m USB extension lead, away from the box (and ideally a USB 2.0 port).** This is the single biggest Zigbee reliability fix: 2.4 GHz Zigbee gets hammered by USB 3.0 ports, NVMe/drives and the metal case right next to it. Dangling it away from the server dramatically cuts dropouts.
 - **💾 Back up the HA / Zigbee2MQTT config** (it's in the backup set) so the **network key + every device pairing survives a restore** — otherwise a rebuild means re-pairing all 30+ devices by hand.
