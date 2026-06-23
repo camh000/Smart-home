@@ -80,6 +80,9 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["Pi-hole", "AdGuard"], def: "Self-hosted network-wide DNS ad-blocker — handy, but don't make it the only DNS or a server outage breaks all internet." },
   { terms: ["IDS/IPS"], def: "Intrusion detection/prevention — the gateway inspecting traffic for threats." },
   { terms: ["MQTT"], def: "Lightweight messaging protocol many sensors use to talk to Home Assistant." },
+  { terms: ["HACS"], def: "Home Assistant Community Store — a one-time add-on that lets you install community integrations and dashboards not bundled with HA." },
+  { terms: ["govee2mqtt"], def: "A small container/add-on that bridges Govee's cloud (and LAN) to MQTT, so cloud-only Govee devices show up in Home Assistant via a free API key." },
+  { terms: ["Mosquitto"], def: "The standard lightweight MQTT broker — the message hub that MQTT devices and bridges publish to." },
   { terms: ["Deco"], def: "TP-Link's mesh Wi-Fi system — here demoted to plain access points behind the UniFi gateway." },
 
   // Radios / standards
