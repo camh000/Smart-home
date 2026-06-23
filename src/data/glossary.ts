@@ -17,6 +17,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["Scrutiny"], def: "Dashboard that tracks hard-drive SMART health and predicts disk failures." },
   { terms: ["Glances"], def: "Lightweight system monitor that exposes CPU/RAM/disk metrics to Home Assistant." },
   { terms: ["SMART"], def: "Self-monitoring data built into drives (reallocated sectors, temperature…) that hints at failure." },
+  { terms: ["ntfy"], def: "Simple self-hosted push-notification service — apps POST a message and it pings your phone/desktop." },
+  { terms: ["Shoutrrr"], def: "A notification-routing library many self-hosted apps (incl. Scrutiny) use to send alerts to services like ntfy, Telegram or a webhook." },
   { terms: ["restic", "borg"], def: "Backup tools with built-in client-side encryption — so an off-site copy can't be read by the host." },
 
   // Voice pipeline
