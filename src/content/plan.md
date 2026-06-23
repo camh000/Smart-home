@@ -382,18 +382,23 @@ So you can't tell Frigate "continuous → cache, events → array." Instead you 
 
 #### Tier 2 — HDD array (the 30-day events) — *the actual constraint*
 
-This is where the month of events lands, and it's the tight bit: **the \*arr apps churn new media onto the array constantly, so free space bounces between ~0.5-2 TB.** Two problems if CCTV shares the media disks: the media drives never get to spin down (CCTV writes 24/7), and CCTV competes with media for that shrinking free space.
+This is where the month of events lands, and it's the tight bit: **the \*arr apps churn new media onto the array constantly, so free space bounces between ~0.5-2 TB.**
 
-So the new drive should be **dedicated to CCTV**, not thrown into the general media pool. Two ways to do it:
+The framing flips here: the risk **isn't** CCTV growing without bound — **Frigate self-caps**, its retention deletes its own oldest footage so the event archive plateaus (~600 GB-1.5 TB). The risk is **media filling the disk so Frigate can't write that plateau.** So the job is to **fence media off a reserve**, not to limit CCTV.
 
-- **🟢 Recommended — a dedicated *unprotected* CCTV disk** (its own pool / unassigned device, outside the parity array): no parity write-penalty, fully isolated from the media churn, and since CCTV footage is **replaceable** you're not wasting a parity slot protecting it. Matches the long-standing rule below.
-- **Add it to the array + pin the frigate share to that one disk** (share → *Included disk(s)*): also expands your **media** capacity, but CCTV then shares parity (write penalty) and that disk spins 24/7. Pick this only if you also want the media headroom.
+**Plan — one 8-12 TB disk doing double duty (media + CCTV), added to the array** so it also expands media capacity. Reserve the camera slice in three layers:
 
-Either way: **don't mix CCTV into the Plex/media share** — keep the media drives able to spin down.
+1. **Unraid per-share "Minimum free space"** on the **media** shares — set it to **≥ the CCTV reserve (~1.5-2 TB)**. Unraid's allocator stops writing *new media* to a disk once its free space drops below that, fencing the tail of the disk for Frigate. (A soft fence on *new* writes, not a hard quota — but media is the churner, so fencing media is exactly the lever you want.)
+2. **The \*arr apps' own "Minimum Free Space"** (Sonarr/Radarr → Media Management, per root folder) — so they **stop importing** when the disk nears the reserve instead of erroring. Media stalls; CCTV keeps its space.
+3. **Pin the frigate share to that disk** (share → *Included disk(s)*) so the footage has a definite home and isn't scattered across the array.
 
-> **Standing rule:** recordings are replaceable; parity costs a whole drive. Prefer CCTV on **unprotected** storage (dedicated disk or cache-only spilling to an unprotected disk), not the parity array.
+> **Hard-guarantee caveat:** on a *shared* disk Unraid has no hard per-share quota — the above is a soft (but reliable) fence, reliable precisely because media is the churner you're capping. The only way to *guarantee* the slice with a hard wall is physical isolation — CCTV on **its own disk** (or the unprotected pool from before; a ZFS dataset quota is the advanced alternative, fiddlier than it's worth here). If the cameras ever feel cramped, that's the upgrade.
 
-**What to buy:** the **1TB NVMe cache is already owned** and sufficient, so the only real spend is a **dedicated CCTV HDD** — a 4-8TB used Red/Ironwolf (~£90-160) covers 30 days comfortably with room to grow. (A 2nd NVMe for a dedicated cache pool is optional, ~£60-80.)
+**Trade-offs you're accepting by sharing:** CCTV now lives on the **parity array** (a small write-penalty on event footage — fine, events are a fraction of the writes) and that disk **spins 24/7**. Still **keep CCTV in its own share**, never inside the Plex/media share.
+
+> **Standing rule:** recordings are replaceable; parity costs a whole drive. Sharing the array disk is the pragmatic call here (you want the media capacity too) — just don't go *adding* a parity drive on CCTV's account.
+
+**What to buy:** the **1TB NVMe cache is already owned** and sufficient. The new spend is the **8-12 TB array disk** (used Red/Ironwolf/Exos, ~£120-220) — media growth *and* the 30-day CCTV archive on one drive. (A 2nd NVMe for a dedicated cache pool stays optional, ~£60-80.)
 
 ## Audio / music
 
@@ -1662,7 +1667,7 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
-- [ ] **CCTV HDD — dedicated unprotected disk vs array expansion.** New Frigate drive: a dedicated unprotected CCTV disk (isolated, no parity penalty, recommended) or add it to the array + pin the frigate share (also expands media capacity). See "Storage sizing (Unraid)". The 1TB NVMe cache is already owned and sufficient.
+- [x] ~~CCTV HDD — dedicated unprotected disk vs array expansion~~ → **resolved: one 8-12 TB disk into the array, shared media + CCTV.** Reserve the camera slice with Minimum-Free-Space fences (Unraid media shares + the \*arr apps, ~1.5-2 TB) so media can't starve Frigate; pin the frigate share to the disk. See "Storage sizing (Unraid)". 1TB NVMe cache already owned.
 - [ ] **Voice PE — confirm lounge performance before buying the full set.** Test one unit in the lounge with media playing (worst-case acoustics); decide STT route (local Whisper+GPU vs HA Cloud) off the back of it. See "Is Voice PE good enough?" above.
 - [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.
 - [ ] Lounge speaker positions chalked on wall before plastering (5.1 positions only)
