@@ -47,7 +47,7 @@ export const SHOPPING: ShopPhase[] = [
     title: "Phase 2 — Security, entry & safety",
     items: [
       { id: "b8", name: "16-port PoE+ switch", meta: "Unifi USW-Lite-16-PoE or TP-Link TL-SG1218MP", cost: 200, costLabel: "~£200", search: "TP-Link TL-SG1218MP" },
-      { id: "b8a", name: "Dedicated CCTV HDD (4-8TB)", meta: "For the 30-day event archive — the *arr apps keep the array tight. 1TB NVMe cache already owned; dedicate this disk to Frigate (unprotected pool, or array + pinned share).", cost: 120, costLabel: "~£90-160", search: "WD Red Plus 8TB" },
+      { id: "b8a", name: "Array HDD 8-12TB (media + CCTV)", meta: "Media growth + the 30-day Frigate event archive on one disk. Reserve the CCTV slice via Minimum-Free-Space on the media shares + *arr apps; pin the frigate share to it. 1TB NVMe cache already owned.", cost: 170, costLabel: "~£120-220", search: "WD Red Plus 12TB" },
       { id: "b9", name: "PoE camera — Front", meta: "Reolink RLC-810A or 811A", cost: 90, costLabel: "~£90", search: "Reolink RLC-810A" },
       { id: "b10", name: "PoE camera — Rear (above conservatory)", meta: "Reolink RLC-810A or 811A", cost: 90, costLabel: "~£90", search: "Reolink RLC-810A" },
       { id: "b11", name: "PoE video doorbell", meta: "Reolink — front porch", cost: 110, costLabel: "~£110", search: "Reolink PoE video doorbell" },

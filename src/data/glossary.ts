@@ -21,6 +21,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["parity", "parity array", "parity-protected"], def: "Unraid's array protection — a dedicated drive lets you rebuild data if one disk dies. Costs a whole drive, so it's wasteful for replaceable data like CCTV footage." },
   { terms: ["btrfs", "ZFS"], def: "Filesystems Unraid uses for multi-device pools — supporting mirrors (redundancy) or stripes (capacity/speed)." },
   { terms: ["unprotected disk", "unassigned device"], def: "An Unraid drive outside the parity array — no rebuild protection, but no parity write-penalty either. Ideal for replaceable, write-heavy data like CCTV." },
+  { terms: ["Minimum free space", "Minimum Free Space"], def: "Unraid (and *arr) setting — once a disk's free space drops below it, new writes for that share stop landing there. Used to fence off a reserve so one share can't fill the disk and starve another." },
   { terms: ["SMART"], def: "Self-monitoring data built into drives (reallocated sectors, temperature…) that hints at failure." },
   { terms: ["ntfy"], def: "Simple self-hosted push-notification service — apps POST a message and it pings your phone/desktop." },
   { terms: ["Shoutrrr"], def: "A notification-routing library many self-hosted apps (incl. Scrutiny) use to send alerts to services like ntfy, Telegram or a webhook." },
