@@ -52,7 +52,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b10", name: "PoE camera — Rear (above conservatory)", meta: "Reolink RLC-810A or 811A", cost: 90, costLabel: "~£90", search: "Reolink RLC-810A" },
       { id: "b11", name: "PoE video doorbell", meta: "Reolink — front porch", cost: 110, costLabel: "~£110", search: "Reolink PoE video doorbell" },
       { id: "b12", name: "Smart lock — Front door", meta: "Yale Assure 2 SL Touchscreen. Matter native, face-rec auto-unlock.", cost: 250, costLabel: "~£250", search: "Yale Assure 2 smart lock" },
-      { id: "b12a", name: "Smart lock — Conservatory door", meta: "Aqara U100. Euro cylinder retrofit for hinged door.", cost: 170, costLabel: "~£170", search: "Aqara U100 smart lock" },
+      { id: "b12a", name: "Smart lock — Conservatory door", meta: "Aqara U200 — euro-cylinder retrofit (keeps your existing key; fit an 'emergency & escape' anti-snap cylinder).", cost: 170, costLabel: "~£170", search: "Aqara U200 smart lock" },
       { id: "b12b", name: "Smart lock — Dining French doors", meta: "Aqara A100 Pro or Nuki 4 Pro — smart Euro cylinder for multi-point door.", cost: 220, costLabel: "~£180-260", search: "Nuki 4 Pro smart lock" },
       { id: "b12c", name: "Anti-snap euro cylinders (×3)", meta: "TS007 3-star or Sold Secure Diamond (SS312). The smart lock is worthless on a snappable cylinder — lock-snapping is the #1 UK break-in method.", cost: 90, costLabel: "~£75-120", search: "anti snap euro cylinder 3 star TS007" },
       { id: "b29h", name: "Frigate face recognition training", meta: "Photos of each person, ~30 min setup", cost: 0, costLabel: "free" },
