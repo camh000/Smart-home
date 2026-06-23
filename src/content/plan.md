@@ -200,7 +200,7 @@ Routine scene buttons worth adding regardless of voice coverage:
 
 - **Zigbee coordinator** — SkyConnect or Sonoff ZBDongle-E (~£20). Handles bulbs, locks, sensors, buttons.
 - Z-Wave stick — only if we buy Z-Wave kit later
-- Matter — supported natively by HA, no extra hardware
+- **Matter** — supported natively by HA, but it splits two ways: **Matter-over-Wi-Fi** (the Meross plugs — working today, no extra radio) vs **Matter-over-Thread** (low-power battery devices), which needs a **Thread Border Router (TBR)** the plan doesn't yet have. The **SkyConnect / ZBT-1 can run OpenThread BR** alongside Zigbee, or an **Apple TV / HomePod mini / Aqara hub** can be the TBR. **Decide Matter-over-Wi-Fi vs Thread per device** so you know whether a TBR is needed — see Open questions.
 
 ### USB passthrough — getting the dongle to HA on Unraid
 
@@ -211,6 +211,15 @@ Routine scene buttons worth adding regardless of voice coverage:
 - **📡 Put the dongle on a 0.5–1 m USB extension lead, away from the box (and ideally a USB 2.0 port).** This is the single biggest Zigbee reliability fix: 2.4 GHz Zigbee gets hammered by USB 3.0 ports, NVMe/drives and the metal case right next to it. Dangling it away from the server dramatically cuts dropouts.
 - **💾 Back up the HA / Zigbee2MQTT config** (it's in the backup set) so the **network key + every device pairing survives a restore** — otherwise a rebuild means re-pairing all 30+ devices by hand.
 - Coordinator note: SkyConnect / ZBDongle-E are Silicon Labs — fine with ZHA, and with Zigbee2MQTT select the **ember** adapter. (The TI-based ZBDongle-**P** is the alternative; either works, just match the driver.)
+
+### 2.4 GHz coexistence &amp; Zigbee mesh — RF planning
+
+The single biggest cause of a flaky smart home is **2.4 GHz congestion**, and this house piles a lot onto that band: **7 Wi-Fi Voice PEs**, Wi-Fi IoT, **Zigbee**, and (if used) **Thread** all share it. Plan the spectrum rather than leave it to luck:
+
+- **Channel plan:** Wi-Fi APs on **1 / 6 / 11** only; **Zigbee on a channel in the gaps** (e.g. **15, 20 or 25**) so it doesn't sit directly under a Wi-Fi channel; give **Thread its own** channel too. Check which Wi-Fi channels are actually in use before pinning Zigbee.
+- **Offload to 5 GHz / wired:** put everything that *can* go on 5 GHz Wi-Fi or Ethernet there (tablets, PCs, gaming) to free 2.4 GHz for the IoT that has no choice (Voice PE, Zigbee).
+- **Zigbee is a mesh — and it needs routers.** Battery sensors don't repeat; **mains-powered Zigbee devices (bulbs, plugs, relays) are the repeaters.** Make sure there are enough, well-distributed, to carry the mesh out to the **garage** and far corners — don't expect the coordinator alone to reach.
+- **Keep the coordinator off the noise floor** (the USB-lead tip above) and away from the Wi-Fi APs and the Unraid box.
 
 ## Lighting
 
@@ -254,6 +263,7 @@ The most important gap the plan was missing. A JARVIS-grade home that promises t
 **Smoke + CO (life safety):**
 
 - Interlinked smart **smoke + heat + CO** alarms feeding HA — e.g. Zigbee **Frient**/**Heiman**, or mains **Ei Electronics** with a relay/contact module into HA. Keep them functioning as standalone alarms too (HA is a *notifier*, never the only line of defence).
+- **⚠️ Meet building regs with the *primary* alarms — don't let cheap Zigbee units do the life-safety job.** A rewire/renovation triggers UK smoke-alarm regs (**BS 5839-6** — typically **Grade D mains-powered with battery backup, interlinked, at least one per storey + escape routes (LD3/LD2)**; **Scotland is stricter** — interlinked in every living room + hall + a heat alarm in the kitchen). Spec the **mains-interlinked Ei Electronics (or equiv.) as the compliant base layer**, with HA *reading* them via a relay/contact module — the Zigbee units are an *additional* sensing layer, not the legal one. Confirm the install meets your nation's regs with the sparky.
 - Unlocks the real version of Cinema-mode's "except smoke" override, plus per-room alerting, phone push when away, and a spoken Claude warning.
 
 **Water leak (protect the build):**
@@ -347,6 +357,9 @@ Revisit only if a summer in the house actually proves it's needed — but with n
 - **PoE switch** — 8-port minimum (TP-Link or Unifi)
 - **Storage** — event recording + 24-48hr continuous buffer. Unraid has plenty.
 - **VLAN** — cameras isolated from main network (good hygiene, not essential)
+- **🕒 Egress-blocked cameras still need time + firmware.** Firewalling the cameras off the internet (good) also kills their **NTP time sync** — clocks drift and timestamps become useless as evidence — and their **firmware updates**. Run a **local NTP server** (the UCG-Max or Unraid can serve it) and point the cameras at it, and set a **manual firmware-update routine** (temporarily allow egress, or sideload). Verify each model accepts a custom NTP server.
+- **⚡ Surge / lightning protection.** The outdoor cameras run **copper PoE back into the switch** — a classic surge/lightning entry path that can take out the PoE switch *and* Unraid behind it. Fit **PoE surge arrestors** (gas-discharge, earthed) on the outdoor camera runs, and a **head-end / whole-house SPD** (surge protection device) in the consumer unit. (The garage link already dodges this via fibre — see cabling spec §8.) Cheap insurance for thousands of pounds of kit.
+- **🎥 Frigate detector sizing — detect on the substream, record on the mainstream.** Running object detection on full 4K from 4-5 cameras will swamp the CPU/iGPU. Configure each camera with a **low-res substream for Frigate detection** and the **4K mainstream for recording** — and size the detector (Coral / OpenVINO iGPU) for the *substream* count, not 4K.
 
 ### Camera positions (confirmed)
 
@@ -1499,6 +1512,8 @@ Most cable runs are already in the spec. The remaining decisions are about **act
 - **Speaker cable** to lounge surround / Atmos positions — separate from the Cat6 spec, runs while walls are open.
 - **Mains for voice nodes** — each room with a Voice PE needs a socket nearby. Most rooms will have this anyway; flag any awkward locations (e.g. landing) to the sparky.
 - **Power for Decos** — hall, landing, garage. Decos aren't PoE. Already noted in spec but worth checking sockets exist at planned Deco positions.
+- **🔌 Future-proof the first fix for solar / battery / EV — walls open is the only cheap moment.** Same logic as the blind cabling: provisioning now is just conduit; retrofitting later means re-chasing walls and a re-dig. Ask the sparky to leave: a **spare consumer-unit way** (or a slightly bigger board), a **duct/cable route to the loft/roof** for future **solar PV**, a **dedicated route to the driveway** for a future **EV charger** (a 32A radial / SWA), and **floor space + a cabling allowance** for a future **home battery** near the CU. The energy dashboards already assume Octopus Agile — solar/battery/EV is the obvious next step, and first-fix is when it's nearly free.
+- **⚡ Surge protection is electrical scope** — have the sparky fit a **Type 2 SPD in the consumer unit** (cheap, protects every always-on device), plus **earthed PoE surge arrestors** on the outdoor camera runs at the head-end (see CCTV → surge).
 
 ## Resilience: power, backup & fallback
 
@@ -1517,6 +1532,7 @@ Today only "a Qdrant volume backup" exists. That's not a backup strategy. Define
 - **Home Assistant** — automated, versioned full snapshots (config + DB + secrets), local **and** off-site.
 - **Frigate** — config + recordings policy (recordings are replaceable; config and the event DB are not).
 - **Memory layer** — Qdrant volume + the structured SQLite store.
+- **Matter fabric + the supporting containers** — back up the **Matter Server's `/data`** (the fabric credentials): lose it in a rebuild and you **re-commission *every* Matter device by hand**. Same trap as the Zigbee network key (which the Hub section already protects) — but currently unguarded. Include **govee2mqtt, Mosquitto and Zigbee2MQTT/ZHA** configs in the set too.
 - **Immich (family photos)** — the irreplaceable one. Back up the **Immich library + its Postgres DB**, **client-side encrypted**, **off-site to Selby over the SD-WAN**. Use **restic** or **borg** (or `rclone` with crypt) so the data is encrypted *before* it leaves the house — dad hosts the bytes but **cannot read the photos**. Keep a local fast copy too (3-2-1: ≥3 copies, 2 media, 1 off-site).
 - **Off-site target = the Selby SD-WAN** for HA snapshots and the Immich/memory backups; private link, no public exposure.
 - **🔁 Store the decryption key *off the box* (dependency-loop trap).** restic/borg encrypt client-side — but if the only copy of the passphrase lives on the Unraid box that died/burned/was stolen, the Selby backup is **unrecoverable ciphertext**. Keep the passphrase out-of-band: a password manager that syncs off-box, a paper copy, and a sealed copy at Selby. The restore drill must start *from the key store*, not from the box.
@@ -1537,6 +1553,7 @@ A dedicated pass for the "depends on the very thing it's meant to protect/observ
 - **🔁 Keep a doorbell chime that works with HA dead.** If the PoE doorbell's only alert path is Frigate/HA, an outage = a **silent doorbell**. Ensure a standalone/local chime so visitors still register without the smart stack.
 - **🔁 Guest mode can't key off guest *presence*.** Guests aren't in your HA Companion, so "auto-disable when their phone leaves" is unreliable for exactly the people it's for. Drive guest mode off a **date window + a manual/host toggle**, not the presence of an untracked phone.
 - **⚠️ One UCG-Max is the whole network (single point of failure).** Its death simultaneously takes internet, the SD-WAN, VLAN routing, remote access *and* the off-site watchdog's reachability — and the Decos can't route without it. Treat it as a conscious accepted risk: keep the old **Deco-as-router config documented as break-glass** (or a cheap spare gateway), so a dead UCG-Max is a swap, not a rebuild.
+- **⚠️ The Unraid box is the *compute* SPOF — and it takes the alarm + CCTV with it.** The *network* SPOF is handled above, but HA, Frigate, the **alarm brain** and RAG all run on one box, and RAID protects the *disks*, not the box. Its death = the whole house goes dumb **and CCTV + the alarm die at once** — exactly when you might want them (e.g. an intruder who pulls the server). Mitigate three ways: **(a)** keep critical control **local** (Zigbee groups, lock-resident codes — already in the plan); **(b)** a **break-glass standby** — a cheap **Raspberry Pi with a minimal HA + a spare Zigbee stick**, restorable from a recent backup, to run lights/locks/alarm essentials; **(c)** give the **siren a trigger path that doesn't depend on the box** (a Zigbee siren bound to a local group / coordinator-side rule) so "smash the server" can't silently disarm the house.
 - See also: the **confirmed-unlock** and **multi-turn confirmation** loops in the Locks section and the integration doc — the security gate and the "yes" antecedent must not depend on a cloud/service that can be down.
 
 ### Monitoring beyond the server
@@ -1551,6 +1568,7 @@ The Unraid health section covers the box; also watch the **edges**: UCG-Max stat
 
 - **Define the VLAN/IP scheme now** (IoT / voice / CCTV / guest / main), **non-overlapping with Selby** (e.g. `10.10.x` here, `10.20.x` there) — it's a prerequisite for the SD-WAN, guest isolation and the camera egress-blocking the privacy plan relies on.
 - **🎮 Keep the gaming PC and the Steam Deck on the *same* VLAN** (the main/trusted one). Game-stream discovery (Steam Remote Play / Moonlight) uses broadcast/mDNS and silently breaks across VLANs — so don't split the office gaming PC from the lounge Deck dock. If they must be segmented, you'll need an **mDNS reflector** + the specific Remote Play/Moonlight ports opened on the UCG-Max. Bake this into the scheme so the segmentation doesn't quietly kill streaming. (See "Game streaming (office → lounge)".)
+- **🔁 Matter / HomeKit / AirPlay / Cast can't be fully VLAN-isolated either — the security goal fights the protocol.** The hardening plan wants IoT on a segregated VLAN with egress blocked, but **Matter (the Meross plugs), AirPlay 2, Chromecast and the Matter Server all rely on mDNS/multicast that doesn't cross VLANs**, and the Matter Server must share the plugs' L2 (it commissions on the same subnet). So you **can't cleanly put Matter devices on a separate VLAN from HA.** Design the scheme around it: **keep Matter/AirPlay/Cast devices on HA's VLAN**, or run an **mDNS reflector + IGMP snooping** so discovery crosses the boundary. Decide this *before* drawing the VLAN map — it's the same trap as the gaming one above.
 - Keep **as-built documentation**: a **patch-panel port map**, a **device/IP inventory**, and the VLAN plan. Cheap to do as you go, painful to reconstruct later. (The "friendly names" convention is good; this is the infrastructure equivalent.)
 
 ### Accounts, credentials & access
@@ -1562,6 +1580,10 @@ The Unraid health section covers the box; also watch the **edges**: UCG-Max stat
 ### Software updates & change management
 
 - **Don't auto-update the house.** HA's `x.0` releases break things; Frigate/Qdrant/Ollama move fast. **Pin container versions**, read release notes, and test major HA updates against a **backup/VM clone** before rolling forward. A broken update at 6pm shouldn't mean no lights.
+
+### Running cost — always-on power
+
+- **Budget the continuous draw, not just the kit price.** A JARVIS home runs 24/7: Unraid (+ its drives), the 2.5G gateway, the PoE switch driving 4-5 cameras + doorbell, the UPS, voice nodes and tablets add up to roughly **~150-300 W continuous** → **~£400-700/yr** at current UK prices. Worth knowing because it (a) sanity-checks the **UPS runtime** maths, (b) argues for a **power-efficient server** (idle watts matter more than peak), and (c) builds the financial case for the **solar/battery provisioning** below. Measure the real figure with one of the owned energy plugs once it's running.
 
 ### Privacy / compliance note (UK)
 
@@ -1764,7 +1786,11 @@ The custom software brain, plus the comfort and resilience layers that build on 
 **Still open — needs deciding soon:**
 
 - [ ] UPS model and sizing confirmed before head-end commissioning
-- [ ] VLAN scheme defined (IoT / voice / CCTV / guest / main) — implementation now easy with the UCG-Max, just needs the scheme designed. **Must be planned across both sites** (Woodhouse + Selby) with non-overlapping subnets so the Site Magic SD-WAN routes don't collide — e.g. `10.10.x` here, `10.20.x` in Selby.
+- [ ] VLAN scheme defined (IoT / voice / CCTV / guest / main) — implementation now easy with the UCG-Max, just needs the scheme designed. **Must be planned across both sites** (Woodhouse + Selby) with non-overlapping subnets so the Site Magic SD-WAN routes don't collide — e.g. `10.10.x` here, `10.20.x` in Selby. **Design in the mDNS/multicast traps:** Matter/AirPlay/Cast devices can't be cleanly isolated from HA's VLAN, and gaming discovery breaks across VLANs (mDNS reflector / IGMP snooping or keep them co-located). See Operations → Network scheme.
+- [ ] **Matter: Wi-Fi vs Thread per device → is a Thread Border Router needed?** Matter-over-Wi-Fi (Meross) needs none; any Matter-over-Thread device does (OpenThread BR on the SkyConnect/ZBT-1, or an Apple TV/HomePod/Aqara hub). See Hub & radios.
+- [ ] **2.4 GHz RF plan** — fix the Wi-Fi (1/6/11) + Zigbee (15/20/25) + Thread channels so they don't collide, and confirm enough **mains-powered Zigbee routers** to mesh out to the garage. See Hub & radios → RF planning.
+- [ ] **Smoke/CO alarms meet building regs?** Confirm the *primary* alarms are **mains-interlinked Grade D (BS 5839-6 / your nation's spec)** with HA reading them — not cheap Zigbee units doing the life-safety job. See Safety sensors.
+- [ ] **Solar PV / home battery / EV-charger first-fix provisioning** — decide what to rough in while walls are open (spare CU way, roof + driveway routes, battery space). Conduit now vs re-chase later. See Pre-move-in wiring.
 - [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
