@@ -78,7 +78,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b16b", name: "Kitchen tablet mount + USB outlet", cost: 35, costLabel: "~£35" },
       { id: "b16c", name: "Fully Kiosk Browser license", meta: "One-off, covers all tablets", cost: 6, costLabel: "~£6", url: "https://www.fully-kiosk.com/" },
       { id: "b16d", name: "Aqara FP2 — Lounge", meta: "mmWave presence, multi-zone. HomeKit Controller integration.", cost: 65, costLabel: "~£65", search: "Aqara FP2 presence sensor" },
-      { id: "b16e", name: "OpenTherm Gateway", meta: "Between boiler & master stat — modulating boiler control via HA", cost: 80, costLabel: "~£80", search: "OpenTherm Gateway" },
+      { id: "b16e", name: "OpenTherm Gateway", meta: "Between boiler & master stat — modulating boiler control via HA. Specialist/DIY buy (nodo-shop) — not an Amazon item.", cost: 80, costLabel: "~£80", url: "https://www.nodo-shop.nl/en/" },
       { id: "b16f", name: "5× Aqara E1 Zigbee TRVs", meta: "Master, bed 2, bed 3, landing, bathroom", cost: 200, costLabel: "~£200", search: "Aqara E1 radiator thermostat" },
     ],
   },
@@ -177,7 +177,7 @@ export const SHOPPING: ShopPhase[] = [
     id: "7",
     title: "Phase 7 — Optional / when-installed",
     items: [
-      { id: "b50", name: "OpenSprinkler (outdoor irrigation)", meta: "Only if irrigation installed", cost: 150, costLabel: "~£150", search: "OpenSprinkler" },
+      { id: "b50", name: "OpenSprinkler (outdoor irrigation)", meta: "Only if irrigation installed. Buy direct (ships to UK) — patchy on Amazon UK.", cost: 150, costLabel: "~£150", url: "https://opensprinkler.com/" },
       { id: "b51", name: "Garden moisture sensors (4-5 beds)", meta: "Aqara T1 outdoor or Ecowitt", cost: 80, costLabel: "~£80", search: "Ecowitt soil moisture sensor" },
       { id: "b52", name: "Airthings View Plus (master bedroom)", meta: "Proper CO2 + radon + PM2.5 — optional premium", cost: 250, costLabel: "~£250", search: "Airthings View Plus" },
     ],
