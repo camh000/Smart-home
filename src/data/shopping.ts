@@ -105,10 +105,10 @@ export const SHOPPING: ShopPhase[] = [
     id: "5",
     title: "Phase 5 — Automation brain, comfort & resilience",
     items: [
-      { id: "b22", name: "Motorised blinds — bedrooms (baseline)", meta: "The funded scope: master bay (3 motors) + bed 2 + bed 3 ≈ 5 motors — quote/bespoke", cost: 700, costLabel: "~£700" },
+      { id: "b22", name: "Motorised blinds — master bedroom bay (baseline)", meta: "The only funded blind — master-bedroom bay, 3 panes (3 motors) — quote/bespoke", cost: 450, costLabel: "~£450" },
       { id: "b22a", name: "Lounge bay blinds (bonus)", meta: "South-facing bay, 3 motors — pairs with the cinema scene. Bonus tier, not in the committed total.", cost: 0, costLabel: "bonus ~£450" },
       { id: "b23", name: "Conservatory blinds (bonus)", meta: "Style + count TBC (thermal/pleated vs roller). Bonus tier, not in the committed total.", cost: 0, costLabel: "bonus ~£600" },
-      { id: "b24", name: "Other room blinds (bonus)", meta: "Dining + kitchen. Bonus tier, not in the committed total.", cost: 0, costLabel: "bonus ~£450" },
+      { id: "b24", name: "Other room blinds (bonus)", meta: "Dining, kitchen + the other bedrooms (bed 2/3). Bonus tier, not in the committed total.", cost: 0, costLabel: "bonus ~£700" },
       { id: "b29g", name: "Proactive Claude service (custom Python)", meta: "~200 lines, FastAPI + HA webhook listener", cost: 0, costLabel: "code only" },
       { id: "b29l", name: "HASS.Agent install on PC", meta: "Windows tray app, exposes PC sensors to HA via MQTT", cost: 0, costLabel: "free" },
       { id: "b29m", name: "Pinned browser dashboard config", meta: "Lovelace dashboard, pinned in corner of PC screen", cost: 0, costLabel: "free" },
