@@ -101,6 +101,10 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["Zigbee"], def: "Low-power mesh radio for sensors/bulbs/switches; needs a USB coordinator dongle." },
   { terms: ["Matter"], def: "Cross-vendor smart-home standard for local control (over Wi-Fi or Thread)." },
   { terms: ["Thread"], def: "Low-power mesh radio that underpins many Matter devices." },
+  { terms: ["Thread Border Router", "TBR", "OpenThread BR"], def: "A bridge between a Thread mesh and your normal LAN — required for any Matter-over-Thread device. Can run on a SkyConnect/ZBT-1 dongle, or an Apple TV / HomePod / Aqara hub." },
+  { terms: ["NTP"], def: "Network Time Protocol — how devices sync their clock. Cameras firewalled off the internet need a local NTP server or their timestamps drift." },
+  { terms: ["SPD", "surge protection device", "surge arrestor"], def: "A device that clamps voltage spikes (lightning/grid transients). A Type 2 SPD goes in the consumer unit; PoE arrestors protect outdoor camera runs." },
+  { terms: ["BS 5839", "Grade D", "BS 5839-6"], def: "The UK standard for domestic fire alarms — typically Grade D (mains-powered with battery backup, interlinked) for a renovation; the legal life-safety layer HA only supplements." },
   { terms: ["mmWave"], def: "Millimetre-wave radar presence sensing — detects you even sitting still (unlike a motion sensor)." },
   { terms: ["PIR"], def: "Passive-infrared motion sensor — only sees movement, not stillness." },
 
