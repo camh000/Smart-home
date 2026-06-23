@@ -225,6 +225,7 @@ Approx zones to cover: dining, kitchen, conservatory, lounge, hall, porch, landi
 **Three entries, three locks** (confirmed in Open questions): the **front door**, the **conservatory hinged door** (S wall), and the **dining French doors** (N wall). Zigbee/Z-Wave/Matter — not Wi-Fi.
 
 - Candidates: Yale Assure 2 (front), Aqara U100 (conservatory Euro-cylinder retrofit), Aqara A100 Pro or Nuki 4 Pro (dining French-door multi-point cylinder)
+- **🔑 Anti-snap cylinders are non-negotiable — the lock is only as good as the cylinder it sits on.** **Lock snapping** is the #1 forced-entry method on UK uPVC/composite doors and takes seconds; a £200 smart lock on a £8 euro cylinder defeats itself (the Aqara/Nuki units mount *on* the existing cylinder/thumb-turn). Fit **TS007 3-star** (or **1-star cylinder + 2-star security handle**), or **Sold Secure Diamond (SS312 Diamond)** cylinders on all three doors. Cheap, and the single biggest physical-security upgrade in the plan.
 - All three are Tier-2 (verbal confirmation before lock/unlock; tool-layer challenge token for locks specifically)
 - **🔁 The secure-unlock gate must not depend on the cloud brain (dependency-loop trap).** The Tier-2 "say yes first" + the challenge token live in Claude + the memory service. If the internet/HA/memory is down you'd either be **unable to unlock** or the local fallback would **bypass the safety**. Two requirements: (a) every lock keeps a **physical key + lock-resident keypad codes** (codes stored *on* the lock, validated offline — not by HA in real time), so a software outage never locks you out and guest codes work without HA; (b) decide explicitly whether the local-intent fallback is *allowed* to do a confirmed unlock, or refuses Tier-2 entirely and defers to the physical key.
 
@@ -698,6 +699,37 @@ Spot on — once the presence layer is in, you've effectively built a **video-ve
 - **Visible deterrent:** add a real **siren/strobe + bell box** on the wall — burglars avoid a house that *looks* alarmed; they can't see your software.
 
 **To make it a proper alarm, add:** Alarmo (free), a **Zigbee indoor siren** (~£25), an **external sounder/bell box + strobe** (~£30-50), a door **keypad** (Zigbee ~£25) or arm via tablet/NFC/phone, and **4G failover** on the gateway. Everything else is already in the plan. **Phase 4-5** — it switches on once the sensors + cameras are in and the proactive brain exists.
+
+### Beyond the alarm — the full security layer
+
+The fancy alarm can lull you into ignoring the unglamorous stuff that actually stops break-ins. Four fronts:
+
+**Physical hardening (stops the entry itself):**
+
+- **🔑 Anti-snap cylinders** on all three locks — *the* priority, see [Locks](#locks). The smart lock is worthless on a snappable cylinder.
+- **Glass-break (acoustic) sensors** — contact sensors catch a window *opening*, not someone *smashing* it and climbing through. Closes that gap.
+- **Vibration / tilt sensors** on the garage door, sheds and vulnerable windows — flag forced entry *before* it opens.
+- **Door/window reinforcement** — hinge bolts, sash jammers, laminated/security-film glass on vulnerable panes; **letterbox guard + keep keys away from the door** (letterbox fishing for keys/thumb-turns is common).
+
+**Smarter detection (mostly free software on kit already bought):**
+
+- **🎥 Camera tamper / offline detection** — a burglar's first move is killing a camera, so a cam going **offline** or its view **blacking out/obscuring** must *itself* trigger the alarm, not pass unnoticed. High value, free.
+- **🔊 Frigate audio detection** — Frigate can classify **breaking glass, a smoke alarm, shouting** — a free second sense alongside video.
+- **Loiter detection** — someone dwelling at the front for >X minutes (Frigate zones + a timer) → alert even without a hard trigger.
+
+**Securing the system itself (a smart home *is* an attack surface):**
+
+- **🛡️ No inbound ports — remote access via Tailscale only** (already in place). Never port-forward HA or the cameras to the internet.
+- **Cameras + IoT on an isolated VLAN with internet egress blocked** — cheap cameras phone home; firewall them local-only (ties into the Operations VLAN scheme).
+- **HA 2FA, change every default password, patch firmware, disable router UPnP**, and **alert on unknown devices joining** the network (UniFi can).
+
+**Evidence, deterrence & people:**
+
+- **☁️ Instant off-site clip upload to Selby on an alarm event** — if they take the Unraid box the footage goes with it, *unless* event clips are pushed off-site the moment they trigger (you already have the SD-WAN link). Also **physically hide/secure the NVR**.
+- **🏠 Occupancy simulation (away mode)** — randomised lights/TV/blinds so the empty house looks lived-in. One of the best burglary deterrents, and free. Plus visible deterrents (bell box, cameras, floodlights, optional **recorded dog-bark** through outdoor speakers on a night perimeter trip).
+- **🆘 Panic button + duress code** — a bedside/by-door Zigbee button for instant full-alarm, and a **duress PIN** that *appears* to disarm but silently alerts (for being forced to open up).
+- **🔥 Fire overrides lockdown** — critical interaction: the alarm locks doors, but on **smoke/CO** the house must **unlock exits + light the escape route + announce**. Life safety beats security — design it explicitly.
+- **Acknowledgement escalation** — no ack on an alert within X minutes → escalate (call, then Dad/keyholder in Selby). Optionally **bridge to a paid monitored/ARC service** for actual police response (closes the gap above). Plus **auto-lock policies** — lock after X min / at night / when everyone leaves, and "door left unlocked or open" nags.
 
 ## PC integration
 
@@ -1732,6 +1764,7 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
 - [ ] **Home insurance — does the policy require an *approved* (NSI/SSAIB) monitored alarm?** If so, the DIY HA/Alarmo system may not satisfy it on its own. Check before relying on it as *the* alarm. See "Alarm & security".
+- [ ] **Do you want police response?** If yes, decide on a **paid monitored/ARC bridge** (the only route to a police URN) — otherwise the system stays self-monitored (alerts you + Dad in Selby). See "Alarm & security".
 - [x] ~~CCTV HDD — dedicated unprotected disk vs array expansion~~ → **resolved: one 8-12 TB disk into the array, shared media + CCTV.** Reserve the camera slice with Minimum-Free-Space fences (Unraid media shares + the \*arr apps, ~1.5-2 TB) so media can't starve Frigate; pin the frigate share to the disk. See "Storage sizing (Unraid)". 1TB NVMe cache already owned.
 - [ ] **Voice PE — confirm lounge performance before buying the full set.** Test one unit in the lounge with media playing (worst-case acoustics); decide STT route (local Whisper+GPU vs HA Cloud) off the back of it. See "Is Voice PE good enough?" above.
 - [x] ~~AVR target brand (Denon/Marantz vs Yamaha)~~ → **resolved: deal-led** — buy whichever of HEOS (Denon/Marantz) or MusicCast (Yamaha) comes up cheap and clean secondhand; both integrate well with HA.
