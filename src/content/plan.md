@@ -233,7 +233,10 @@ Approx zones to cover: dining, kitchen, conservatory, lounge, hall, porch, landi
 
 **Three entries, three locks** (confirmed in Open questions): the **front door**, the **conservatory hinged door** (S wall), and the **dining French doors** (N wall). Zigbee/Z-Wave/Matter — not Wi-Fi.
 
-- Candidates: Yale Assure 2 (front), **Aqara U200** (conservatory euro-cylinder retrofit — *not* the U100, which is a US deadbolt form factor), Aqara A100 Pro or Nuki 4 Pro (dining French-door multi-point cylinder)
+- Candidates:
+  - **Front door — pick by door type.** A typical UK uPVC/composite front door is a **euro-cylinder multipoint**, which wants a **Yale Linus L2** (retrofit — keeps your existing key) or **Conexis L2** (multipoint replacement). The **Yale Assure 2** *does* list on Amazon UK (so it's buyable here — correction to an earlier claim), but it's a **US deadbolt** form factor — only the right pick if your front door actually takes a deadbolt. Confirm the door type before choosing.
+  - **Conservatory** — **Aqara U200** (euro-cylinder retrofit — *not* the U100, which is a US deadbolt form factor).
+  - **Dining French doors** — **Aqara A100 Pro or Nuki 4 Pro** (multi-point cylinder).
 - **All keep a physical key as an optional fallback — but how depends on the type:**
   - **Retrofit (Nuki 4 Pro, Aqara U200)** — mounts on the *inside* over your existing thumb-turn and just motorises it; the original cylinder stays, so your **normal key works from outside as before**, no battery/software needed (a true fail-safe). ⚠️ Fit the anti-snap cylinder with the **"emergency &amp; escape" function** so the key turns from outside even while the thumb-turn/Nuki is engaged inside — a standard cylinder blocks that and locks you out.
   - **Replacement (Aqara A100/A100 Pro)** — replaces the cylinder, ships with a **mechanical keyway + keys** alongside fingerprint/keypad/NFC.
@@ -1583,7 +1586,7 @@ The Unraid health section covers the box; also watch the **edges**: UCG-Max stat
 
 ### Running cost — always-on power
 
-- **Budget the continuous draw, not just the kit price.** A JARVIS home runs 24/7: Unraid (+ its drives), the 2.5G gateway, the PoE switch driving 4-5 cameras + doorbell, the UPS, voice nodes and tablets add up to roughly **~150-300 W continuous** → **~£400-700/yr** at current UK prices. Worth knowing because it (a) sanity-checks the **UPS runtime** maths, (b) argues for a **power-efficient server** (idle watts matter more than peak), and (c) builds the financial case for the **solar/battery provisioning** below. Measure the real figure with one of the owned energy plugs once it's running.
+- **Budget the continuous draw, not just the kit price — and we now have the real baseline.** The current smart meter shows **~358 kWh / £86 in May 2026 (≈£0.26/kWh all-in)**, i.e. the **whole home already averages ~480 W**, and **~1,962 kWh / £505 across Jan-Jun** (winter-weighted → roughly **3,500-3,800 kWh / £900-1,000 a full year**). The always-on smart-home infrastructure — Unraid (+ Frigate's AI load), the 2.5G gateway, the PoE switch driving 4-5 cameras + doorbell, voice nodes and tablets — adds roughly **~150-250 W continuous ≈ £350-560/yr**. That's a **notable ~40-50% on top of current usage**, which is exactly why it's worth (a) a **power-efficient server with HDD spin-down** (idle watts dominate a 24/7 box), (b) sanity-checking the **UPS runtime** maths, and (c) the **solar/battery provisioning** below — the numbers now make a real financial case. Confirm the actual figure with one of the owned energy plugs once it's running.
 
 ### Privacy / compliance note (UK)
 
