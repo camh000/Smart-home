@@ -22,7 +22,7 @@ Roughly the entire *software* brain plus every device already owned can go in to
 - **Frigate** — install/configure now (CPU/OpenVINO detection, no Coral needed; test with a phone-as-IP-camera) so it's ready when cameras arrive.
 - **Grocy** ✅ **container up** — now populate inventory; the Claude meal-plan + receipt-OCR layer lands later with the proactive service (Phase 5–6).
 - **Mosquitto MQTT** broker ✅ **up** — HA's MQTT integration linked. (Gotcha for next time: `eclipse-mosquitto:2` ships no usable config — needs a `mosquitto.conf` with `listener 1883` + `allow_anonymous true`, else it binds localhost-only and HA can't connect.)
-- **Unraid health monitoring** — **Glances + Scrutiny → HA**, immediately useful on the current box (SMART, capacity, temps, containers). **Scrutiny ✅ container up** — next: point its notifications at HA (API/MQTT, or Shoutrrr → ntfy/HA webhook) and set the SMART thresholds so a climbing reallocated-sector count actually pings you. Remember it shares the **self-monitoring blind spot** (it's on the box it watches) — the off-site watchdog still does the "is it even up?" job.
+- **Unraid health monitoring** — **Glances + Scrutiny → HA**, immediately useful on the current box (SMART, capacity, temps, containers). ✅ **Both containers up and integrated into HA** (Glances + Scrutiny entities live). Next: **turn the data into alerts** — HA automations on **disk >90% full, temp high, and a climbing SMART reallocated-sector count** → push/notify (Scrutiny's own Shoutrrr → ntfy/HA webhook works too). Then add the **Unraid integration (HACS, via the Connect GraphQL API)** for array/parity/Docker state — the third source. Remember it all shares the **self-monitoring blind spot** (it's on the box it watches) — the off-site watchdog still owns the "is it even up?" job.
 
 **Owned devices, integrated today:**
 
@@ -30,7 +30,7 @@ Roughly the entire *software* brain plus every device already owned can go in to
   - *Setup gotchas:* the **454** login error is Govee rate-limiting repeated restarts — wait it out, don't restart-spam. A bulb that's discovered but won't respond with **"Device is offline"** is a **bulb/Wi-Fi** problem (check it's powered + online in the Govee app), not an HA one.
 - **4× Meross Matter plugs** → HA via Matter → control + **energy monitoring** + "washing's done" cycle detection + safety auto-off. ✅ **Matter Server container up + first plug (bedroom lamp) commissioned** — fully **local**, no cloud/lag (the model the house runs on). *(Needs HA's Matter Server container on host networking + IPv6 on Unraid; commission via the phone Companion app on the same LAN. Multi-admin can share a plug already in Alexa/Apple Home, else factory-reset + scan its Matter QR. A plug exposes as a **switch**, not a light — use the **"Change device type for a switch"** helper to present a lamp-on-a-plug as a `light` (on/off only, no dimming).)*
 - **Apple TV** → media-player entity, auto-dim on play/pause, "what's playing".
-- **Phones** → HA Companion → **Tier-1 presence** + push notifications.
+- **Phones** → HA Companion → **Tier-1 presence** + push notifications. ✅ **Companion app installed** (first phone) — next: grant **location → set home/work zones** for presence, enable **notifications**, and add the second phone.
 - **Cam + Nova's PCs** → **HASS.Agent** → ~30 activity/presence sensors each + a pinned dashboard.
 
 **Voice pipeline — prototype with no hardware:**
