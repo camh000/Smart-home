@@ -132,6 +132,11 @@ export const GLOSSARY: GlossaryEntry[] = [
   // Brands / integrations
   { terms: ["HASS.Agent"], def: "Windows app that exposes PC sensors (active/idle, focused window…) to HA over MQTT." },
   { terms: ["WLED"], def: "Open-source firmware for ESP32-driven addressable LED strips — effects, colours and music-reactive, controllable from HA." },
+  { terms: ["bias light", "bias lighting"], def: "A soft light behind the TV that reduces eye-strain and makes the picture appear punchier." },
+  { terms: ["Ambilight", "screen sync", "screen-sync"], def: "LED strips behind/around the TV that extend the on-screen colours onto the wall in real time — Philips' name is Ambilight." },
+  { terms: ["HyperHDR", "Hyperion"], def: "Open-source software that drives a DIY Ambilight — grabs the screen/HDMI feed and pushes matching colours to an addressable LED strip." },
+  { terms: ["Hue Sync Box", "HDMI Sync Box"], def: "An HDMI box that reads the video passing through it and syncs Philips Hue lights to it — the turnkey, Dolby-Vision-capable screen-sync option." },
+  { terms: ["bass shaker", "tactile transducer"], def: "A transducer bolted under the sofa, fed from the AVR's bass channel, so you physically feel low-frequency rumble." },
   { terms: ["ESP32"], def: "A cheap Wi-Fi microcontroller that runs WLED/ESPHome — the glue for DIY sensors and lighting." },
   { terms: ["NFC"], def: "Near-field tags you tap a phone/reader on — here, coasters that queue a song or open a tab." },
   { terms: ["CodeProject.AI"], def: "Self-hosted AI server (runs on Unraid) for tasks like licence-plate or dart scoring via the cameras." },
