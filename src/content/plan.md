@@ -26,7 +26,8 @@ Roughly the entire *software* brain plus every device already owned can go in to
 
 **Owned devices, integrated today:**
 
-- **4× Govee bulbs** ✅ **in HA** via **govee2mqtt** (API-key/Platform API; email+password pulled to dodge the 454 login rate-limit) → MQTT discovery. Next: scenes (cosy/movie/reading) + **Adaptive Lighting** circadian. Cloud-routed (laggy/rate-limited) — fine for test bulbs, why the house goes Zigbee.
+- **4× Govee bulbs** ✅ **in HA** via **govee2mqtt** (Govee account creds + API key → control over the Platform API) → MQTT discovery. Full chain proven (HA→MQTT→govee2mqtt→Govee API returns 200). Next: scenes (cosy/movie/reading) + **Adaptive Lighting** circadian. Cloud-routed (laggy/rate-limited) — fine for test bulbs, why the house goes Zigbee.
+  - *Setup gotchas:* the **454** login error is Govee rate-limiting repeated restarts — wait it out, don't restart-spam. A bulb that's discovered but won't respond with **"Device is offline"** is a **bulb/Wi-Fi** problem (check it's powered + online in the Govee app), not an HA one.
 - **4× Meross Matter plugs** → HA via Matter → control + **energy monitoring** + "washing's done" cycle detection + safety auto-off.
 - **Apple TV** → media-player entity, auto-dim on play/pause, "what's playing".
 - **Phones** → HA Companion → **Tier-1 presence** + push notifications.
