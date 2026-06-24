@@ -143,10 +143,16 @@ export function SiteShell({
 
   return (
     <>
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink shadow-[var(--shadow-lift)] focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
+      >
+        Skip to content
+      </a>
       <Hero />
       <TabNav active={active} onChange={(key) => navigate({ tab: key })} onSearch={() => setPaletteOpen(true)} />
 
-      <main className="mx-auto max-w-6xl px-6 pb-28 pt-8">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-6 pb-28 pt-8 outline-none">
         <AnimatePresence mode="wait">
           <motion.div
             key={active}

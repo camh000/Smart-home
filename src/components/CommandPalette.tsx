@@ -98,6 +98,7 @@ export function CommandPalette({
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search the plan — rooms, kit, sections…"
                 className="w-full bg-transparent py-3.5 text-[15px] text-ink outline-none placeholder:text-muted-light"
+                aria-label="Search the plan"
               />
               <kbd className="shrink-0 rounded border border-line bg-paper px-1.5 py-0.5 font-mono text-[10px] text-muted">
                 esc

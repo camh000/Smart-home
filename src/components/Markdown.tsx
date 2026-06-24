@@ -133,6 +133,11 @@ export function Markdown({
           p: ({ children }) => <p>{annotate(children)}</p>,
           li: ({ children }) => <li>{annotate(children)}</li>,
           td: ({ children }) => <td>{annotate(children)}</td>,
+          table: ({ children }) => (
+            <div className="prose-table-wrap">
+              <table>{children}</table>
+            </div>
+          ),
           a: linkRenderer,
         }}
       >
