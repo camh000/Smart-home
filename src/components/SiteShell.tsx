@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Hero } from "./Hero";
+import { Home } from "./Home";
 import { TabNav, TABS } from "./TabNav";
 import { LongDoc } from "./LongDoc";
 import type { NavTarget } from "./Markdown";
@@ -37,15 +38,6 @@ const INTROS: Record<string, { meta: string; title: string; lead: string }> = {
   },
 };
 
-function scrollToId(id: string, attempts = 24) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    return;
-  }
-  if (attempts > 0) setTimeout(() => scrollToId(id, attempts - 1), 30);
-}
-
 export function SiteShell({
   planDoc,
   integrationDoc,
@@ -57,12 +49,14 @@ export function SiteShell({
   cablingDoc: ParsedDoc;
   searchIndex: SearchEntry[];
 }) {
-  const [active, setActive] = useState("plan");
+  const [active, setActive] = useState("home");
   const [planSub, setPlanSub] = useState(planDoc.subviews[0]?.key ?? "overview");
   const [intSub, setIntSub] = useState(integrationDoc.subviews[0]?.key ?? "overview");
   const [cablingSub, setCablingSub] = useState(cablingDoc.subviews[0]?.key ?? "scope");
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const pendingScroll = useRef<string | null>(null);
+  // A heading to scroll to after a view switch; the target LongDoc expands the
+  // containing section and scrolls once it has rendered.
+  const [pendingHeading, setPendingHeading] = useState<string | null>(null);
 
   const locById = useMemo(() => {
     const m = new Map<string, { tab: string; subview?: string }>();
@@ -85,34 +79,17 @@ export function SiteShell({
       }
       tab = tab ?? active;
 
-      const curSub =
-        tab === "plan" ? planSub : tab === "integration" ? intSub : tab === "cabling" ? cablingSub : undefined;
-      const sameView = tab === active && (subview === undefined || subview === curSub);
-
       setActive(tab);
       if (tab === "plan" && subview) setPlanSub(subview);
       if (tab === "integration" && subview) setIntSub(subview);
       if (tab === "cabling" && subview) setCablingSub(subview);
 
-      if (headingId) {
-        if (sameView) scrollToId(headingId);
-        else pendingScroll.current = headingId;
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      if (headingId) setPendingHeading(headingId);
+      else window.scrollTo({ top: 0, behavior: "smooth" });
       setPaletteOpen(false);
     },
-    [active, planSub, intSub, cablingSub, locById],
+    [active, locById],
   );
-
-  // Consume a pending cross-view scroll once the new content has rendered.
-  useEffect(() => {
-    if (pendingScroll.current) {
-      const id = pendingScroll.current;
-      pendingScroll.current = null;
-      scrollToId(id);
-    }
-  }, [active, planSub, intSub, cablingSub]);
 
   // Tab ↔ URL hash
   useEffect(() => {
@@ -149,7 +126,7 @@ export function SiteShell({
       >
         Skip to content
       </a>
-      <Hero />
+      {active === "home" && <Hero />}
       <TabNav active={active} onChange={(key) => navigate({ tab: key })} onSearch={() => setPaletteOpen(true)} />
 
       <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-6 pb-28 pt-8 outline-none">
@@ -175,14 +152,36 @@ export function SiteShell({
               </div>
             )}
 
+            {active === "home" && <Home onNavigate={(tab) => navigate({ tab })} />}
             {active === "plan" && (
-              <LongDoc doc={planDoc} activeSubview={planSub} onSubviewChange={setPlanSub} onNavigate={navigate} />
+              <LongDoc
+                doc={planDoc}
+                activeSubview={planSub}
+                onSubviewChange={setPlanSub}
+                onNavigate={navigate}
+                focusHeading={pendingHeading}
+                onFocusHandled={() => setPendingHeading(null)}
+              />
             )}
             {active === "integration" && (
-              <LongDoc doc={integrationDoc} activeSubview={intSub} onSubviewChange={setIntSub} onNavigate={navigate} />
+              <LongDoc
+                doc={integrationDoc}
+                activeSubview={intSub}
+                onSubviewChange={setIntSub}
+                onNavigate={navigate}
+                focusHeading={pendingHeading}
+                onFocusHandled={() => setPendingHeading(null)}
+              />
             )}
             {active === "cabling" && (
-              <LongDoc doc={cablingDoc} activeSubview={cablingSub} onSubviewChange={setCablingSub} onNavigate={navigate} />
+              <LongDoc
+                doc={cablingDoc}
+                activeSubview={cablingSub}
+                onSubviewChange={setCablingSub}
+                onNavigate={navigate}
+                focusHeading={pendingHeading}
+                onFocusHandled={() => setPendingHeading(null)}
+              />
             )}
             {active === "behaviours" && <Behaviours />}
             {active === "floorplan" && <Floorplan />}

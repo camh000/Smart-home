@@ -25,14 +25,65 @@ export interface DocHeading {
   title: string;
   level: 2 | 3;
 }
+/** A single H2 section, rendered as one collapsible card in the UI. */
+export interface DocSection {
+  /** Slug of the H2 — the scroll/anchor target. */
+  id: string;
+  title: string;
+  /** One-line plain-text preview shown when the card is collapsed. */
+  lead: string;
+  /** Section markdown WITHOUT the leading "## Title" (the title lives in the card header). */
+  body: string;
+  headings: DocHeading[];
+  /** Number of H3 sub-headings inside the section. */
+  subCount: number;
+}
 export interface DocSubview {
   key: string;
   label: string;
-  markdown: string;
+  /** Optional preamble (the doc's H1 + lead paragraph), shown above the cards. */
+  intro?: string;
+  sections: DocSection[];
   headings: DocHeading[];
 }
 export interface ParsedDoc {
   subviews: DocSubview[];
+}
+
+/** Strip the common inline markdown so a heading/paragraph reads as plain text. */
+function stripInline(s: string): string {
+  return s
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/~~([^~]+)~~/g, "$1")
+    .trim();
+}
+
+function truncate(s: string, n = 175): string {
+  if (s.length <= n) return s;
+  return s.slice(0, n).replace(/\s+\S*$/, "") + "…";
+}
+
+/** First meaningful line of a section (prose, or the first list item) as a preview. */
+function extractLead(lines: string[]): string {
+  let inCode = false;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line.startsWith("```")) {
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode || !line) continue;
+    if (/^#{1,6}\s/.test(line) || line.startsWith(">") || line.startsWith("|")) continue;
+    const stripped = line.replace(/^[-*]\s+/, "").replace(/^\d+\.\s+/, "");
+    const txt = stripInline(stripped);
+    if (txt) return truncate(txt);
+  }
+  return "";
 }
 
 export interface GroupDef {
@@ -99,13 +150,19 @@ export function parseDoc(
   const subviews: DocSubview[] = groups
     .map((g, idx) => {
       const secs = buckets.get(g.key) ?? [];
-      const parts = secs.map((s) => s.lines.join("\n"));
+      const sections: DocSection[] = secs.map((s) => ({
+        id: s.slug,
+        title: s.headings[0]?.title ?? s.slug,
+        lead: extractLead(s.lines),
+        body: s.lines.slice(1).join("\n").trim(),
+        headings: s.headings,
+        subCount: s.headings.filter((h) => h.level === 3).length,
+      }));
       const headings = secs.flatMap((s) => s.headings);
-      const pre = preamble.join("\n").trim();
-      if (idx === 0 && pre) parts.unshift(pre);
-      return { key: g.key, label: g.label, markdown: parts.join("\n\n"), headings };
+      const intro = idx === 0 ? preamble.join("\n").trim() : "";
+      return { key: g.key, label: g.label, intro: intro || undefined, sections, headings };
     })
-    .filter((sv) => sv.markdown.trim().length > 0);
+    .filter((sv) => sv.sections.length > 0 || (sv.intro?.length ?? 0) > 0);
 
   return { subviews };
 }
