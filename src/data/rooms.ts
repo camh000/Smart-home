@@ -64,6 +64,8 @@ export const ROOMS: Room[] = [
       { cat: "display", label: "Wall tablet — phase 3", detail: "Samsung Tab A8/A9 secondhand, flush-mount, USB through wall. Fully Kiosk Browser. Auto-popup to doorbell camera on ring." },
       { cat: "light", label: "Zigbee lighting", detail: "Under-cabinet, ceiling, possibly accent. Multi-zone." },
       { cat: "blind", label: "Window blind", detail: "Single motor." },
+      { cat: "safety", label: "Natural-gas detector", detail: "Aqara Zigbee gas detector near the hob/boiler feed (local via ZHA/Z2M). Methane leak → Alarmo + Claude: announce, cut gas-appliance plugs, advise ventilation. Complements the BS 5839-6 smoke/CO units." },
+      { cat: "safety", label: "Mains water shut-off + flow meter", detail: "Motorised stopcock on the mains plus a Sonoff Hydro ONE (Zigbee valve with a built-in flow meter). Feeds the Water Monitor integration for dribble / running-toilet / burst detection → auto-shut. Fully local." },
     ],
   },
   {
@@ -93,6 +95,7 @@ export const ROOMS: Room[] = [
       { cat: "lock", label: "Front door lock", detail: "Yale Assure 2 or Aqara U100. Tier-2 (verbal confirm before lock/unlock)." },
       { cat: "display", label: "Wall tablet — phase 4", detail: "Away/home modes, doorbell feed, household status overview." },
       { cat: "light", label: "Lighting", detail: "Hall + stairs." },
+      { cat: "safety", label: "Smoke / heat / CO alarm", detail: "Mains-interlinked Grade D (BS 5839-6) on the ground-floor escape route, read into HA via a relay/contact module. Fire overrides lockdown — unlock exits + light the route." },
     ],
   },
   {
@@ -119,6 +122,7 @@ export const ROOMS: Room[] = [
       { cat: "heat", label: "TRV (Aqara E1)", detail: "Zigbee TRV on radiator. Per-person preferences (Cam vs Nova), sleep-mode drop, wake warm-up." },
       { cat: "display", label: "Wall tablet (optional) — phase 4", detail: "Wake-up dashboard, sleep mode. Optional." },
       { cat: "speaker", label: "WiiM Mini (optional)", detail: "For music. Could start with Voice PE built-in speaker." },
+      { cat: "mmwave", label: "Bedside 60 GHz health radar", detail: "Seeed MR60BHA2 (ESPHome, ~$25): contactless breathing + heart rate + presence at the bedside, fully local (FP2 sleep/HR data is Aqara-cloud-only). Feeds sleep-aware automations — suppress proactive speech, hold heating, dim." },
     ],
   },
   {
@@ -165,6 +169,7 @@ export const ROOMS: Room[] = [
       { cat: "display", label: "Smart mirror — phase 5", detail: "DIY: tablet behind two-way acrylic, runs MagicMirror² or HA dashboard. Easier in a standard bathroom than a wet room — no constant steam risk." },
       { cat: "light", label: "Bathroom lighting + Aqara FP1E", detail: "mmWave presence keeps lights on through shower — mounted on ceiling away from direct spray. Standard bathroom (not wet room) makes this straightforward." },
       { cat: "heat", label: "TRV (Aqara E1)", detail: "Zigbee TRV on towel rail / radiator. Pre-warm scene before shower time." },
+      { cat: "mmwave", label: "Fall-detection radar (ceiling)", detail: "Seeed MR60FDA2 (ESPHome, ~$25): camera-free fall detection where Frigate can't go → Alarmo + a Claude 'are you OK?' check. Separate unit from the FP1E (radar modes are mutually exclusive)." },
     ],
   },
   {
@@ -177,6 +182,7 @@ export const ROOMS: Room[] = [
       { cat: "net", label: "Deco 2", detail: "First-floor mesh node, wired backhaul." },
       { cat: "light", label: "Landing lighting", detail: "Plus Zigbee scene buttons at top of stairs (goodnight / good morning)." },
       { cat: "heat", label: "TRV (Aqara E1)", detail: "Zigbee TRV on landing radiator." },
+      { cat: "safety", label: "Smoke / heat / CO alarm", detail: "First-floor mains-interlinked Grade D unit (BS 5839-6) on the upstairs escape route, read into HA." },
     ],
   },
   {
