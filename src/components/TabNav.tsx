@@ -10,6 +10,7 @@ export interface TabDef {
 }
 
 export const TABS: TabDef[] = [
+  { key: "home", num: "00", label: "Overview" },
   { key: "plan", num: "01", label: "Project Plan" },
   { key: "integration", num: "02", label: "Claude + HA" },
   { key: "behaviours", num: "03", label: "Behaviours" },
