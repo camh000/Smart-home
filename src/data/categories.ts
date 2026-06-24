@@ -10,7 +10,8 @@ export type CategoryKey =
   | "display"
   | "mmwave"
   | "net"
-  | "window";
+  | "window"
+  | "safety";
 
 export interface CategoryMeta {
   key: CategoryKey;
@@ -30,6 +31,7 @@ export const CATEGORIES: CategoryMeta[] = [
   { key: "mmwave", label: "Presence", color: "#8a5a1c" },
   { key: "net", label: "Network", color: "#5a6478" },
   { key: "window", label: "Windows", color: "#2f8a7a" },
+  { key: "safety", label: "Safety", color: "#a83232" },
 ];
 
 export const CATEGORY_MAP: Record<CategoryKey, CategoryMeta> = Object.fromEntries(

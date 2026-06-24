@@ -36,7 +36,7 @@ export const BEHAVIOURS: Behaviour[] = [
     hardware: "Custom Python",
     summary: "Targeted announcements and broadcasts that find the right person in the right room.",
     points: [
-      "“Tell Nova dinner's ready” → Claude finds Nova via phone + mmWave, routes TTS to her nearest Voice PE.",
+      "“Tell Nova dinner's ready” → Claude finds Nova via phone + mmWave + Bermuda BLE room location, routes TTS to her nearest Voice PE.",
       "Falls back to phone push if away. Plays once, repeats louder after 30s, gives up after 2 tries.",
       "“Broadcast: dinner everyone” → all Voice PEs simultaneously, with per-room/time opt-outs.",
       "Reply tracking — monitors the target room's mic and relays the answer back to the sender.",
@@ -119,14 +119,29 @@ export const BEHAVIOURS: Behaviour[] = [
     ],
   },
   {
+    id: "wellness",
+    title: "Sleep, vitals & fall awareness",
+    phase: 4,
+    cost: "~£40",
+    hardware: "60GHz health radar (Seeed)",
+    summary: "Cheap ESPHome 60GHz radar gives the house contactless sleep and safety sense — no wearable, fully local.",
+    points: [
+      "Bedside MR60BHA2 reads breathing + heart rate + presence; once you're asleep, proactive Claude goes quiet, heating holds and lights stay off.",
+      "Wake-up and wind-down tie into Adaptive Lighting and the morning briefing (sleep quality → next-day comfort).",
+      "Ceiling MR60FDA2 in the bathroom/landing detects a fall, camera-free → Alarmo alert + a Claude “are you OK?” check before escalating to a keyholder.",
+      "Sleep stays local — FP2 sleep/HR data is Aqara-cloud-only, so the radar is the privacy-preserving source. iPhone households can add Withings Sleep or Apple Watch → Apple Health.",
+      "Optional behavioural wellness layer: routine-deviation reasoning over existing sensors for aging-in-place — gentle in-home check-in, then a keyholder SMS.",
+    ],
+  },
+  {
     id: "driveway",
     title: "Driveway sensor",
     phase: 3,
     cost: "~£30-40",
-    hardware: "Beam + ALPR (free)",
+    hardware: "Beam + Frigate LPR (free)",
     summary: "Beam catches anything crossing reliably; ALPR adds plate identity.",
     points: [
-      "CodeProject.AI trains on your specific plates (Cam, Nova, family, friends).",
+      "Frigate's native LPR (0.16+) reads plates on-device and learns your specific ones (Cam, Nova, family, friends) — no separate ALPR container.",
       "“Cam's car arrived” → office preheat, welcome lighting, porch + hall warm 40% post-9pm.",
       "Departure → “away” mode auto-engages if no other phones present.",
       "Unknown car → snapshot, alert, higher-rate recording.",
@@ -191,6 +206,7 @@ export const BEHAVIOURS: Behaviour[] = [
       "Anomaly alerts: “boiler usage up 30% vs last week → suggests a service”.",
       "Phantom load detection: “80W idle overnight — something left on?”",
       "On Octopus Agile, auto-scheduling high-load appliances can save £100-300/year.",
+      "EMHASS solves a cost/CO2-optimal schedule for deferrable loads (washer, dishwasher, immersion) off the Octopus integration's tariff feed; Claude explains and overrides it in plain English.",
     ],
   },
   {
@@ -287,6 +303,7 @@ export const BEHAVIOURS: Behaviour[] = [
       "Filters routine, focuses on visitors, deliveries and anything unusual.",
       "Weekly digest (Sunday) sent as an image carousel to phones.",
       "Variations: time-lapses, bird-feeder log, pet movement patterns.",
+      "Captions + event summaries come from Frigate's own GenAI review summaries / LLM Vision (Claude-native), not a bespoke captioner.",
     ],
   },
 ];

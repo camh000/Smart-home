@@ -20,6 +20,7 @@ const GROUP_LABELS: Record<string, string> = {
   blinds: "Blinds",
   voice: "Voice & sensors",
   stark: "Displays & extras",
+  extras2026: "2026 additions",
   windows: "Window motors",
 };
 

@@ -307,6 +307,51 @@ export const CALC_GROUPS: CalcGroup[] = [
     ],
   },
   {
+    key: "extras2026",
+    title: "2026 additions",
+    fields: [
+      {
+        key: "ble-presence",
+        label: "Per-person presence (Bermuda)",
+        sub: "ESP32 BT proxies + BLE beacons; Bermuda is free",
+        options: [
+          { value: 0, label: "Skip" },
+          { value: 40, label: "Beacons + reuse plant proxies (~£40)" },
+          { value: 80, label: "+ extra proxies for coverage (~£80)" },
+        ],
+      },
+      {
+        key: "health-radar",
+        label: "60GHz health radar",
+        sub: "Bedside vitals + a ceiling fall sensor (Seeed)",
+        options: [
+          { value: 0, label: "Skip" },
+          { value: 40, label: "2× kits (~£40)" },
+          { value: 80, label: "4× kits (~£80)" },
+        ],
+      },
+      {
+        key: "safety2026",
+        label: "Gas + water-flow safety",
+        sub: "Aqara gas detector + Sonoff Hydro ONE flow valve",
+        options: [
+          { value: 0, label: "Skip" },
+          { value: 40, label: "Gas detector only (~£40)" },
+          { value: 90, label: "Gas + water-flow valve (~£90)" },
+        ],
+      },
+      {
+        key: "airquality2026",
+        label: "Reference air quality (AirGradient)",
+        options: [
+          { value: 0, label: "Skip" },
+          { value: 150, label: "1× AirGradient ONE (~£150)" },
+          { value: 230, label: "+ outdoor Open Air (~£230)" },
+        ],
+      },
+    ],
+  },
+  {
     key: "windows",
     title: "Optional: Window motors",
     fields: [
@@ -336,6 +381,7 @@ export const PRESETS: Record<string, CalcState> = {
     light: 300, locks: 250, blinds: 450,
     voice: 220, buttons: 0, sensors: 100,
     tablets: 80, "tablet-mounts": 70, mirror: 0, mmwave: 65, energy: 0, garage: 0,
+    "ble-presence": 0, "health-radar": 0, safety2026: 40, airquality2026: 0,
     windows: 200,
   },
   balanced: {
@@ -344,6 +390,7 @@ export const PRESETS: Record<string, CalcState> = {
     light: 500, locks: 590, blinds: 450,
     voice: 275, buttons: 60, sensors: 200,
     tablets: 320, "tablet-mounts": 140, mirror: 150, mmwave: 250, energy: 120, garage: 0,
+    "ble-presence": 40, "health-radar": 40, safety2026: 90, airquality2026: 0,
     windows: 1800,
   },
   generous: {
@@ -352,6 +399,7 @@ export const PRESETS: Record<string, CalcState> = {
     light: 700, locks: 680, blinds: 2800,
     voice: 275, buttons: 120, sensors: 300,
     tablets: 320, "tablet-mounts": 160, mirror: 200, mmwave: 250, energy: 120, garage: 30,
+    "ble-presence": 80, "health-radar": 80, safety2026: 90, airquality2026: 230,
     windows: 2800,
   },
 };
@@ -374,6 +422,7 @@ export function computeTotals(state: CalcState) {
     blinds: v("blinds"),
     voice: v("voice") + v("buttons") + v("sensors"),
     stark: v("tablets") + v("tablet-mounts") + v("mirror") + v("mmwave") + v("energy") + v("garage"),
+    extras2026: v("ble-presence") + v("health-radar") + v("safety2026") + v("airquality2026"),
     windows: v("windows"),
   };
   const grand = Object.values(groups).reduce((a, b) => a + b, 0);
