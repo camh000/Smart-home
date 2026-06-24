@@ -142,7 +142,7 @@ export function Calculator() {
                       <select
                         value={state[f.key] ?? f.options[0].value}
                         onChange={(e) => setField(f.key, Number(e.target.value))}
-                        className="mt-1.5 w-full cursor-pointer rounded-lg border border-line bg-paper px-2.5 py-2 text-[13px] text-ink outline-none transition-colors focus:border-accent"
+                        className="mt-1.5 w-full cursor-pointer rounded-lg border border-line bg-paper px-2.5 py-2 text-[13px] text-ink transition-colors focus:border-accent"
                       >
                         {f.options.map((o) => (
                           <option key={o.value + o.label} value={o.value}>

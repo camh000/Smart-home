@@ -21,6 +21,13 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  // Base for resolving relative OG/canonical URLs. On Vercel this is the
+  // production domain; falls back to localhost in dev so builds don't warn.
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000",
+  ),
   title: "Smart Home — Woodhouse Road",
   description:
     "A bespoke, self-hosted replacement for Alexa — voice control, lighting, locks, blinds and CCTV, with Claude wired into Home Assistant. The full project plan, integration design, floorplan, cost calculator and shopping list.",

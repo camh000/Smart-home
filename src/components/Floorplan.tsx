@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ROOMS, ROOM_MAP, type Room } from "@/data/rooms";
 import { CATEGORIES, CATEGORY_MAP, type CategoryKey } from "@/data/categories";
@@ -34,7 +34,9 @@ function FloorPlan({
         <span className="h-px flex-1 bg-line" />
       </div>
       <div
-        className="relative w-full rounded-[var(--radius-card)] border border-line-strong bg-paper-soft/60"
+        className={`relative w-full rounded-[var(--radius-card)] border border-line-strong bg-paper-soft/60 ${
+          floor === "detached" ? "" : "min-h-[31rem] sm:min-h-0"
+        }`}
         style={{ aspectRatio: floor === "detached" ? "3 / 1" : "7 / 6" }}
       >
         {rooms.map((room) => {
@@ -101,6 +103,22 @@ function FloorPlan({
 export function Floorplan() {
   const [selected, setSelected] = useState<string | null>("lounge");
   const [filter, setFilter] = useState<Filter>("all");
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // On phones the detail panel sits below the plans, so bring it into view when a
+  // room is tapped — otherwise the kit list updates off-screen and the tap reads
+  // as unresponsive. No-op on desktop where the panel is a sticky sidebar.
+  function handleSelect(id: string) {
+    setSelected(id);
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 1023px)").matches
+    ) {
+      requestAnimationFrame(() =>
+        panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    }
+  }
 
   const room = selected ? ROOM_MAP[selected] : null;
   const items = useMemo(() => {
@@ -131,11 +149,11 @@ export function Floorplan() {
         {/* Plans */}
         <div className="space-y-7">
           <div className="grid gap-7 sm:grid-cols-2">
-            <FloorPlan title="Ground floor" floor="ground" selected={selected} filter={filter} onSelect={setSelected} />
-            <FloorPlan title="First floor" floor="first" selected={selected} filter={filter} onSelect={setSelected} />
+            <FloorPlan title="Ground floor" floor="ground" selected={selected} filter={filter} onSelect={handleSelect} />
+            <FloorPlan title="First floor" floor="first" selected={selected} filter={filter} onSelect={handleSelect} />
           </div>
           <div className="relative">
-            <FloorPlan title="Detached garage — fibre link" floor="detached" selected={selected} filter={filter} onSelect={setSelected} />
+            <FloorPlan title="Detached garage — fibre link" floor="detached" selected={selected} filter={filter} onSelect={handleSelect} />
           </div>
           <p className="font-mono text-[11px] leading-relaxed text-muted-light">
             Schematic — not to scale. Front of house faces south. Tap a room to see its
@@ -144,7 +162,7 @@ export function Floorplan() {
         </div>
 
         {/* Detail panel */}
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div ref={panelRef} className="scroll-mt-20 lg:sticky lg:top-28 lg:self-start">
           <div className="min-h-[18rem] rounded-[var(--radius-card)] border border-line bg-surface p-6 shadow-[var(--shadow-soft)]">
             <AnimatePresence mode="wait">
               {room ? (

@@ -48,6 +48,7 @@ export function Toc({
           <li key={h.id} style={{ paddingLeft: h.level === 3 ? 12 : 0 }}>
             <button
               onClick={() => onJump(h.id)}
+              aria-current={isActive ? "true" : undefined}
               className="block w-full truncate border-l-2 py-1 pl-3 text-left text-[12.5px] leading-snug transition-colors"
               style={{
                 borderColor: isActive ? "var(--color-accent)" : "transparent",
