@@ -268,11 +268,13 @@ The most important gap the plan was missing. A JARVIS-grade home that promises t
 - Interlinked smart **smoke + heat + CO** alarms feeding HA — e.g. Zigbee **Frient**/**Heiman**, or mains **Ei Electronics** with a relay/contact module into HA. Keep them functioning as standalone alarms too (HA is a *notifier*, never the only line of defence).
 - **⚠️ Meet building regs with the *primary* alarms — don't let cheap Zigbee units do the life-safety job.** A rewire/renovation triggers UK smoke-alarm regs (**BS 5839-6** — typically **Grade D mains-powered with battery backup, interlinked, at least one per storey + escape routes (LD3/LD2)**; **Scotland is stricter** — interlinked in every living room + hall + a heat alarm in the kitchen). Spec the **mains-interlinked Ei Electronics (or equiv.) as the compliant base layer**, with HA *reading* them via a relay/contact module — the Zigbee units are an *additional* sensing layer, not the legal one. Confirm the install meets your nation's regs with the sparky.
 - Unlocks the real version of Cinema-mode's "except smoke" override, plus per-room alerting, phone push when away, and a spoken Claude warning.
+- **Natural-gas (methane) detection** — the boiler runs on gas, but the plan only senses CO/smoke. Add an **[Aqara Gas Detector](https://www.zigbee2mqtt.io/devices/JT-BZ-01AQ_A.html)** (Zigbee, local via ZHA/Z2M) near the boiler/hob so a methane leak joins Alarmo + the fusion brain (announce, cut gas-appliance smart sockets, advise ventilation). Complements — doesn't replace — the BS 5839-6 smoke/CO units.
 
 **Water leak (protect the build):**
 
 - Zigbee **leak sensors** at the obvious sources: **UFH manifold**, **boiler**, under **kitchen/bathroom sinks**, behind the **washing machine/dishwasher**.
 - Highest-ROI add: a **motorised stopcock** (e.g. Sonoff/Aqara valve or a proper actuator on the mains) so HA can auto-shut the water on a confirmed leak — the single best "catastrophe avoided" device in a smart home.
+- **Whole-home flow analytics (the missing software layer).** Spot sensors + the stopcock catch a *burst*; they miss a slow dribble or a running toilet. Add a whole-home **flow** source — e.g. the **[Sonoff Hydro ONE](https://www.zigbee2mqtt.io/devices/SWV-ZFU.html)** (Zigbee valve *with* a built-in flow meter, local via ZHA/Z2M) — feeding the **[Water Monitor](https://github.com/markaggar/Water-Monitor)** HACS integration, which does continuous-low-flow ("dribble") and tank-refill detection and drives the stopcock to auto-shut. Fully local and UK-usable (unlike the US-only/cloud Phyn and Hydrific). HA 2026.3's Energy dashboard adds a native water Sankey + flow badges on top.
 
 **Cost:** ~£15-25 per Zigbee sensor, ~£60-120 for a motorised stopcock. All on the Zigbee mesh, no new hub. Phase 2 with the rest of the Zigbee fleet (the coordinator must exist first).
 
@@ -391,6 +393,15 @@ Detecting a *person* at night is easy; recognising *who* they are is a different
 3. Mount that front/entry camera at a **face-height approach angle**, not just a high wide shot, if identity matters there.
 
 **Verdict:** person *detection* (and the alarm trigger) work at night everywhere; face *recognition* (identity) is reliable only **close + lit** — the doorbell and a well-lit porch — **not** a distant IR perimeter cam at 2am. Treat night face-ID as a bonus on the perimeter, a dependable feature at the door.
+
+### Frigate 0.16/0.17 — native LPR, semantic search &amp; GenAI triage
+
+Frigate gained a stack of on-device AI in 2025 that **absorbs separate line-items in this plan and adds new powers** — all local, no Frigate+ required:
+
+- **Native [License Plate Recognition](https://docs.frigate.video/configuration/license_plate_recognition/)** (PaddleOCR, on-device) — **drop the separate CodeProject.AI / Plate Recognizer ALPR container.** The plate arrives over Frigate's existing MQTT (known plate → the car's `sub_label`; unknown → `recognized_license_plate`), so the driveway "Cam's car arrived / unknown plate at 11pm" logic maps plate → vehicle → person directly. Keep Plate Recognizer only as an optional high-accuracy fallback for fast/oblique traffic.
+- **[Semantic Search](https://docs.frigate.video/configuration/semantic_search/)** (CLIP embeddings, local on the iGPU) — natural-language search of your *own* footage ("when did you last see the postman?"). A *video* memory alongside the Qdrant *text* RAG; expose it to Claude as a tool.
+- **[GenAI review summaries](https://docs.frigate.video/configuration/genai/genai_review/)** — a vision-LLM summarises a whole alert sequence into structured JSON (`potential_threat_level` 0/1/2, scene narrative, notification text). Upgrades the **photo digest** and feeds a *pre-classified* scene into the alarm's multi-sensor-fusion + Claude false-alarm reasoning. ⚠️ Frigate's GenAI has **no native Anthropic provider** — run it against **local Ollama (qwen3-vl)** for free always-on triage, **or** use the next item for Claude-native analysis.
+- **[LLM Vision (ha-llmvision)](https://github.com/valentinfrlch/ha-llmvision)** (HACS) — sends a clip/snapshot to a multimodal LLM with **native Claude support**, returns a description, and builds a queryable event **Timeline/memory**. The clean way to use **Claude itself** to describe real video (the snapshot-only "photo digest" wants exactly this). Pattern: local qwen3-vl for cheap always-on triage → escalate the interesting clips to Claude via LLM Vision.
 
 ### Storage sizing (Unraid)
 
@@ -694,12 +705,50 @@ Three layers, all complementary:
 
 Combined inference: "Cam's phone says he's home + lounge is occupied + last face-recognised at front door 2 min ago" = strong confidence Cam is in the lounge. That's what enables proactive Claude to route to the right room and address the right person.
 
+### Per-person room location — Bermuda BLE (reuses the Bluetooth proxies)
+
+The FP2/FP1E answer "*someone* is in this zone" — they can't say *who*. **[Bermuda](https://github.com/agittins/bermuda)** (HACS) closes that gap using the **ESP32 Bluetooth proxies already in the plan** (bought for the Mi Flora plant sensors): it reads BLE advertisement strength across the proxy mesh and reports which **room (HA Area)** each tracked phone/watch/tag is in, plus a rough distance. Near-zero new hardware, fully local. It resolves rotating MACs via HA's core **[Private BLE Device](https://www.home-assistant.io/integrations/private_ble_device/)** integration using each device's **IRK**, so it tracks the actual phone, not a churn of random addresses.
+
+- **🍏 iPhone caveat (both phones in this house are iPhones).** iPhones track reliably, but: **(a)** you must extract each phone's **IRK once** — the clean route is the **ESP32 "IRK Capture"** ESPHome package (briefly pair the phone to an ESP32), or pull it from a paired Mac (Apple syncs the IRK via iCloud Keychain); and **(b) iOS forbids background iBeacon advertising**, so there's no Android-style "phone-as-beacon" trick — Bermuda leans on the iPhone's native adverts, which slow in power-save, so expect occasional tens-of-seconds presence lag when a phone's been idle.
+- **🔑 Snappier + object/pet tracking.** Drop a **cheap always-on BLE beacon (~£5-10)** in each everyday bag/pocket (and on keys, and a pet collar): Bermuda tracks dedicated beacons perfectly (they don't power-save), and the same trick gives "where are my keys" at room level (via HA's **iBeacon Tracker**) and **pet-aware false-alarm suppression** for the alarm.
+
+**What it unlocks:** the missing *identity* dimension for proactive Claude — route TTS to the room the right person is actually in, disambiguate "turn off the lights" to the speaker's room, and tag memory per-person — fused with the mmWave occupancy to cut false positives. Deploy alongside the BT proxies / FP2s.
+
+### Contactless vitals &amp; fall detection — 60 GHz health radar
+
+Cheap ESPHome-native 60 GHz radar adds a *health* layer the FP2 can't expose (FP2 sleep/HR data is Aqara-cloud-computed and never reaches HA):
+
+- **[Seeed XIAO MR60BHA2](https://esphome.io/components/seeed_mr60bha2/) (~$25)** — bedside breathing + heart rate + presence, fully local. Gives Claude real sleep context ("breathing steady, asleep → suppress proactive speech, hold heating, dim").
+- **Seeed XIAO MR60FDA2 (~$25)** — ceiling presence + **fall detection**, wired straight into Alarmo and the proactive service. Camera-free, so it covers the bathroom/bedroom where Frigate can't go. (The FP2 also has a ceiling fall-mode, but its Fall/Zone/Sleep modes are mutually exclusive — a fall sensor must be a *separate* dedicated unit.)
+- *Caveats:* the radar module runs closed firmware (you get HR/RR/fall/presence outputs, no raw point-cloud), and vitals are short-range (~1.5 m, i.e. per-bed) — so these complement, not replace, the FP2's multi-zone tracking.
+- *PoE alternative:* **[Everything Presence Pro](https://shop.everythingsmart.io/products/everything-presence-pro)** / Apollo R PRO-1 — ESPHome, PoE, true X/Y multi-target tracking (HLK-LD2450) as a 100%-local FP2 alternative in key rooms.
+
 ### Cost
 
 - 2× FP2 (lounge + master): ~£120-140
 - 1× FP1E (bathroom): ~£40
 - 1× FP1E (office, optional): ~£40
 - **Total: ~£200-220**
+- BLE beacons (optional, for snappier presence / keys / pet): ~£5-10 each
+- 2× Seeed 60 GHz health radar (bedside vitals + a fall sensor): ~£40
+
+## Health, sleep &amp; eldercare
+
+A wellness layer that mostly composes kit already in the plan. (Sleep/fall *sensing* is the 60 GHz radar above; this is the structured-data and reasoning side.)
+
+### Sleep tracking — iPhone-appropriate
+
+Both phones are iPhones, so the Android-only sleep apps (Sleep as Android) don't apply. Three local-first routes, best first:
+
+- **60 GHz bedside radar (Seeed MR60BHA2)** — above; contactless, no wearable, fully local. The primary source.
+- **Withings Sleep Analyzer** — under-mattress, OS-agnostic, native HA integration (late-2025 HRV firmware). Cloud-tied (Withings account) but nothing on the phone — a polished non-wearable option.
+- **Apple Watch → Apple Health → HA** via **Health Auto Export** (if either of you wears a watch to bed) — sleep stages, HRV, resting HR into HA. This replaces the old "Sleep Cycle via HomeKit" note.
+
+Feeds: proactive speech suppression in deep sleep, Adaptive Lighting wind-down/sunrise, and the nightly RAG distillation (sleep quality → next-day comfort).
+
+### Behavioural wellness checks (optional — aging-in-place)
+
+A *reasoning pattern*, not a product: the existing motion/contact/presence sensors + RAG memory + nightly distillation + proactive service become passive aging-in-place monitoring — missed morning routine, no bathroom visit by a usual hour, no movement for N hours, abnormally long bathroom occupancy → graduated escalation (gentle in-home check-in, then a keyholder SMS over the Selby link). Self-hosted and Claude-reasoned rather than a vendor cloud (CarePredict-style). Architecturally almost free; baselines take weeks to learn and thresholds need tuning to avoid alarm fatigue. **Scenario-dependent** — high value only if a relative actually ages in place here. Pairs with the radar fall detection above.
 
 ## Alarm &amp; security
 
@@ -1245,6 +1294,8 @@ Cheap, high-impact on how you feel.
 - **IKEA Vindstyrka** (~£40) — temp, humidity, PM2.5, VOC, CO2-eq. Zigbee, built-in display.
 - **Aqara TVOC sensor** (~£35) — temp, humidity, TVOC. Zigbee.
 - **Airthings View Plus** (~£250) — proper CO2 + radon + PM2.5 + VOC. Premium pick for master bedroom only.
+- **[AirGradient ONE](https://www.airgradient.com/) + Open Air** (Works-With-HA certified, open-hardware) — reference-grade PM2.5, true NDIR CO2 and NOx, and crucially an **outdoor** unit too, so Claude can reason on the indoor-vs-outdoor delta ("outdoor air's better — open the windows?"). Fits the DIY/local-first ethos better than the closed Airthings.
+- **Formaldehyde:** if you want it quantified (new furniture/flooring off-gassing), a **Sensirion SEN68** via ESPHome adds true HCHO on the existing ESP32 pattern.
 
 **Deployment:** one per main room — lounge, bedrooms, kitchen, conservatory, optional office.
 
@@ -1266,7 +1317,7 @@ Two approaches, ideally combined.
 
 **ALPR (license plate recognition):**
 
-- **CodeProject.AI** (free, Docker on Unraid CPU) or **Plate Recognizer** (cloud, free tier usually enough)
+- **Frigate native LPR** (on-device, 0.16+ — see CCTV → "Frigate 0.16/0.17" above) is now the primary path, no separate container. **CodeProject.AI** or **Plate Recognizer** (cloud) stay as optional higher-accuracy fallbacks
 - Trains on your specific plates (Cam, Nova, family, friends)
 - Triggers: "Cam's car arrived", "Nova just left", "unknown plate at 11pm — recording"
 
@@ -1322,6 +1373,11 @@ Cost:
 - Combined: ~£350-500
 
 Phase 6 (indoor); phase 7 (outdoor, if installed).
+
+### Robots — local-first vacuum &amp; wire-free mower
+
+- **Vacuum → [Valetudo](https://valetudo.cloud/pages/general/buying-supported-robots/).** The phase-6 "robot vacuum" should be a **rooted, cloud-free** one: Valetudo firmware runs the robot entirely on the LAN with per-room MQTT entities Claude can target and brush/filter wear sensors for proactive maintenance. **Catch:** pick a still-rootable model **before buying** (Dreame is best-supported; Roborock is locking down) — rooting voids warranty. Because vacuum rooms map to the same HA Areas as presence/lighting, Claude can issue room-scoped cleans through its existing area model.
+- **Lawn → wire-free RTK mower.** A genuinely new 2024-26 category: boundary-wire-free mowers navigating by RTK GNSS + vision, with HA integrations — **[Mammotion](https://github.com/mikey0000/Mammotion-HA)** (Luba/Yuka) and **[Segway Navimow](https://github.com/segwaynavimow/NavimowHA)** (official integration). Claude schedules mowing against weather, soil moisture and Agile/quiet-hours, and warns on RTK dropouts. Cloud-account-backed today (local on the roadmap), so usable-now but not yet fully local-first.
 
 ### Guest mode
 
@@ -1400,6 +1456,16 @@ If on Octopus Agile, this combo can save £100-300/year by auto-scheduling high-
 
 Cost: **£0** software (Shelly EM already in plan, APIs free). Phase 5.
 
+### Energy optimization engine — EMHASS + the Octopus integration
+
+The dashboards above *inform*; this *optimises*. The plan currently load-shifts by hand — replace that with a real engine.
+
+- **[EMHASS](https://emhass.readthedocs.io/)** (Energy Management for HA) — a self-hosted solver (LP/MPC, CVXPY+HiGHS since v0.17) that produces cost/CO2-optimal schedules for deferrable loads, battery and PV export given the half-hourly tariff + a forecast. Useful on **Agile today** for the dishwasher/washer/immersion; the battery/PV/EV modules light up once the first-fixed **solar + battery + EV** land. Its v0.17.3 constant-efficiency thermal mode even maps onto the **gas/OpenTherm** flow-temp modulation, so the predictive-preheat idea is captured locally — no need for a heat-pump-specific controller like Homely. **Claude is the natural-language explainer/override on top** — it does the words, EMHASS does the numbers.
+- **[BottlecapDave "Home Assistant Octopus Energy"](https://bottlecapdave.github.io/HomeAssistant-OctopusEnergy/)** (HACS) — the de-facto integration, well beyond the raw Agile endpoint: **saving-session** + **free-electricity** calendar entities (Octoplus), intelligent-dispatch sensors, and **target-rate "cheapest N-hour window"** sensors. The clean primitive layer under EMHASS *and* the proactive service — saving sessions / free hours are exactly the irregular, opportunistic triggers where Claude reasoning adds value.
+- **Later:** **PredBat** (battery charge/discharge optimiser) and **Solcast** PV forecast become relevant with the battery/solar; the **Octopus Home Mini** adds near-real-time meter-side import/export. **Procurement rule** for the EV/solar phase: prefer **Matter-energy device types** (EVSE/battery with local state-of-charge + setpoint) over cloud-only kit.
+
+Cost: **£0** software (runs on Unraid). Phase 5 for deferrable-load optimisation; battery/PV modules with the solar phase.
+
 ### Calendar-driven anticipation
 
 Google Calendar integration (built into HA, free).
@@ -1437,7 +1503,7 @@ Cost: **£0**. Phase 5 with proactive Claude service.
 
 ### Photo digest
 
-Daily/weekly summary of "what happened around the house" using Frigate snapshots + face recognition.
+Daily/weekly summary of "what happened around the house" using Frigate snapshots + face recognition. (Frigate's own **GenAI review summaries** and **LLM Vision** — see CCTV → "Frigate 0.16/0.17" — now generate the captions and structured event text natively, rather than a bespoke captioner.)
 
 **Daily digest (delivered evenings):**
 
@@ -1743,7 +1809,7 @@ Fill in every remaining room so coverage is complete.
 - **Scene buttons** on landing + bedside
 - Motion / contact / presence sensors
 - **Remaining wall tablets** (lounge, hall, master bedroom)
-- **Second FP2** (master bedroom), FP1E (bathroom), optional FP1E (office)
+- **Second FP2** (master bedroom), FP1E (bathroom), optional FP1E (office); **ESP32 Bluetooth proxies + Bermuda** for per-person room presence; bedside **60 GHz health radar** (sleep/vitals + a ceiling fall sensor)
 - Remaining Zigbee lighting across the house
 
 ### Phase 5 — Automation brain, comfort & resilience
@@ -1755,7 +1821,7 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - **PC integration** — HASS.Agent on the gaming PC, pinned browser dashboard, optional custom Tauri overlay app
 - **Desk setup** — 34" ultrawide + dual-head KVM; game streaming office → lounge (Sunshine/Moonlight to the docked Steam Deck)
 - **Focus mode** — NFC focus-dock + green→red accountability LED
-- **Energy monitoring** via Shelly EM on the consumer unit
+- **Energy monitoring** via Shelly EM on the consumer unit; **EMHASS** optimiser + the **BottlecapDave Octopus** integration for tariff-aware load-shifting
 - **UFH zone control** — Shelly relays on lounge + dining actuators, Aqara temp sensors, HA Generic Thermostats configured
 - **Air quality** — CO2/VOC sensors (feeds night-purge ventilation + comfort)
 - **Smart mirror** in bathroom (DIY) + scene buttons next to it and around the house
@@ -1834,6 +1900,20 @@ The custom software brain, plus the comfort and resilience layers that build on 
 - [ ] Boiler model confirmed with OpenTherm support — Vaillant ecoTEC plus / Worcester Greenstar / Ideal Vogue / Viessmann Vitodens
 - [ ] UFH manifold spec — confirm 2 separate zones (lounge + dining) at install
 - [ ] Conservatory heating — included in UFH (third zone), separate rad, or electric panel?
+
+## Considered &amp; rejected (2026 cutting-edge review)
+
+A mid-2026 sweep of current smart-home tech against this plan. The genuinely-new, high-value findings were folded into the sections above; these were checked and **deliberately left out** — recorded with the reasoning so they're not re-litigated:
+
+- **Z-Wave Long Range** — ⚠️ *correction to a common belief:* ZWLR is **no longer EU/UK-illegal** (an EU_LR spec landed; EU-certified devices have shipped since April 2025). Still rejected here — the house has **no Z-Wave** (it's Zigbee/Thread/Matter), and outbuildings are better served by the Thread mesh, the ESP32 BLE proxies or wired runs than by adding a whole new radio.
+- **Matter cameras / video doorbells (Matter 1.5)** — real and shipping (SmartThings first; Aqara/Eve cameras due ~early 2026), but a **downgrade vs Frigate** — Matter cameras carry no local object/face AI and no NVR. Frigate stays the vision brain.
+- **Matter 1.6 Joint Fabric + NFC commissioning** — track only. The spec is real (announced Jun 2026) but its predecessor (Fabric Sync) went 18+ months with nothing implementing it, and the benefit is for **mixed Apple+Google+Alexa** homes — this house deliberately centralises on HA.
+- **Homely heat-pump controller** — wrong fit: an installer-fitted, heat-pump-specific box, where the plan deliberately chose a **gas combi with HA as the thermostat**. The transferable idea (predictive, heat-loss-aware pre-heating into cheap slots) is captured locally by **EMHASS's thermal mode** instead.
+- **Phyn Plus / Hydrific Droplet (US water monitors)** — US-only and/or cloud-tethered (Hydrific explicitly "cannot work in Europe even for Home Assistant"; Phyn's HA integrations are cloud-push). The local **Sonoff Hydro ONE + Water Monitor** path above replaces them; for freeze protection use a DS18B20 / Aqara temp probe + HA automation.
+- **Sleepal AI Lamp / Ultrahuman Home (CES 2026 bedside AI)** — not yet shippable / no proven *local* HA feed. The Seeed 60 GHz radar + the sleep-tracking options above already cover contactless sleep/vitals.
+- **FunctionGemma 270M (tiny tool-calling model)** — real, but ships as a *base to be fine-tuned* with no turnkey HA integration; the **Qwen3 local-LLM fallback** already covers the offline-brain need without the fine-tuning effort.
+
+**Parked as watch-list (real but low-value/emerging today):** UWB centimetre positioning (no turnkey HA product yet — Bermuda BLE covers the realistic use cases), low-power e-ink HA dashboards, smart-ring / AR-glasses controllers, and the Matter 1.5 Closures framework. Revisit at the next review.
 
 ## Cost ballpark (very rough, UK, phase 1 only)
 

@@ -20,6 +20,14 @@ The home's voice assistant is built on Home Assistant (HA) as the orchestrator, 
 
 **Voice PE alternatives worth noting:** if the Voice PE underperforms (some users report it as a bit slow or short on far-field mic range), the M5Stack Atom Echo and ESP32-S3-BOX are well-supported by HA's Wyoming protocol and cheaper. The Voice PE remains the path of least resistance for phase 1.
 
+**Local voice stack — 2025-2026 upgrades over Whisper-base + Piper.** The table above is the starting point; these are the current best-in-class local components, all Wyoming-compatible on the Unraid box:
+
+- **STT, fast control path — [Speech-to-Phrase](https://www.home-assistant.io/blog/2025/02/13/voice-chapter-9-speech-to-phrase/)** (HA 2025.3; fuzzy matcher 2025.9). A close-vocab recogniser compiled from our *own* entity/area names → sub-1s and near-perfect on room/device names (the exact failure mode flagged below: "a small quantised model fumbles names"). It's the STT-side partner to the local-intent fast path; it falls through to a full STT only for open-ended queries.
+- **STT, conversational path — [Parakeet-TDT-0.6B-v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)** via Wyoming (Aug 2025). Beats whisper-large on accuracy at ~2.5 GB RAM, ~0.26 s on CPU — a drop-in `faster-whisper` replacement for the Claude-bound transcripts, so fewer misfires.
+- **TTS — [Kokoro-82M](https://github.com/nordwestt/kokoro-wyoming)** via Wyoming. Best-in-class lightweight local TTS, real-time on CPU, ships a "Jarvis"-ish voice. Becomes the everyday voice in place of Piper and demotes paid ElevenLabs to truly-premium moments. (Honest: "natural local voice" yes; "beats ElevenLabs" overstated.)
+- **Wake + streaming — microWakeWord v2** on-device on the satellites (offloads always-on listening from Unraid), and **[Voice Chapter 11](https://www.home-assistant.io/blog/2025/10/22/voice-chapter-11/)** chunked streaming TTS (the satellite starts speaking ~0.5 s after Claude emits its first tokens) + two-pipelines-per-satellite (one wake word → instant local control, a second → the full Claude pipeline).
+- **Consolidation — Speaches** (OpenAI-compatible) can host STT + TTS in one container on Unraid, reused by the proactive / RAG Python services for ad-hoc transcription/synthesis.
+
 ## Conversation flow
 
 ```
@@ -47,6 +55,22 @@ Two-model approach to balance speed and capability:
 
 HA supports multiple agents per pipeline, so routing between them is feasible.
 
+## Native HA AI primitives (2025-2026) — prefer these before hand-rolling
+
+This design predates a wave of native LLM features Home Assistant shipped through 2025-2026. Several pieces below were originally specced as custom Python; where a native primitive now exists, use it — less code to own, and it rides HA's auth/exposure model for free. The custom FastAPI service (next section) then shrinks to just the genuinely proactive/streaming logic these don't cover.
+
+| Primitive | Since | What it gives | Use here for |
+|---|---|---|---|
+| **[MCP Server](https://www.home-assistant.io/integrations/mcp_server/)** | HA 2025.2 | Exposes the Assist API over Model Context Protocol (Streamable HTTP, OAuth / long-lived token). An **external** Claude (Claude Desktop, **Claude Code**, the Agent SDK) reads live home state and calls HA tools, bounded by the exposed-entity permissions. | A governed, standard way to let a more capable external Claude *drive* the house, instead of bespoke websocket/REST glue. Gate behind the VLAN + token hygiene already in the plan. |
+| **[AI Task](https://www.home-assistant.io/integrations/ai_task/)** (`ai_task.generate_data`) | 2025.8 | One-shot LLM call **inside an automation/script**, returns into a response variable, takes a **JSON schema** (schema-valid structured output) + image/PDF attachments. Routes to the existing Anthropic integration (still Haiku/Sonnet). | The bespoke "ask Claude about this event" path for *structured* tasks — e.g. classify a Frigate snapshot into `{threat_level, known_person, action}` with guaranteed JSON. |
+| **[start_conversation](https://www.home-assistant.io/blog/2025/06/25/voice-chapter-10/)** + continued conversation | 2025.7 (Voice Ch.10) | A satellite (our Voice PE) **initiates** a spoken two-way LLM conversation from an automation; multi-turn continues without re-waking. Native "critical confirmations" (spoken confirm before a protected action) are in development. | The proactive service should *call* these rather than reimplement turn-taking / barge-in / one-shot TTS. The critical-confirm work dovetails with the Tier-2 lock gate. |
+| **Anthropic integration options** | through HA 2026.4 | Config-only toggles on the integration we already run: **prompt caching** (System or Full), **tool-search**, **extended-thinking effort**, server-side **web search / fetch**, code execution, structured outputs, PDF/vision attachments. | **Prompt caching** cuts the cost of our long system prompt + RAG context on *every* turn; **tool-search** keeps context lean once many entities/MCP tools are exposed; **thinking effort** gives controllable depth for security / false-alarm reasoning. |
+| **[MCP Client](https://www.home-assistant.io/integrations/mcp/)** / custom `llm.Tool` | HA 2025.2 | The *in-HA* Claude agent consumes external MCP servers (SSE), or you register native `llm.Tool`s. | Surface our **own** subsystems — Qdrant memory, Grocy, energy/carbon APIs — to Claude as standard tools instead of side-channel glue. `llm.Tool` is the lower-latency in-process route; MCP is the out-of-process one. |
+
+**Net effect on the architecture:** the "custom Python wrapper" is no longer the default first move. Reactive control + structured one-shot reasoning + proactive *speech* are now native; the FastAPI service is reserved for event subscription, cross-signal fusion, streaming, and the routing / quiet-hours / throttling policy it already owns.
+
+**Maintenance angle (off-runtime, not part of the live loop):** Claude Code is a good fit for *maintaining* this large automation / RAG / proactive codebase (dependency graphing, dead-entity detection, refactor-with-context) — point it at a git checkout or the standby Pi, never write-access to the live box.
+
 ## Reactive vs proactive — two modes
 
 The setup runs in two complementary modes:
@@ -55,6 +79,8 @@ The setup runs in two complementary modes:
 - **Proactive** (phase 5+) — Claude initiates. Volunteers info, warns about anomalies, addresses people by name. Built on a custom Python service running on Unraid because HA's built-in integration is reactive-only.
 
 ## Proactive Claude — custom service architecture
+
+> **Use the native primitives where they fit (see "Native HA AI primitives" above).** Proactive *speech* is now native via `start_conversation` + continued conversation, and one-shot structured reasoning via `ai_task.generate_data`. So this service no longer reimplements turn-taking or TTS — it owns event subscription, cross-signal fusion, streaming, and the routing / quiet-hours / throttling policy, and *calls* the native actions to actually speak.
 
 A small Python service subscribes to HA events and decides when Claude should speak unprompted.
 
@@ -293,6 +319,7 @@ Use **friendly names** in HA — Claude works much better with `kitchen_ceiling_
 - [x] ~~Multi-step / clarification turns~~ → **resolved naturally by the RAG memory layer** ("set a timer" → "for how long?" — the memory wrapper holds the open intent across turns). **🔁 Dependency-loop caveat:** don't make *safety-critical* multi-turn confirmation depend on the full Qdrant/Python RAG stack — if that service is down, "yes" loses its antecedent and either fails or (worse) attaches to the wrong intent. Hold the **short-term conversational buffer in HA itself** (a lightweight last-N-turns store), so "shall I unlock the front door?" / "yes" still resolves correctly during a memory-service outage. RAG is for *long-term* recall; the open-intent buffer that gates Tier-2 actions must survive without it.
 - [ ] Per-user voice ID — relevant for per-person responses without phone proximity. Picovoice Eagle, ~£100/year. Worth phase 5 not phase 6 given two cohabitants want personalised behaviour
 - [x] ~~Fallback when Claude API is slow/down~~ → **resolved: Phase-1 deliverable** (see plan → Resilience → Graceful degradation). Timeout → HA's built-in local intents; the fallback must cover **lights, goodnight, and a confirmed unlock** at minimum, and explicitly decide whether the local path is allowed to perform Tier-2 actions or defers to the physical key.
+- [x] ~~Offline brain beyond keyword intents~~ → **add a local-LLM fallback tier.** Beyond HA's built-in intents, run a small tool-calling model (**Qwen3-4B-Instruct-2507** on an 8 GB card, or the MoE **Qwen3-30B-A3B-Instruct-2507** on a 24 GB GPU) via HA's native **[Ollama integration](https://www.home-assistant.io/integrations/ollama/)** with Assist control, set per-pipeline as the fallback when the Anthropic API / internet is down. Use the non-thinking `-Instruct-2507` variants (reasoning modes are too slow/verbose for voice) and keep exposed entities modest (HA recommends <~25 for reliable control). Tiering becomes: **local fast-path** (Speech-to-Phrase / intents) → **local Qwen3 agent** (offline) → **Claude cloud** (smart). Reuses the existing Unraid Ollama host; hardens the cloud-reasoning single point of failure.
 - [ ] Rate limit handling for the proactive service — bounded queue, throttle classes per trigger type, drop trivia first
 
 ## Memory architecture (RAG + structured)
@@ -300,6 +327,8 @@ Use **friendly names** in HA — Claude works much better with `kitchen_ceiling_
 The conversational buffer above is the floor — useful for "yes do that" but won't carry context across days or remember anything we said last winter. Properly long-term memory needs a real retrieval layer.
 
 **Pure RAG is the wrong default.** Similarity search for structured facts ("lounge default is 21°C") will sometimes drift through paraphrasing and is always slower than a direct lookup. The right architecture is **hybrid** — structured store + vector store, queried in parallel.
+
+**Video memory is a separate store.** The text RAG here won't remember what the cameras *saw*. **[Frigate Semantic Search](https://docs.frigate.video/configuration/semantic_search/)** (0.16/0.17) embeds every tracked-object thumbnail (Jina CLIP, local on the iGPU) into Frigate's own vector store, searchable in natural language — expose it to Claude as a tool so "when did you last see the postman?" is grounded in real footage. Frigate's **GenAI review summaries** (see plan → CCTV → Frigate native AI) emit structured event text that *can* also be embedded into Qdrant, tying the two memories together.
 
 ### Components
 
