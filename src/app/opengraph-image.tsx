@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { ROOMS } from "@/data/rooms";
+import { SHOPPING } from "@/data/shopping";
 
 // Branded share card shown when the URL is pasted into iMessage / WhatsApp /
 // Slack / email. Next auto-wires this into og:image (and twitter:image).
@@ -6,11 +8,16 @@ export const alt = "Smart Home — Woodhouse Road";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Computed from live data so the share card never drifts out of date.
+const voiceRooms = ROOMS.filter((r) => r.items.some((it) => it.cat === "voice")).length;
+const catCount = (key: string) =>
+  ROOMS.reduce((n, r) => n + r.items.filter((it) => it.cat === key).length, 0);
+
 const STATS: [string, string][] = [
-  ["7", "voice rooms"],
-  ["13", "light zones"],
-  ["3", "smart locks"],
-  ["5", "build phases"],
+  [String(voiceRooms), "voice rooms"],
+  [String(catCount("light")), "light zones"],
+  [String(catCount("lock")), "smart locks"],
+  [String(SHOPPING.length), "build phases"],
 ];
 
 export default function Image() {
