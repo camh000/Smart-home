@@ -9,6 +9,8 @@ export interface ShopItem {
   /** Curated Amazon UK search query. A link only shows if `url` or `search` is set
    *  — generic bundles, secondhand finds and free/config items get no link. */
   search?: string;
+  /** Already owned/bought — counts as money already spent, not "to buy". */
+  owned?: boolean;
 }
 export interface ShopPhase {
   id: string;
@@ -136,7 +138,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "b29n", name: "Custom Tauri desktop overlay app (optional)", meta: "~1-2 weekends dev. Doorbell pop-up, urgent Claude messages.", cost: 0, costLabel: "code only" },
       { id: "b29x", name: "34\" ultrawide monitor (3440×1440, 144Hz)", meta: "Office second screen. USB-C input + built-in KVM is a bonus. LG 34GP/34GS, Dell, Gigabyte M34WQ, MSI.", cost: 450, costLabel: "~£350-550", search: "34 inch ultrawide monitor 3440x1440 144Hz" },
       { id: "b29y", name: "Basic dual-head KVM (DP 1.4 + USB-C)", meta: "Manual switch between work laptop & gaming PC (no HA control — chosen). DP1.4 for 3440×1440@144Hz; USB-C input avoids DisplayLink. Confirm the laptop can drive 2 displays natively first.", cost: 180, costLabel: "~£120-250", search: "dual monitor KVM switch DisplayPort 1.4" },
-      { id: "b29z", name: "Steam Deck dock — JSAUX (owned)", meta: "Already owned — has Ethernet. Wire it to a lounge Cat6 drop, same VLAN as the gaming PC.", cost: 0, costLabel: "owned" },
+      { id: "b29z", name: "Steam Deck dock — JSAUX (owned)", meta: "Already owned — has Ethernet. Wire it to a lounge Cat6 drop, same VLAN as the gaming PC.", cost: 0, costLabel: "owned", owned: true },
       { id: "b29z1", name: "Sunshine + Moonlight (game streaming)", meta: "Host on the gaming PC + client on the Steam Deck. Free, open-source.", cost: 0, costLabel: "free" },
       { id: "b29w", name: "Focus mode — NFC tag + desk LED", meta: "Phone-mindfulness: NFC focus-dock + green→red accountability LED. Fixed 9–5:30 schedule, no work-laptop software needed.", cost: 15, costLabel: "~£12-17", search: "NFC tags NTAG215" },
       { id: "b29f", name: "Shelly EM + CT clamps (consumer unit)", meta: "Sparky install recommended", cost: 120, costLabel: "~£120", search: "Shelly EM" },
@@ -164,7 +166,7 @@ export const SHOPPING: ShopPhase[] = [
     id: "6",
     title: "Phase 6 — Extras & signature behaviours",
     items: [
-      { id: "b30", name: "Meross Matter plugs", meta: "Already owned — deploy as needed (lamp ✓, washer, immersion, bedroom)", cost: 0, costLabel: "owned" },
+      { id: "b30", name: "Meross Matter plugs", meta: "Already owned (£50 spent) — deploy as needed (lamp ✓, washer, immersion, bedroom)", cost: 50, costLabel: "owned · £50", owned: true },
       { id: "b31", name: "Additional Meross Matter plugs (4-pack)", meta: "Kettle, coffee, TV stack, more lamps", cost: 40, costLabel: "~£40", search: "Meross Matter smart plug 4 pack" },
       { id: "b31a", name: "Safety smart plugs — straighteners, iron, etc.", meta: "Aqara Zigbee or more Meross, ~3-4 units", cost: 60, costLabel: "~£60", search: "Aqara smart plug" },
       { id: "b40", name: "Grocy install (Docker on Unraid)", meta: "Fridge inventory + meal planning", cost: 0, costLabel: "free" },

@@ -39,6 +39,11 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
     (sum, p) => sum + p.items.reduce((a, it) => a + it.cost, 0),
     0,
   );
+  // Money already spent on owned/bought kit (data-known; checkbox spend is client-only).
+  const ownedSpent = SHOPPING.reduce(
+    (sum, p) => sum + p.items.reduce((a, it) => a + (it.owned ? it.cost : 0), 0),
+    0,
+  );
   const phases = SHOPPING.map((p) => ({
     ...phaseParts(p.title),
     total: p.items.reduce((a, it) => a + it.cost, 0),
@@ -116,7 +121,7 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="font-display text-xl font-medium tracking-tight text-ink">Live today</h2>
             <span className="font-mono text-[11px] text-muted">
-              {doneCount} / {FOUNDATIONS.length} foundations · £0 spent
+              {doneCount} / {FOUNDATIONS.length} foundations · £{ownedSpent.toLocaleString("en-GB")} spent so far
             </span>
           </div>
           <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-line">

@@ -51,7 +51,7 @@ export function ShoppingList() {
     SHOPPING.forEach((p) =>
       p.items.forEach((it) => {
         total++;
-        if (bought[it.id]) {
+        if (bought[it.id] || it.owned) {
           done++;
           spent += it.cost;
         } else {
@@ -74,7 +74,7 @@ export function ShoppingList() {
       <div className="space-y-8">
         {SHOPPING.map((phase) => {
           const phaseSpent = phase.items.reduce(
-            (a, it) => a + (bought[it.id] ? it.cost : 0),
+            (a, it) => a + (bought[it.id] || it.owned ? it.cost : 0),
             0,
           );
           const phaseTotal = phase.items.reduce((a, it) => a + it.cost, 0);
@@ -93,8 +93,9 @@ export function ShoppingList() {
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {phase.items.map((it) => {
-                  const isOn = !!bought[it.id];
-                  const buy = buyUrl(it);
+                  const owned = !!it.owned;
+                  const isOn = owned || !!bought[it.id];
+                  const buy = owned ? null : buyUrl(it);
                   return (
                     <motion.div
                       key={it.id}
@@ -106,8 +107,8 @@ export function ShoppingList() {
                       }}
                     >
                       <button
-                        onClick={() => toggle(it.id)}
-                        className="flex min-w-0 flex-1 items-start gap-3 text-left"
+                        onClick={() => { if (!owned) toggle(it.id); }}
+                        className={`flex min-w-0 flex-1 items-start gap-3 text-left${owned ? " cursor-default" : ""}`}
                       >
                         <span
                           className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors"
