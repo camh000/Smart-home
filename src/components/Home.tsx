@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { motion } from "motion/react";
 import { SHOPPING } from "@/data/shopping";
 import { ROOMS } from "@/data/rooms";
+import { CATEGORIES } from "@/data/categories";
 import { BEHAVIOURS } from "@/data/behaviours";
 import { AnimatedNumber } from "./AnimatedNumber";
 
@@ -49,6 +50,17 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
     { value: BEHAVIOURS.length, label: "signature behaviours" },
   ];
 
+  // House-wide kit tally, computed from the floorplan so it stays correct.
+  const kit = CATEGORIES.map((c) => ({
+    key: c.key,
+    label: c.label,
+    color: c.color,
+    count: ROOMS.reduce(
+      (n, r) => n + r.items.filter((it) => it.cat === c.key).length,
+      0,
+    ),
+  })).filter((c) => c.count > 0);
+
   return (
     <div className="pt-2">
       {/* At a glance */}
@@ -74,8 +86,41 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
         ))}
       </motion.div>
 
-      {/* Build phases timeline */}
+      {/* Kit by the numbers */}
       <motion.section custom={1} variants={reveal} initial="hidden" animate="visible" className="mt-10">
+        <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
+          <h2 className="font-display text-xl font-medium tracking-tight text-ink">Kit by the numbers</h2>
+          <button
+            onClick={() => onNavigate("floorplan")}
+            className="font-mono text-[11px] text-accent transition-colors hover:text-accent-soft"
+          >
+            floorplan →
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+          {kit.map((k, i) => (
+            <motion.button
+              key={k.key}
+              custom={i}
+              variants={reveal}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+              onClick={() => onNavigate("floorplan")}
+              className="flex items-center gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4 text-left shadow-[var(--shadow-soft)] transition-colors hover:border-line-strong"
+            >
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: k.color }} />
+              <span className="min-w-0">
+                <span className="block font-display text-2xl font-medium tracking-tight text-ink">{k.count}</span>
+                <span className="block truncate font-mono text-[10.5px] uppercase tracking-wide text-muted">{k.label}</span>
+              </span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* Build phases timeline */}
+      <motion.section custom={2} variants={reveal} initial="hidden" animate="visible" className="mt-10">
         <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
           <h2 className="font-display text-xl font-medium tracking-tight text-ink">Build phases</h2>
           <button
