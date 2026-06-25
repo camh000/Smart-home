@@ -35,8 +35,10 @@ function phaseParts(title: string): { num: string; label: string } {
 }
 
 export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
+  // Committed total excludes optional / "when-installed" items — they only land
+  // in Spent if actually bought, never in the committed budget.
   const totalCost = SHOPPING.reduce(
-    (sum, p) => sum + p.items.reduce((a, it) => a + it.cost, 0),
+    (sum, p) => sum + p.items.reduce((a, it) => a + (it.optional ? 0 : it.cost), 0),
     0,
   );
   // Money already spent on owned/bought kit (data-known; checkbox spend is client-only).
@@ -46,7 +48,10 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
   );
   const phases = SHOPPING.map((p) => ({
     ...phaseParts(p.title),
+    // Full phase cost (for the timeline cards).
     total: p.items.reduce((a, it) => a + it.cost, 0),
+    // Committed cost (excludes optional) — for the budget bar.
+    committed: p.items.reduce((a, it) => a + (it.optional ? 0 : it.cost), 0),
   }));
 
   const stats: { value: ReactNode; label: string }[] = [
@@ -74,7 +79,7 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
   // Budget split by phase (proportional segments).
   const PHASE_COLORS = ["#b8543a", "#c98a2b", "#466b3f", "#3f6b6b", "#4a6b8a", "#7a4a8a", "#a83232", "#5a6478"];
   const budgetSegments = phases
-    .map((p, i) => ({ num: p.num, total: p.total, color: PHASE_COLORS[i % PHASE_COLORS.length] }))
+    .map((p, i) => ({ num: p.num, total: p.committed, color: PHASE_COLORS[i % PHASE_COLORS.length] }))
     .filter((s) => s.total > 0)
     .map((s) => ({ ...s, pct: (s.total / totalCost) * 100 }));
 

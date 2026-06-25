@@ -54,7 +54,7 @@ export function ShoppingList() {
         if (bought[it.id] || it.owned) {
           done++;
           spent += it.cost;
-        } else {
+        } else if (!it.optional) {
           remaining += it.cost;
         }
       }),

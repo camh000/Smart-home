@@ -11,6 +11,9 @@ export interface ShopItem {
   search?: string;
   /** Already owned/bought — counts as money already spent, not "to buy". */
   owned?: boolean;
+  /** Optional / "when-installed" — counts as Spent if bought, but never toward
+   *  the committed total or Remaining. */
+  optional?: boolean;
 }
 export interface ShopPhase {
   id: string;
@@ -26,7 +29,7 @@ export const SHOPPING: ShopPhase[] = [
       { id: "bp0a", name: "HA Voice PE — testbed", meta: "Living room of current home. Travels to Woodhouse Phase 1.", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
       { id: "bp0b", name: "Sonoff ZBDongle-E", meta: "Start the Zigbee mesh now. Travels to Woodhouse Phase 1.", cost: 25, costLabel: "~£25", url: "https://thepihut.com/search?q=sonoff+zbdongle-e" },
       { id: "bp0c", name: "2× Innr Zigbee bulbs", meta: "For testbed. Migrate to Woodhouse with everything else.", cost: 30, costLabel: "~£30", search: "Innr smart bulb Zigbee E27" },
-      { id: "bp0d", name: "Anthropic API credit", meta: "First month at testbed scale", cost: 10, costLabel: "~£5-10" },
+      { id: "bp0d", name: "Anthropic API credit", meta: "£10 credit added to the console account ✓ — first month at testbed scale.", cost: 10, costLabel: "owned · £10", owned: true },
       { id: "bp0f", name: "3D printer (Bambu Lab A1 Mini)", meta: "Prints the bespoke mounts + DIY-board enclosures across the build. Appliance-tier, near-zero tuning.", cost: 230, costLabel: "~£200-250", search: "Bambu Lab A1 Mini" },
       { id: "bp0g", name: "Filament — PETG + ASA", meta: "PETG for heat/radiator-adjacent parts; ASA for outdoor/sunny camera mounts (PLA sags). A few kg.", cost: 40, costLabel: "~£40", search: "PETG filament 1.75mm" },
       { id: "bp0e", name: "(optional) 2nd HA Voice PE", meta: "For multi-room handoff testing. Skip if budget tight.", cost: 55, costLabel: "~£55", url: "https://thepihut.com/search?q=home+assistant+voice+preview" },
@@ -195,10 +198,10 @@ export const SHOPPING: ShopPhase[] = [
     id: "7",
     title: "Phase 7 — Optional / when-installed",
     items: [
-      { id: "b50", name: "OpenSprinkler (outdoor irrigation)", meta: "Only if irrigation installed. Buy direct (ships to UK) — patchy on Amazon UK.", cost: 150, costLabel: "~£150", url: "https://opensprinkler.com/" },
-      { id: "b51", name: "Garden moisture sensors (4-5 beds)", meta: "Aqara T1 outdoor or Ecowitt", cost: 80, costLabel: "~£80", search: "Ecowitt soil moisture sensor" },
-      { id: "b52", name: "Airthings View Plus (master bedroom)", meta: "Proper CO2 + radon + PM2.5 — optional premium", cost: 250, costLabel: "~£250", search: "Airthings View Plus" },
-      { id: "b53", name: "Wire-free RTK robot mower (optional)", meta: "Boundary-wire-free (RTK GNSS + vision) with an HA integration — Mammotion (Luba/Yuka) or Segway Navimow. Claude schedules vs weather/soil/Agile. Cloud-account today, local on the roadmap.", cost: 900, costLabel: "~£800-1,500", search: "Mammotion Luba 2 robot mower" },
+      { id: "b50", name: "OpenSprinkler (outdoor irrigation)", meta: "Only if irrigation installed. Buy direct (ships to UK) — patchy on Amazon UK.", cost: 150, costLabel: "~£150", url: "https://opensprinkler.com/", optional: true },
+      { id: "b51", name: "Garden moisture sensors (4-5 beds)", meta: "Aqara T1 outdoor or Ecowitt", cost: 80, costLabel: "~£80", search: "Ecowitt soil moisture sensor", optional: true },
+      { id: "b52", name: "Airthings View Plus (master bedroom)", meta: "Proper CO2 + radon + PM2.5 — optional premium", cost: 250, costLabel: "~£250", search: "Airthings View Plus", optional: true },
+      { id: "b53", name: "Wire-free RTK robot mower (optional)", meta: "Boundary-wire-free (RTK GNSS + vision) with an HA integration — Mammotion (Luba/Yuka) or Segway Navimow. Claude schedules vs weather/soil/Agile. Cloud-account today, local on the roadmap.", cost: 900, costLabel: "~£800-1,500", search: "Mammotion Luba 2 robot mower", optional: true },
     ],
   },
 ];
