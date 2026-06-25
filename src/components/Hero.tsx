@@ -1,13 +1,21 @@
 "use client";
 
 import { motion } from "motion/react";
+import { ROOMS } from "@/data/rooms";
+import { SHOPPING } from "@/data/shopping";
+
+// Computed from the floorplan + shopping data so these never drift out of date.
+const catCount = (key: string) =>
+  ROOMS.reduce((n, r) => n + r.items.filter((it) => it.cat === key).length, 0);
+const voiceRooms = ROOMS.filter((r) => r.items.some((it) => it.cat === "voice")).length;
 
 const STATS = [
-  { value: "7", label: "voice rooms" },
-  { value: "13", label: "light zones" },
-  { value: "3", label: "smart locks" },
-  { value: "4", label: "cameras + bell" },
-  { value: "5", label: "build phases" },
+  { value: String(voiceRooms), label: "voice rooms" },
+  { value: String(catCount("light")), label: "light zones" },
+  { value: String(catCount("lock")), label: "smart locks" },
+  // camera markers include the doorbell — show it as "+ bell".
+  { value: String(Math.max(catCount("camera") - 1, 0)), label: "cameras + bell" },
+  { value: String(SHOPPING.length), label: "build phases" },
 ];
 
 const container = {
