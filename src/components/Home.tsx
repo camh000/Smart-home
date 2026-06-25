@@ -6,6 +6,7 @@ import { SHOPPING } from "@/data/shopping";
 import { ROOMS } from "@/data/rooms";
 import { CATEGORIES } from "@/data/categories";
 import { BEHAVIOURS } from "@/data/behaviours";
+import { FOUNDATIONS } from "@/data/progress";
 import { AnimatedNumber } from "./AnimatedNumber";
 
 const NAV: { key: string; num: string; title: string; blurb: string }[] = [
@@ -61,6 +62,29 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
     ),
   })).filter((c) => c.count > 0);
 
+  // Live build tracker — what's already running on the £0 testbed.
+  const doneCount = FOUNDATIONS.filter((f) => f.done).length;
+  const donePct = Math.round((doneCount / FOUNDATIONS.length) * 100);
+
+  // Budget split by phase (proportional segments).
+  const PHASE_COLORS = ["#b8543a", "#c98a2b", "#466b3f", "#3f6b6b", "#4a6b8a", "#7a4a8a", "#a83232", "#5a6478"];
+  const budgetSegments = phases
+    .map((p, i) => ({ num: p.num, total: p.total, color: PHASE_COLORS[i % PHASE_COLORS.length] }))
+    .filter((s) => s.total > 0)
+    .map((s) => ({ ...s, pct: (s.total / totalCost) * 100 }));
+
+  // Safety & security scorecard.
+  const camCount = kit.find((k) => k.key === "camera")?.count ?? 0;
+  const lockCount = kit.find((k) => k.key === "lock")?.count ?? 0;
+  const security = [
+    { icon: "🎥", title: "Video-verified CCTV", detail: `${Math.max(camCount - 1, 0)} PoE cameras + doorbell, person & face detection, instant off-site clip upload.` },
+    { icon: "🔒", title: "Hardened entry", detail: `${lockCount} smart locks on all doors — anti-snap cylinders, physical-key fallback.` },
+    { icon: "🔥", title: "Life-safety", detail: "Interlinked smoke/heat/CO (Grade D), gas detector, leak sensors + auto mains water shut-off." },
+    { icon: "🚨", title: "Intruder alarm", detail: "Alarmo + sensor fusion — glass-break, vibration, contacts; escalates to phones + Selby." },
+    { icon: "🌙", title: "Night & perimeter", detail: "Driveway beam + ALPR, lights-on-motion, plus fall + health radar upstairs." },
+    { icon: "🛡️", title: "Resilience", detail: "UPS, 4G failover, off-site encrypted backup, dead-man's-switch watchdog." },
+  ];
+
   return (
     <div className="pt-2">
       {/* At a glance */}
@@ -85,6 +109,39 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
           </div>
         ))}
       </motion.div>
+
+      {/* Live today — build tracker */}
+      <motion.section custom={1} variants={reveal} initial="hidden" animate="visible" className="mt-10">
+        <div className="rounded-[var(--radius-card)] border border-line bg-surface p-5 shadow-[var(--shadow-soft)]">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-xl font-medium tracking-tight text-ink">Live today</h2>
+            <span className="font-mono text-[11px] text-muted">
+              {doneCount} / {FOUNDATIONS.length} foundations · £0 spent
+            </span>
+          </div>
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-line">
+            <motion.div
+              className="h-full rounded-full bg-accent"
+              initial={{ width: 0 }}
+              animate={{ width: `${donePct}%` }}
+              transition={{ duration: 0.9, ease: [0.21, 0.6, 0.35, 1] as const }}
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {FOUNDATIONS.map((f) => (
+              <span
+                key={f.label}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] ${
+                  f.done ? "border-accent-soft/40 bg-accent-tint text-ink" : "border-line bg-paper-soft text-muted"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${f.done ? "bg-accent" : "bg-muted-light"}`} />
+                {f.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </motion.section>
 
       {/* Kit by the numbers */}
       <motion.section custom={1} variants={reveal} initial="hidden" animate="visible" className="mt-10">
@@ -119,8 +176,41 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
         </div>
       </motion.section>
 
+      {/* Budget by phase */}
+      <motion.section custom={3} variants={reveal} initial="hidden" animate="visible" className="mt-10">
+        <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
+          <h2 className="font-display text-xl font-medium tracking-tight text-ink">Budget by phase</h2>
+          <button
+            onClick={() => onNavigate("calculator")}
+            className="font-mono text-[11px] text-accent transition-colors hover:text-accent-soft"
+          >
+            calculator →
+          </button>
+        </div>
+        <div className="flex h-4 w-full overflow-hidden rounded-full border border-line">
+          {budgetSegments.map((s) => (
+            <div
+              key={s.num}
+              title={`Phase ${s.num}: £${s.total.toLocaleString("en-GB")}`}
+              style={{ width: `${s.pct}%`, backgroundColor: s.color }}
+            />
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          {budgetSegments.map((s) => (
+            <span key={s.num} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted">
+              <span className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: s.color }} />
+              P{s.num} · £{s.total.toLocaleString("en-GB")}
+            </span>
+          ))}
+          <span className="font-mono text-[11px] font-semibold text-ink">
+            £{totalCost.toLocaleString("en-GB")} committed
+          </span>
+        </div>
+      </motion.section>
+
       {/* Build phases timeline */}
-      <motion.section custom={2} variants={reveal} initial="hidden" animate="visible" className="mt-10">
+      <motion.section custom={4} variants={reveal} initial="hidden" animate="visible" className="mt-10">
         <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
           <h2 className="font-display text-xl font-medium tracking-tight text-ink">Build phases</h2>
           <button
@@ -158,6 +248,38 @@ export function Home({ onNavigate }: { onNavigate: (tab: string) => void }) {
           ))}
         </ol>
       </motion.section>
+
+      {/* Safety & security */}
+      <section className="mt-10">
+        <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
+          <h2 className="font-display text-xl font-medium tracking-tight text-ink">Safety &amp; security</h2>
+          <button
+            onClick={() => onNavigate("plan")}
+            className="font-mono text-[11px] text-accent transition-colors hover:text-accent-soft"
+          >
+            the plan →
+          </button>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {security.map((s, i) => (
+            <motion.div
+              key={s.title}
+              custom={i}
+              variants={reveal}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+              className="rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow-soft)]"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-base">{s.icon}</span>
+                <span className="font-display text-[15px] font-medium text-ink">{s.title}</span>
+              </div>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{s.detail}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
       {/* Explore */}
       <section className="mt-10">
