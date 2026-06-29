@@ -17,6 +17,7 @@ const NAV: { key: string; num: string; title: string; blurb: string }[] = [
   { key: "calculator", num: "05", title: "Cost Calculator", blurb: "Live budget builder with Minimal / Balanced / Generous presets." },
   { key: "shopping", num: "06", title: "Shopping List", blurb: "Everything to buy, by build phase, with tickable progress." },
   { key: "cabling", num: "07", title: "Cabling Spec", blurb: "The structured-cabling specification — the physical backbone." },
+  { key: "network", num: "08", title: "Network", blurb: "Interactive topology — gateway, switches, APs, VLANs, the garage fibre and the Selby SD-WAN." },
 ];
 
 const reveal = {

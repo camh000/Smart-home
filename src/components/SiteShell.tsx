@@ -11,6 +11,7 @@ import { Floorplan } from "./Floorplan";
 import { Calculator } from "./Calculator";
 import { ShoppingList } from "./ShoppingList";
 import { Behaviours } from "./Behaviours";
+import { NetworkMap } from "./NetworkMap";
 import { BackToTop } from "./BackToTop";
 import { CommandPalette } from "./CommandPalette";
 import type { ParsedDoc, SearchEntry } from "@/lib/doc";
@@ -35,6 +36,11 @@ const INTROS: Record<string, { meta: string; title: string; lead: string }> = {
     meta: "Phase by phase",
     title: "Shopping list",
     lead: "Everything to buy, ordered by build phase. Tick items as you go — your progress saves locally in this browser.",
+  },
+  network: {
+    meta: "How it all connects",
+    title: "Network topology",
+    lead: "The logical network — gateway, switches, APs, server, cameras, the garage fibre link and the Selby SD-WAN. Colour-coded by VLAN; tap a node for detail or filter by VLAN. Documented from the plan, not live-discovered.",
   },
 };
 
@@ -184,6 +190,7 @@ export function SiteShell({
               />
             )}
             {active === "behaviours" && <Behaviours />}
+            {active === "network" && <NetworkMap />}
             {active === "floorplan" && <Floorplan />}
             {active === "calculator" && <Calculator />}
             {active === "shopping" && <ShoppingList />}
