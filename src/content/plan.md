@@ -38,7 +38,7 @@ Roughly the entire *software* brain plus every device already owned can go in to
 - **openWakeWord + Whisper + Piper** run locally on Unraid (free).
 - Use the **HA Companion app's Assist on a phone** as the satellite to prove the full *wake → STT → reasoning → tool-call → TTS* loop and the memory retrieval — no Voice PE needed yet (and remember the Voice PE is Wi-Fi-only anyway).
 
-**Network — when the UCG-Max lands (it's a gift, £0):** set it as root, Decos as APs, the 2× TP-Link switches as VLAN access switches, define the VLAN scheme, and bring up **Site Magic SD-WAN to Selby** with the off-site backups below.
+**Network — UCG-Ultra is in ✅ (gift from dad):** set as root, Decos demoted to APs, the 2× TP-Link switches as VLAN access switches, VLAN scheme defined, and **Site Magic SD-WAN to Selby is up ✅** — the off-site backups below now have their private link.
 
 **The one caveat:** using **Claude** as the brain is pay-per-use (fractions of a penny per request). For a *strict* £0 prototype, use HA's built-in **local conversation agent** first, then swap Claude in once a few pennies are acceptable.
 
@@ -73,8 +73,8 @@ The whole-house Cat6 install is being procured separately under the **Woodhouse 
 ## Existing kit to reuse
 
 - **Unraid server** — handles NVR, recordings, Home Assistant, Docker containers
-- **UniFi Cloud Gateway Max (UCG-Max)** (gift from dad) — becomes the network root. Replaces Deco-as-gateway role. Decos demote to AP-only mode behind it. 5× 2.5GbE (1 WAN + 4 LAN), no built-in PoE (so the PoE switch stays in scope), no built-in WiFi (so the Decos stay as APs), full UniFi Network with IDS/IPS and VLANs. Runs **Site Magic SD-WAN** — the basis for the Selby inter-site link (see "Networking" below).
-- **3× TP-Link Deco XE75** mesh, wired backhaul to router — repurposed as access points only once UniFi is in place
+- **UniFi Cloud Gateway Ultra (UCG-Ultra)** ✅ **in hand** (gift from dad) — the network root. Replaces Deco-as-gateway role; Decos demoted to AP-only mode behind it. **1× 2.5GbE WAN + 4× 1GbE LAN** (the 2.5G is WAN-only — LAN is gigabit), no built-in PoE (so the PoE switch stays in scope), no built-in WiFi (so the Decos stay as APs), full UniFi Network with IDS/IPS (~1 Gbps) and VLANs. Runs **Site Magic SD-WAN** — now live to Selby (see "Networking" below).
+- **3× TP-Link Deco XE75** mesh, wired backhaul — repurposed as access points only behind the UniFi gateway; **planned swap to WiFi-7 UniFi APs (U7) once prices come down** (PoE-powered — see Switching layer)
 - **4× Govee H6008 bulbs** — keep, use in lounge for early testing
 - **4× Meross Matter Smart Plug Mini (13A, energy monitoring)** — Matter-native, local, no cloud required. Pair direct to HA via built-in Matter integration.
 - **2× Eltax C-205 floorstanders** — deploy as *rears* in the lounge surround setup
@@ -95,23 +95,32 @@ Headline points that affect this plan:
 
 ## Networking — gateway & inter-site SD-WAN
 
-The network root is the **UniFi Cloud Gateway Max (UCG-Max)**, gifted by dad. It sits in front of the Decos (demoted to APs), runs the full UniFi Network application with IDS/IPS, and handles the VLAN segmentation this plan relies on (IoT / voice / CCTV / guest / main). All five ports are 2.5GbE — give the **Unraid ↔ gateway link a 2.5G path** at the head-end so Frigate/HA traffic isn't bottlenecked behind the gigabit PoE switch.
+The network root is the **UniFi Cloud Gateway Ultra (UCG-Ultra)** ✅, gifted by dad and now installed. It sits in front of the Decos (demoted to APs), runs the full UniFi Network application with IDS/IPS (~1 Gbps), and handles the VLAN segmentation this plan relies on (IoT / voice / CCTV / guest / main). **Only the WAN port is 2.5GbE; the four LAN ports are gigabit** — so a **2.5G path for Unraid/Frigate can't hang off a gateway LAN port** (it could on the Max). To keep that head-end link off gigabit, sit Unraid and the gateway on a **2.5G-capable switch**; otherwise the server uplink is 1GbE (fine until Frigate + several cameras + off-site backups contend for it).
 
-**No built-in PoE** → a PoE+ switch is **required** for the powered devices. **No built-in WiFi** → the 3× Deco stay on as APs; a later swap to UniFi APs (U6/U7) is optional for single-pane management and better roaming.
+**No built-in PoE** → a **UniFi PoE+ switch** is **required** for the powered devices (kept UniFi so it's managed in one pane with the gateway). **No built-in WiFi** → the 3× Deco stay on as APs for now, with a **planned swap to WiFi-7 UniFi APs (U7)** once prices come down — for single-pane management, better roaming and WiFi 7. Those APs are **PoE-powered**, so they add to the switch's PoE budget (see Switching layer).
 
 ### Switching layer
 
-- **Core PoE+ switch** (head-end, Bedroom 3) — feeds the PoE devices. In practice that's only the **4 cameras + doorbell** (the Voice PE units are Wi-Fi + USB-C, so they don't touch the switch at all). The 16-port in the shopping list is therefore mostly headroom — an 8-port PoE+ would technically cover the PoE load — but the extra ports and the option to run AP/tablet data drops off it are worth keeping.
+- **Core UniFi PoE+ switch** (head-end, Bedroom 3) — feeds the PoE devices, UniFi so it's managed in one pane with the gateway. Today the PoE load is only the **4 cameras + doorbell** (the Voice PE units are Wi-Fi + USB-C, so they don't touch the switch at all). **But size the PoE budget for the end state:** once the **WiFi-7 UniFi APs** replace the Decos they're PoE-powered too (~3 APs at ~15-25W each), so cameras + doorbell + APs can outgrow a small switch — a USW-Lite-16-PoE (~45W) won't cover all of it. A **USW-Pro-Max-16-PoE** is the tidy answer: bigger PoE budget **and** the **2.5GbE ports** the Ultra's gigabit LAN lacks (so it doubles as the 2.5G path for Unraid/Frigate).
 - **2× TP-Link 9-port gigabit Easy Smart (owned)** — reused as **VLAN-aware access switches** where several non-PoE wired devices fan out off one drop: the **office desk** (two PCs + peripherals for Cam + Nova), the **lounge AV stack** (AVR, Apple TV, TV, console), and/or the **garage**. Configure 802.1Q on them (PVID + tagged/untagged) to match the UniFi VLAN IDs.
-- **Caveats:** these are **gigabit, not 2.5G** (keep the Unraid uplink and the CCTV/backup path on the gateway's 2.5G ports), and they're **not UniFi-managed** (they won't appear in the UniFi controller — configure once in TP-Link's web UI and leave them). Free kit, zero added cost, and they cut how many home-run drops the core switch has to terminate.
+- **Caveats:** these are **gigabit, not 2.5G**, and they're **not UniFi-managed** (they won't appear in the UniFi controller — configure once in TP-Link's web UI and leave them). Free kit, zero added cost, and they cut how many home-run drops the core switch has to terminate.
+
+### Consolidating on UniFi (with the Ultra)
+
+Now the gateway is UniFi, it's worth pulling the rest of the network under one controller — but not everything:
+
+- **Switches — yes.** The **core PoE switch goes UniFi** (above). The 2× owned TP-Link access switches can *stay* — they're free and do the job — but swapping them for small UniFi switches later buys single-pane VLAN management. The one genuinely worth *buying* UniFi is a **2.5G-capable PoE switch (USW-Pro-Max-16-PoE)**: it's the cleanest way to give Unraid/Frigate the 2.5G uplink the Ultra's gigabit LAN can't.
+- **Wi-Fi — yes, later.** The Decos become **WiFi-7 UniFi APs (U7)** once prices ease (above).
+- **Cameras / doorbell — no, keep Frigate.** The **UCG-Ultra can't run UniFi Protect** (it isn't a Protect console — Protect needs a UDM-Pro/SE, a UCG-Max/Fiber, or a UNVR). Going UniFi cameras would mean buying a **separate UNVR** *and* dropping the local **Frigate + HA + Claude/face-rec** pipeline this plan is built on. Stay on **Frigate** with third-party PoE cameras.
+- **Already UniFi, no action:** routing/firewall, **IDS/IPS**, VLAN segmentation, guest isolation, **WireGuard/Teleport** remote access, DNS and device fingerprinting/alerts all come from the gateway already.
 
 ### Inter-site SD-WAN — the Selby link
 
-The aim is a site-to-site **SD-WAN between Woodhouse Road and dad's place in Selby**, using UniFi's **Site Magic** (one-click site-to-site SD-WAN between two UniFi gateways — automatic tunnel setup, route exchange and WAN failover, managed from a single UniFi account).
+✅ **Now live:** a site-to-site **SD-WAN between Woodhouse Road and dad's place in Selby**, via UniFi's **Site Magic** (one-click site-to-site SD-WAN between two UniFi gateways — automatic tunnel setup, route exchange and WAN failover, managed from a single UniFi account).
 
-- **Both ends are UniFi** — UCG-Max here, an existing UniFi gateway in Selby — so Site Magic meshes them in a couple of clicks once both sites are under one UniFi account.
+- **Both ends are UniFi** — UCG-Ultra here, an existing UniFi gateway in Selby — so Site Magic meshed them once both sites were under one UniFi account. ✅ Tunnel up.
 - **Woodhouse has a public dynamic IP** — that's the reachable endpoint. A static IP is **not** needed: the gateway reports its current WAN IP to UniFi's cloud, so the tunnel re-establishes automatically when the dynamic IP changes (no dynamic-DNS needed). Because our side is public, **CGNAT at the Selby end is fine** — that side dials out to us.
-- **Plan non-overlapping subnets** — the one real to-do. Woodhouse and Selby must use different ranges (e.g. `10.10.x` vs `10.20.x`) or the SD-WAN routes collide. Settle this alongside the VLAN scheme, across both sites.
+- **Non-overlapping subnets** — required for the tunnel, so settled as part of the bring-up: Woodhouse and Selby use different ranges (e.g. `10.10.x` vs `10.20.x`) so the SD-WAN routes don't collide.
 - **What it unlocks:** off-site backup is the headline — Qdrant memory store and Frigate footage backed up to dad's over the private link (and vice versa), plus remote support of each other's HA/Unraid/cameras. Complements the existing **Tailscale** (per-device overlay) with whole-subnet, gateway-to-gateway routing.
 
 ## Server health monitoring (Unraid)
@@ -150,7 +159,7 @@ Because the in-HA monitoring above dies with the box, "is the house even up?" ne
 
 - **Dead-man's-switch heartbeat (best single fix).** HA pings an external service every minute (**Healthchecks.io** — free tier, or self-hosted). If the pings *stop* for N minutes, the **external** service alerts you (email / SMS / Telegram / push). Because the alert fires on *absence* of signal, it catches **everything** — array stopped, power cut, network down, HA crashed — and needs no inbound access to your house.
 - **Off-site active probe at Selby.** Run **Uptime Kuma** on dad's box in Selby (it's already a peer over the SD-WAN) probing Woodhouse's HA, Unraid and gateway. Because Selby is a *separate site on separate power and internet*, it survives a total Woodhouse outage. Make it **mutual** — Woodhouse watches Selby too. This reuses the SD-WAN and pairs naturally with the off-site backups.
-- **Gateway-level alerting.** The **UCG-Max** is independent of HA: have UniFi alert when **Unraid drops off the LAN**, and UniFi's cloud notifies if the **gateway/WAN itself** dies. (And the second small UPS on the network gear means the gateway can still send that alert during a server-only outage.)
+- **Gateway-level alerting.** The **UCG-Ultra** is independent of HA: have UniFi alert when **Unraid drops off the LAN**, and UniFi's cloud notifies if the **gateway/WAN itself** dies. (And the second small UPS on the network gear means the gateway can still send that alert during a server-only outage.)
 
 Net effect: the in-HA layer gives you the *detail* while things run; the external watchdogs answer *"did it come back up?"* — the question HA structurally can't answer about itself.
 
@@ -359,10 +368,10 @@ Revisit only if a summer in the house actually proves it's needed — but with n
 - **NVR**: Frigate on Unraid. **Detector: Coral TPU is optional now, not required** — Frigate also supports **OpenVINO on an Unraid iGPU** (or ONNX/CPU) for object detection, so don't let chronic Coral supply block the build. Use whichever the Unraid box can run; Coral is a nice-to-have for low CPU load.
 - **Cameras**: PoE only. Reolink (budget), Amcrest/Dahua (mid), Unifi (premium). *Verify* the specific Reolink models stream cleanly to Frigate with internet egress fully blocked (some Reolink firmware misbehaves when firewalled).
 - **Doorbell**: Reolink PoE Video Doorbell — works with Frigate, runs off PoE switch. *Verify* doorbell-press events reach HA/Frigate with egress blocked.
-- **PoE switch** — 8-port minimum (TP-Link or Unifi)
+- **PoE switch** — 8-port minimum, **UniFi** (single-pane with the gateway; 16-port in the main plan)
 - **Storage** — event recording + 24-48hr continuous buffer. Unraid has plenty.
 - **VLAN** — cameras isolated from main network (good hygiene, not essential)
-- **🕒 Egress-blocked cameras still need time + firmware.** Firewalling the cameras off the internet (good) also kills their **NTP time sync** — clocks drift and timestamps become useless as evidence — and their **firmware updates**. Run a **local NTP server** (the UCG-Max or Unraid can serve it) and point the cameras at it, and set a **manual firmware-update routine** (temporarily allow egress, or sideload). Verify each model accepts a custom NTP server.
+- **🕒 Egress-blocked cameras still need time + firmware.** Firewalling the cameras off the internet (good) also kills their **NTP time sync** — clocks drift and timestamps become useless as evidence — and their **firmware updates**. Run a **local NTP server** (the UCG-Ultra or Unraid can serve it) and point the cameras at it, and set a **manual firmware-update routine** (temporarily allow egress, or sideload). Verify each model accepts a custom NTP server.
 - **⚡ Surge / lightning protection.** The outdoor cameras run **copper PoE back into the switch** — a classic surge/lightning entry path that can take out the PoE switch *and* Unraid behind it. Fit **PoE surge arrestors** (gas-discharge, earthed) on the outdoor camera runs, and a **head-end / whole-house SPD** (surge protection device) in the consumer unit. (The garage link already dodges this via fibre — see cabling spec §8.) Cheap insurance for thousands of pounds of kit.
 - **🎥 Frigate detector sizing — detect on the substream, record on the mainstream.** Running object detection on full 4K from 4-5 cameras will swamp the CPU/iGPU. Configure each camera with a **low-res substream for Frigate detection** and the **4K mainstream for recording** — and size the detector (Coral / OpenVINO iGPU) for the *substream* count, not 4K.
 
@@ -1594,7 +1603,7 @@ Most cable runs are already in the spec. The remaining decisions are about **act
 
 - **Head-end is Bedroom 3** (per spec). Unraid sits here too — same room as patch panel + switch + voice node. Needs the mains spur, ventilation and clear cable route the spec already calls out.
 - **UPS at the head-end is mandatory, not optional.** Unraid hates dirty power and brownout-induced unclean shutdowns can corrupt the array. Size for the head-end load (switch + Unraid + Decos + media converter + voice node): 1000-1500VA online or line-interactive is the right shape. APC Back-UPS Pro, CyberPower CP1500, or Eaton 5E equivalent. Budget £150-200. Position and socket are already called out in cabling spec §4 Rev B.
-- **PoE switch** at head-end. Sized for: cameras (4-6), doorbell, voice nodes (6+), Decos (3 wired), AVR if networked. **Target 16-port PoE+ minimum**, e.g. Unifi USW-Lite-16-PoE or TP-Link TL-SG1218MP.
+- **UniFi PoE+ switch** at head-end. PoE load = **cameras (4-6) + doorbell** today; data drops also fan out here (voice nodes are Wi-Fi/USB-C, not PoE). **Target 16-port PoE+ minimum — UniFi** (USW-Lite-16-PoE); but if you're going to **WiFi-7 UniFi APs** (PoE-powered, ~3×) pick a bigger PoE budget — **USW-Pro-Max-16-PoE**, which also brings the 2.5GbE the Ultra's LAN lacks.
 - **Speaker cable** to lounge surround / Atmos positions — separate from the Cat6 spec, runs while walls are open.
 - **Mains for voice nodes** — each room with a Voice PE needs a socket nearby. Most rooms will have this anyway; flag any awkward locations (e.g. landing) to the sparky.
 - **Power for Decos** — hall, landing, garage. Decos aren't PoE. Already noted in spec but worth checking sockets exist at planned Deco positions.
@@ -1609,7 +1618,7 @@ The house *runs on* Unraid + the network + the Claude pipeline. Each needs a def
 
 - **Size the head-end UPS by *runtime*, not just VA.** "1000-1500VA" names apparent power, not minutes. With Unraid + a loaded PoE switch (cameras can pull 30-60W+) + Decos + media converter, a 1500VA unit may only give a few minutes. Compute the actual watt load and target a defined runtime (**≥15 min** to ride out blips + trigger a clean shutdown).
 - **🔁 The shutdown must be driven by Unraid, not HA (dependency-loop trap).** Don't make "clean shutdown on power loss" an *HA automation* — HA runs *on* the box it would be shutting down, and a hung/updating HA may never fire it, risking a dirty stop and a corrupt array. Use **Unraid's own native UPS/NUT daemon** to self-shut-down; HA's role is *notification only*.
-- **Consider a second small UPS for the network gear** (UCG-Max + core switch) so the **SD-WAN / remote access / off-site watchdog reachability stays up** even while the server is shutting down or rebooting.
+- **Consider a second small UPS for the network gear** (UCG-Ultra + core switch) so the **SD-WAN / remote access / off-site watchdog reachability stays up** even while the server is shutting down or rebooting.
 
 ### Backup & disaster recovery (3-2-1, with a *tested* restore)
 
@@ -1634,18 +1643,18 @@ Today only "a Qdrant volume backup" exists. That's not a backup strategy. Define
 
 A dedicated pass for the "depends on the very thing it's meant to protect/observe/recover" class of bug — the trap the HA-on-Unraid monitoring fell into. (Backup-key, UPS-shutdown and head-end-thermal loops are covered above.)
 
-- **🔁 Remote-recovery access must not live on the box you're recovering.** If the Tailscale node runs as an Unraid container, then when Unraid is down you **can't VPN in to fix it**. Run the recovery VPN on the **UCG-Max** (UniFi's built-in WireGuard / Teleport) — independent of Unraid, and kept alive by the network UPS. Keep Tailscale too, but don't let it be the *only* way in.
+- **🔁 Remote-recovery access must not live on the box you're recovering.** If the Tailscale node runs as an Unraid container, then when Unraid is down you **can't VPN in to fix it**. Run the recovery VPN on the **UCG-Ultra** (UniFi's built-in WireGuard / Teleport) — independent of Unraid, and kept alive by the network UPS. Keep Tailscale too, but don't let it be the *only* way in.
 - **🖥️ Keep a local break-glass console for the head-end.** When the network/web UI is unreachable — or Unraid won't boot, the array won't start, or you need the BIOS — a directly-attached **monitor + keyboard** is the only way in. Stash a **cheap monitor + a wireless keyboard/mouse combo (~£20 total)** in the head-end cupboard; don't leave it permanently powered (heat/clutter in a small space) — plug in only when needed. The **keyboard is the essential part** (Unraid's console is CLI; the mouse only matters for local GUI-boot mode). **Match the server's video output** (HDMI/DP/VGA — and check it *has* one). If the board has **IPMI/BMC**, that gives remote KVM-over-IP too — better when the network's up, but the local screen still wins when the network itself is down.
 - **🔁 Don't single-home DNS on the everything-box.** The classic next step is Pi-hole/AdGuard on Unraid — and then when Unraid is down the **whole house (and your phones) lose name resolution**, breaking even unrelated internet. Set a fallback resolver on the gateway/clients (or run DNS on the gateway), so a server outage doesn't take the internet with it.
 - **🔁 Keep a doorbell chime that works with HA dead.** If the PoE doorbell's only alert path is Frigate/HA, an outage = a **silent doorbell**. Ensure a standalone/local chime so visitors still register without the smart stack.
 - **🔁 Guest mode can't key off guest *presence*.** Guests aren't in your HA Companion, so "auto-disable when their phone leaves" is unreliable for exactly the people it's for. Drive guest mode off a **date window + a manual/host toggle**, not the presence of an untracked phone.
-- **⚠️ One UCG-Max is the whole network (single point of failure).** Its death simultaneously takes internet, the SD-WAN, VLAN routing, remote access *and* the off-site watchdog's reachability — and the Decos can't route without it. Treat it as a conscious accepted risk: keep the old **Deco-as-router config documented as break-glass** (or a cheap spare gateway), so a dead UCG-Max is a swap, not a rebuild.
+- **⚠️ One UCG-Ultra is the whole network (single point of failure).** Its death simultaneously takes internet, the SD-WAN, VLAN routing, remote access *and* the off-site watchdog's reachability — and the Decos can't route without it. Treat it as a conscious accepted risk: keep the old **Deco-as-router config documented as break-glass** (or a cheap spare gateway), so a dead UCG-Ultra is a swap, not a rebuild.
 - **⚠️ The Unraid box is the *compute* SPOF — and it takes the alarm + CCTV with it.** The *network* SPOF is handled above, but HA, Frigate, the **alarm brain** and RAG all run on one box, and RAID protects the *disks*, not the box. Its death = the whole house goes dumb **and CCTV + the alarm die at once** — exactly when you might want them (e.g. an intruder who pulls the server). Mitigate three ways: **(a)** keep critical control **local** (Zigbee groups, lock-resident codes — already in the plan); **(b)** a **break-glass standby** — a cheap **Raspberry Pi with a minimal HA + a spare Zigbee stick**, restorable from a recent backup, to run lights/locks/alarm essentials; **(c)** give the **siren a trigger path that doesn't depend on the box** (a Zigbee siren bound to a local group / coordinator-side rule) so "smash the server" can't silently disarm the house.
 - See also: the **confirmed-unlock** and **multi-turn confirmation** loops in the Locks section and the integration doc — the security gate and the "yes" antecedent must not depend on a cloud/service that can be down.
 
 ### Monitoring beyond the server
 
-The Unraid health section covers the box; also watch the **edges**: UCG-Max status, **SD-WAN tunnel up/down**, **WAN reachability**, and a **Claude-API error-rate** counter.
+The Unraid health section covers the box; also watch the **edges**: UCG-Ultra status, **SD-WAN tunnel up/down**, **WAN reachability**, and a **Claude-API error-rate** counter.
 
 **Split by who's alerting, though** — anything reported *by HA* (push / toast / proactive Claude) only works while HA is up, so it can't tell you HA/Unraid is down. That "is it even up?" question belongs to the **independent off-site watchdog** (Healthchecks dead-man's-switch + Uptime Kuma at Selby + gateway-level offline alerts) described in [Server health monitoring → "Watching the watcher"](#server-health-monitoring-unraid). Use HA's rails for *detail while running*; the external watchdog for *availability*.
 
@@ -1654,7 +1663,7 @@ The Unraid health section covers the box; also watch the **edges**: UCG-Max stat
 ### Network & IP scheme + as-built docs
 
 - **Define the VLAN/IP scheme now** (IoT / voice / CCTV / guest / main), **non-overlapping with Selby** (e.g. `10.10.x` here, `10.20.x` there) — it's a prerequisite for the SD-WAN, guest isolation and the camera egress-blocking the privacy plan relies on.
-- **🎮 Keep the gaming PC and the Steam Deck on the *same* VLAN** (the main/trusted one). Game-stream discovery (Steam Remote Play / Moonlight) uses broadcast/mDNS and silently breaks across VLANs — so don't split the office gaming PC from the lounge Deck dock. If they must be segmented, you'll need an **mDNS reflector** + the specific Remote Play/Moonlight ports opened on the UCG-Max. Bake this into the scheme so the segmentation doesn't quietly kill streaming. (See "Game streaming (office → lounge)".)
+- **🎮 Keep the gaming PC and the Steam Deck on the *same* VLAN** (the main/trusted one). Game-stream discovery (Steam Remote Play / Moonlight) uses broadcast/mDNS and silently breaks across VLANs — so don't split the office gaming PC from the lounge Deck dock. If they must be segmented, you'll need an **mDNS reflector** + the specific Remote Play/Moonlight ports opened on the UCG-Ultra. Bake this into the scheme so the segmentation doesn't quietly kill streaming. (See "Game streaming (office → lounge)".)
 - **🔁 Matter / HomeKit / AirPlay / Cast can't be fully VLAN-isolated either — the security goal fights the protocol.** The hardening plan wants IoT on a segregated VLAN with egress blocked, but **Matter (the Meross plugs), AirPlay 2, Chromecast and the Matter Server all rely on mDNS/multicast that doesn't cross VLANs**, and the Matter Server must share the plugs' L2 (it commissions on the same subnet). So you **can't cleanly put Matter devices on a separate VLAN from HA.** Design the scheme around it: **keep Matter/AirPlay/Cast devices on HA's VLAN**, or run an **mDNS reflector + IGMP snooping** so discovery crosses the boundary. Decide this *before* drawing the VLAN map — it's the same trap as the gaming one above.
 - Keep **as-built documentation**: a **patch-panel port map**, a **device/IP inventory**, and the VLAN plan. Cheap to do as you go, painful to reconstruct later. (The "friendly names" convention is good; this is the infrastructure equivalent.)
 
@@ -1876,13 +1885,13 @@ The custom software brain, plus the comfort and resilience layers that build on 
 **Still open — needs deciding soon:**
 
 - [ ] UPS model and sizing confirmed before head-end commissioning
-- [ ] VLAN scheme defined (IoT / voice / CCTV / guest / main) — implementation now easy with the UCG-Max, just needs the scheme designed. **Must be planned across both sites** (Woodhouse + Selby) with non-overlapping subnets so the Site Magic SD-WAN routes don't collide — e.g. `10.10.x` here, `10.20.x` in Selby. **Design in the mDNS/multicast traps:** Matter/AirPlay/Cast devices can't be cleanly isolated from HA's VLAN, and gaming discovery breaks across VLANs (mDNS reflector / IGMP snooping or keep them co-located). See Operations → Network scheme.
+- [ ] VLAN scheme defined (IoT / voice / CCTV / guest / main) — implementation now easy with the UCG-Ultra, just needs the scheme designed. **Must be planned across both sites** (Woodhouse + Selby) with non-overlapping subnets so the Site Magic SD-WAN routes don't collide — e.g. `10.10.x` here, `10.20.x` in Selby. **Design in the mDNS/multicast traps:** Matter/AirPlay/Cast devices can't be cleanly isolated from HA's VLAN, and gaming discovery breaks across VLANs (mDNS reflector / IGMP snooping or keep them co-located). See Operations → Network scheme.
 - [ ] **Matter: Wi-Fi vs Thread per device → is a Thread Border Router needed?** Matter-over-Wi-Fi (Meross) needs none; any Matter-over-Thread device does (OpenThread BR on the SkyConnect/ZBT-1, or an Apple TV/HomePod/Aqara hub). See Hub & radios.
 - [ ] **2.4 GHz RF plan** — fix the Wi-Fi (1/6/11) + Zigbee (15/20/25) + Thread channels so they don't collide, and confirm enough **mains-powered Zigbee routers** to mesh out to the garage. See Hub & radios → RF planning.
 - [ ] **Smoke/CO alarms meet building regs?** Confirm the *primary* alarms are **mains-interlinked Grade D (BS 5839-6 / your nation's spec)** with HA reading them — not cheap Zigbee units doing the life-safety job. See Safety sensors.
 - [ ] **Solar PV / home battery / EV-charger first-fix provisioning** — decide what to rough in while walls are open (spare CU way, roof + driveway routes, battery space). Conduit now vs re-chase later. See Pre-move-in wiring.
-- [x] ~~**UniFi gateway model confirmed** from dad~~ → **resolved: UniFi Cloud Gateway Max (UCG-Max).** No built-in PoE → 16-port PoE switch stays required; no built-in WiFi → Decos stay as APs. Runs Site Magic SD-WAN for the Selby link (see "Networking").
-- [ ] **Inter-site SD-WAN (Selby)** — confirm both sites are under one UniFi account, then enable Site Magic. Woodhouse public dynamic IP is the reachable endpoint (Selby CGNAT is fine). Blocker is only the cross-site subnet scheme above.
+- [x] ~~**UniFi gateway — confirmed & installed.**~~ → **UniFi Cloud Gateway Ultra (UCG-Ultra), gift from dad, now in.** No built-in PoE → 16-port UniFi PoE switch stays required; no built-in WiFi → Decos stay as APs (WiFi-7 UniFi AP swap planned later). **Only the WAN is 2.5GbE — LAN is gigabit**, so a 2.5G Unraid path needs a 2.5G switch, not a gateway port. Runs Site Magic SD-WAN for the Selby link (see "Networking").
+- [x] ~~**Inter-site SD-WAN (Selby)**~~ → **done: Site Magic SD-WAN between Woodhouse and Selby is up.** Woodhouse's public dynamic IP is the reachable endpoint (Selby CGNAT fine); non-overlapping subnets settled as part of the bring-up.
 - [ ] Garage heated/insulated enough for voice node electronics in winter?
 - [ ] **Home insurance — does the policy require an *approved* (NSI/SSAIB) monitored alarm?** If so, the DIY HA/Alarmo system may not satisfy it on its own. Check before relying on it as *the* alarm. See "Alarm & security".
 - [ ] **Do you want police response?** If yes, decide on a **paid monitored/ARC bridge** (the only route to a police URN) — otherwise the system stays self-monitored (alerts you + Dad in Selby). See "Alarm & security".
@@ -1947,7 +1956,7 @@ Offset: Echo resale ~£60-100.
 
 | Item | Est. |
 |---|---|
-| 16-port PoE+ switch (Unifi USW-Lite-16-PoE or TP-Link TL-SG1218MP) | £180-220 |
+| 16-port UniFi PoE+ switch (USW-Lite-16-PoE; Pro-Max-16-PoE if adding UniFi APs) | £180-300 |
 | 4× Reolink PoE cameras (RLC-810A / 811A, 4K) — front, rear, driveway-side, garage | £280-360 |
 | 1× Reolink PoE doorbell | £100-120 |
 | Coral USB TPU (optional — OpenVINO/iGPU is the free fallback) | 0-60 |
