@@ -84,7 +84,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["VLAN"], def: "Virtual LAN — logically separates devices (IoT, cameras, guest) on the same physical network." },
   { terms: ["SD-WAN"], def: "Software-defined link that securely joins two sites' networks over the internet." },
   { terms: ["Site Magic"], def: "Ubiquiti's one-click feature to build a site-to-site SD-WAN between two UniFi gateways." },
-  { terms: ["UCG-Max", "Cloud Gateway Max"], def: "UniFi Cloud Gateway Max — the router/firewall at the heart of the network." },
+  { terms: ["UCG-Ultra", "UCG Ultra", "Cloud Gateway Ultra"], def: "UniFi Cloud Gateway Ultra — the router/firewall at the heart of the network: one 2.5GbE WAN + 4× gigabit LAN, no PoE/WiFi, runs UniFi Network with IDS/IPS and Site Magic SD-WAN." },
   { terms: ["CGNAT"], def: "Carrier-grade NAT — when your ISP shares one public IP across many customers, so you don't get your own." },
   { terms: ["Tailscale"], def: "Zero-config mesh VPN that securely connects your devices over the internet." },
   { terms: ["WireGuard"], def: "A fast, modern VPN protocol — here run on the gateway so remote access doesn't depend on the server." },
