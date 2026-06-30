@@ -99,6 +99,21 @@ The network root is the **UniFi Cloud Gateway Ultra (UCG-Ultra)** ✅, gifted by
 
 **No built-in PoE** → a **UniFi PoE+ switch** is **required** for the powered devices (kept UniFi so it's managed in one pane with the gateway). **No built-in WiFi** → the 3× Deco stay on as APs for now, with a **planned swap to WiFi-7 UniFi APs (U7)** once prices come down — for single-pane management, better roaming and WiFi 7. Those APs are **PoE-powered**, so they add to the switch's PoE budget (see Switching layer).
 
+### Firewall zones (UCG)
+
+The UCG groups networks into **zones** and firewalls *between zones* (UniFi's Zone-Based Firewall) rather than rule-by-rule. The zones in use:
+
+- **Internal** — the trusted LAN (the `Default` network; the planned IoT / voice / CCTV / main segments live here until they're split into their own networks).
+- **External** — the WAN uplinks (`Internet 1` / `Internet 2`). No unsolicited inbound — reply-only.
+- **Gateway** — the UCG itself.
+- **VPN** — the site-to-site links (`Branetec`, `The Barn`), trusted like Internal.
+- **Hotspot** — guest networks: internet only.
+- **DMZ** — isolated servers (`DMZ`, plus the VPN-routed **download stack**): internet only, no lateral access into the trusted zones.
+
+**The policy matrix** (source → destination): **Internal** and **VPN** reach everything (Allow All); **External** is reply-only everywhere (Allow Return — nothing new initiates from the internet); **Hotspot** and **DMZ** get **Allow All → External** (internet) but are **Block All** to each other and only **Allow Return** to Internal/Gateway/VPN — so a guest or an isolated server can use the internet yet can't initiate into the house. (The interactive matrix is on the **Network** tab.)
+
+> The download stack sits in **DMZ** — internet-only via its VPN policy-route, no path into Internal — so the one rule to add is a narrow **DMZ → media-shares** exception so the *arr apps can still import.
+
 ### Switching layer
 
 - **Core UniFi PoE+ switch** (head-end, Bedroom 3) — feeds the PoE devices, UniFi so it's managed in one pane with the gateway. Today the PoE load is only the **4 cameras + doorbell** (the Voice PE units are Wi-Fi + USB-C, so they don't touch the switch at all). **But size the PoE budget for the end state:** once the **WiFi-7 UniFi APs** replace the Decos they're PoE-powered too (~3 APs at ~15-25W each), so cameras + doorbell + APs can outgrow a small switch — a USW-Lite-16-PoE (~45W) won't cover all of it. A **USW-Pro-Max-16-PoE** is the tidy answer: bigger PoE budget **and** the **2.5GbE ports** the Ultra's gigabit LAN lacks (so it doubles as the 2.5G path for Unraid/Frigate).

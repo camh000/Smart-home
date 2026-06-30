@@ -7,25 +7,36 @@ import {
   EDGES,
   VLANS,
   VLAN_MAP,
+  ZONES,
+  ZONE_MAP,
+  NODE_ZONE,
+  ZONE_MATRIX,
+  MATRIX_STYLE,
   EDGE_STYLE,
   TIER_Y,
   VIEW_W,
   VIEW_H,
-  type VlanKey,
   type NetNode,
 } from "@/data/network";
 
-type Filter = VlanKey | "all";
+type Mode = "vlan" | "zone";
 
 const NODE_BY_ID = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<string, NetNode>;
 const cx = (n: NetNode) => n.x;
 const cy = (n: NetNode) => TIER_Y[n.tier];
+const zoneOf = (n: NetNode) => NODE_ZONE[n.id] ?? "internal";
 
 export function NetworkMap() {
   const [selected, setSelected] = useState<string>("ucg");
   const [hover, setHover] = useState<string | null>(null);
-  const [filter, setFilter] = useState<Filter>("all");
+  const [mode, setMode] = useState<Mode>("vlan");
+  const [filter, setFilter] = useState<string>("all");
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const groups = mode === "vlan" ? VLANS : ZONES;
+  const groupKey = (n: NetNode) => (mode === "vlan" ? n.vlan : zoneOf(n));
+  const colorOf = (n: NetNode) =>
+    mode === "vlan" ? VLAN_MAP[n.vlan].color : ZONE_MAP[zoneOf(n)].color;
 
   const focus = hover ?? selected;
   const incident = useMemo(() => {
@@ -50,20 +61,43 @@ export function NetworkMap() {
     }
   }
 
-  const dimNode = (n: NetNode) => filter !== "all" && n.vlan !== filter;
+  const dimNode = (n: NetNode) => filter !== "all" && groupKey(n) !== filter;
+
+  function switchMode(m: Mode) {
+    setMode(m);
+    setFilter("all");
+  }
 
   return (
     <div className="mt-8">
-      {/* VLAN legend / filter */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        <Chip active={filter === "all"} color="var(--color-ink)" onClick={() => setFilter("all")}>
-          All VLANs
-        </Chip>
-        {VLANS.map((v) => (
-          <Chip key={v.key} active={filter === v.key} color={v.color} onClick={() => setFilter(filter === v.key ? "all" : v.key)}>
-            {v.label}
+      {/* Mode toggle: colour/group by VLAN or by UniFi firewall Zone */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-full border border-line bg-surface p-0.5">
+          {(["vlan", "zone"] as Mode[]).map((m) => (
+            <button
+              key={m}
+              onClick={() => switchMode(m)}
+              className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
+              style={{
+                background: mode === m ? "var(--color-ink)" : "transparent",
+                color: mode === m ? "var(--color-surface)" : "var(--color-muted)",
+              }}
+            >
+              {m === "vlan" ? "By VLAN" : "By Zone"}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Chip active={filter === "all"} color="var(--color-ink)" onClick={() => setFilter("all")}>
+            {mode === "vlan" ? "All VLANs" : "All zones"}
           </Chip>
-        ))}
+          {groups.map((g) => (
+            <Chip key={g.key} active={filter === g.key} color={g.color} onClick={() => setFilter(filter === g.key ? "all" : g.key)}>
+              {g.label}
+            </Chip>
+          ))}
+        </div>
       </div>
 
       {/* Diagram */}
@@ -82,7 +116,7 @@ export function NetworkMap() {
               const style = EDGE_STYLE[e.kind];
               const on = incident.has(String(i));
               const dimmed =
-                filter !== "all" && a.vlan !== filter && b.vlan !== filter && !on;
+                filter !== "all" && groupKey(a) !== filter && groupKey(b) !== filter && !on;
               return (
                 <line
                   key={i}
@@ -120,7 +154,7 @@ export function NetworkMap() {
           {/* nodes */}
           {NODES.map((n) => {
             const isSel = selected === n.id;
-            const color = VLAN_MAP[n.vlan].color;
+            const color = colorOf(n);
             return (
               <button
                 key={n.id}
@@ -161,8 +195,11 @@ export function NetworkMap() {
         ))}
       </div>
       <p className="mt-3 font-mono text-[11px] leading-relaxed text-muted-light">
-        Logical view — documented from the plan, not live-discovered. Tap a node for detail; filter by VLAN. *Unraid&apos;s 2.5 GbE needs a 2.5 G switch port (the Ultra&apos;s LAN is gigabit).
+        Logical view — documented from the plan, not live-discovered. Toggle VLAN/Zone, tap a node for detail, filter by group. *Unraid&apos;s 2.5 GbE needs a 2.5 G switch port (the Ultra&apos;s LAN is gigabit).
       </p>
+
+      {/* UniFi firewall zones + matrix */}
+      <ZoneMatrix />
 
       {/* detail panel */}
       <div ref={panelRef} className="mt-6 scroll-mt-24">
@@ -180,11 +217,19 @@ export function NetworkMap() {
                 <h3 className="font-display text-xl font-medium tracking-tight text-ink">{node.label}</h3>
                 {node.sub && <p className="font-mono text-[11px] text-muted">{node.sub}</p>}
               </div>
-              <span
-                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
-                style={{ background: VLAN_MAP[node.vlan].color }}
-              >
-                {VLAN_MAP[node.vlan].label}
+              <span className="flex shrink-0 flex-col items-end gap-1">
+                <span
+                  className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+                  style={{ background: VLAN_MAP[node.vlan].color }}
+                >
+                  {VLAN_MAP[node.vlan].label}
+                </span>
+                <span
+                  className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+                  style={{ background: ZONE_MAP[zoneOf(node)].color }}
+                >
+                  {ZONE_MAP[zoneOf(node)].label} zone
+                </span>
               </span>
             </div>
 
@@ -258,6 +303,77 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div className="rounded-lg border border-line bg-paper-soft/50 px-3 py-2">
       <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-light">{label}</div>
       <div className="mt-0.5 text-[13px] text-ink-soft">{children}</div>
+    </div>
+  );
+}
+
+// UniFi Zone-Based Firewall: the zones and the inter-zone policy matrix.
+function ZoneMatrix() {
+  return (
+    <div className="mt-8">
+      <h3 className="font-display text-xl font-medium tracking-tight text-ink">Firewall zones (UCG)</h3>
+      <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-ink-soft">
+        How the gateway groups networks for firewalling. Internal and VPN are trusted; External is
+        inbound-blocked (reply-only); Hotspot and DMZ get the internet but are walled off from each
+        other and can only reply to the trusted zones.
+      </p>
+
+      {/* Zone definitions */}
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {ZONES.map((z) => (
+          <div key={z.key} className="rounded-[var(--radius-card)] border border-line bg-surface p-3 shadow-[var(--shadow-soft)]">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: z.color }} />
+              <span className="text-[13px] font-semibold text-ink">{z.label}</span>
+              <span className="ml-auto truncate font-mono text-[10px] text-muted-light">{z.members.join(" · ")}</span>
+            </div>
+            <p className="mt-1 text-[12px] leading-snug text-muted">{z.note}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Matrix */}
+      <div className="mt-4 overflow-x-auto rounded-[var(--radius-card)] border border-line shadow-[var(--shadow-soft)]">
+        <table className="w-full min-w-[640px] border-collapse text-center">
+          <thead>
+            <tr>
+              <th className="bg-paper-soft px-3 py-2 text-left font-mono text-[10px] uppercase tracking-[0.1em] text-muted">
+                Src ↓ / Dst →
+              </th>
+              {ZONES.map((z) => (
+                <th key={z.key} className="bg-paper-soft px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted">
+                  {z.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {ZONES.map((src) => (
+              <tr key={src.key}>
+                <td className="border-t border-line bg-paper-soft px-3 py-2 text-left text-[12px] font-semibold text-ink">
+                  {src.label}
+                </td>
+                {ZONES.map((dst) => {
+                  const p = ZONE_MATRIX[src.key][dst.key];
+                  const s = MATRIX_STYLE[p];
+                  return (
+                    <td
+                      key={dst.key}
+                      className="border-l border-t border-line px-3 py-2 text-[11px] font-medium"
+                      style={{ background: s.bg, color: s.fg }}
+                    >
+                      {s.label}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 font-mono text-[11px] text-muted-light">
+        Mirrors the UCG zone matrix. Rows = source, columns = destination.
+      </p>
     </div>
   );
 }

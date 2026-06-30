@@ -40,7 +40,7 @@ const INTROS: Record<string, { meta: string; title: string; lead: string }> = {
   network: {
     meta: "How it all connects",
     title: "Network topology",
-    lead: "The logical network — gateway, switches, APs, server, cameras, the garage fibre link and the Selby SD-WAN. Colour-coded by VLAN; tap a node for detail or filter by VLAN. Documented from the plan, not live-discovered.",
+    lead: "The logical network — gateway, switches, APs, server, cameras, the garage fibre link and the Selby SD-WAN. Toggle between a VLAN and a UniFi firewall-Zone view, with the live zone matrix below; tap a node for detail or filter by group. Documented from the plan, not live-discovered.",
   },
 };
 

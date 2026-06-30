@@ -92,6 +92,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { terms: ["gluetun"], def: "A VPN-client container — route other containers' traffic through it, with a built-in kill-switch so nothing leaks to the open internet if the VPN drops." },
   { terms: ["Prowlarr"], def: "Indexer manager for the *arr stack — configure all your torrent/usenet indexers in one place and Sonarr/Radarr query them through it." },
   { terms: ["macvlan", "ipvlan"], def: "Docker network modes that give a container its own MAC/IP on a chosen (VLAN-tagged) network, so it sits on a different VLAN from its host." },
+  { terms: ["Zone-Based Firewall", "zone-based firewall", "zones"], def: "UniFi's firewall model — group networks into zones (Internal, External, DMZ…) and set one policy per zone-pair, instead of many individual rules." },
+  { terms: ["DMZ"], def: "A semi-trusted zone for internet-facing or isolated servers — it can reach the internet but is walled off from initiating into the trusted LAN." },
   { terms: ["Pi-hole", "AdGuard"], def: "Self-hosted network-wide DNS ad-blocker — handy, but don't make it the only DNS or a server outage breaks all internet." },
   { terms: ["IDS/IPS"], def: "Intrusion detection/prevention — the gateway inspecting traffic for threats." },
   { terms: ["MQTT"], def: "Lightweight messaging protocol many sensors use to talk to Home Assistant." },
