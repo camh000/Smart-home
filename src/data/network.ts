@@ -121,3 +121,70 @@ export const EDGES: NetEdge[] = [
 export const TIER_Y = [44, 150, 262, 386, 516];
 export const VIEW_W = 1000;
 export const VIEW_H = 560;
+
+// ---------------------------------------------------------------------------
+// UniFi Zone-Based Firewall — mirrors the actual UCG zone setup. A zone groups
+// one or more networks; the matrix is the inter-zone policy.
+// ---------------------------------------------------------------------------
+export type ZoneKey = "internal" | "external" | "gateway" | "vpn" | "hotspot" | "dmz";
+
+export interface Zone {
+  key: ZoneKey;
+  label: string;
+  color: string;
+  members: string[];
+  note: string;
+}
+
+export const ZONES: Zone[] = [
+  { key: "internal", label: "Internal", color: "#466b3f", members: ["Default"], note: "Trusted LAN — the everyday network." },
+  { key: "external", label: "External", color: "#2a3548", members: ["Internet 1", "Internet 2"], note: "WAN uplinks; no unsolicited inbound." },
+  { key: "gateway", label: "Gateway", color: "#8e96a6", members: ["UCG-Ultra"], note: "The gateway itself." },
+  { key: "vpn", label: "VPN", color: "#4a6b8a", members: ["Branetec", "The Barn"], note: "Site-to-site links — trusted like Internal." },
+  { key: "hotspot", label: "Hotspot", color: "#c98a2b", members: ["Guest networks"], note: "Guest portal — internet only." },
+  { key: "dmz", label: "DMZ", color: "#b8543a", members: ["DMZ", "Downloads"], note: "Isolated servers — internet only, no lateral access." },
+];
+
+export const ZONE_MAP = Object.fromEntries(ZONES.map((z) => [z.key, z])) as Record<ZoneKey, Zone>;
+
+// Which zone each topology node sits in (best-effort: today everything trusted
+// is on the single Default network → Internal; the download stack is isolated
+// in DMZ; the off-site peer is in VPN).
+export const NODE_ZONE: Record<string, ZoneKey> = {
+  wan: "external",
+  selby: "vpn",
+  ucg: "gateway",
+  core: "internal",
+  "office-sw": "internal",
+  "lounge-sw": "internal",
+  aps: "internal",
+  cameras: "internal",
+  unraid: "internal",
+  garage: "internal",
+  "office-pcs": "internal",
+  "lounge-av": "internal",
+  voice: "internal",
+  phones: "internal",
+  iot: "internal",
+  "garage-leaf": "internal",
+  downloads: "dmz",
+};
+
+export type Policy = "all" | "return" | "block" | "self";
+
+export const MATRIX_STYLE: Record<Policy, { label: string; bg: string; fg: string }> = {
+  all: { label: "Allow All", bg: "#e7f0e6", fg: "#2f5a2a" },
+  return: { label: "Allow Return", bg: "#e6eef5", fg: "#2a4a6b" },
+  block: { label: "Block All", bg: "#f6e1dd", fg: "#8a2f1c" },
+  self: { label: "—", bg: "transparent", fg: "#8e96a6" },
+};
+
+// Source zone → destination zone → policy (faithful to the UCG zone matrix).
+export const ZONE_MATRIX: Record<ZoneKey, Record<ZoneKey, Policy>> = {
+  internal: { internal: "all", external: "all", gateway: "all", vpn: "all", hotspot: "all", dmz: "all" },
+  external: { internal: "return", external: "return", gateway: "return", vpn: "return", hotspot: "return", dmz: "return" },
+  gateway: { internal: "all", external: "all", gateway: "self", vpn: "all", hotspot: "all", dmz: "all" },
+  vpn: { internal: "all", external: "all", gateway: "all", vpn: "all", hotspot: "all", dmz: "all" },
+  hotspot: { internal: "return", external: "all", gateway: "return", vpn: "return", hotspot: "block", dmz: "block" },
+  dmz: { internal: "return", external: "all", gateway: "return", vpn: "return", hotspot: "block", dmz: "block" },
+};
