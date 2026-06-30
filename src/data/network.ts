@@ -1,7 +1,7 @@
 // Logical network topology — hand-curated from the plan (not auto-discovered).
 // Rendered as a tiered diagram by NetworkMap.tsx.
 
-export type VlanKey = "infra" | "main" | "iot" | "voice" | "cctv" | "guest";
+export type VlanKey = "infra" | "main" | "iot" | "voice" | "cctv" | "guest" | "download";
 
 export interface Vlan {
   key: VlanKey;
@@ -18,6 +18,7 @@ export const VLANS: Vlan[] = [
   { key: "voice", label: "Voice", color: "#b8543a" },
   { key: "cctv", label: "CCTV", color: "#3f6b6b" },
   { key: "guest", label: "Guest", color: "#7a4a8a" },
+  { key: "download", label: "Downloads (VPN)", color: "#5a8f3f" },
 ];
 
 export const VLAN_MAP: Record<VlanKey, Vlan> = Object.fromEntries(
@@ -32,6 +33,7 @@ export type NodeType =
   | "ap"
   | "camera"
   | "server"
+  | "service"
   | "voice"
   | "iot"
   | "client";
@@ -93,6 +95,7 @@ export const NODES: NetNode[] = [
   { id: "phones", label: "Phones & tablets", sub: "Companion app", type: "client", vlan: "main", tier: 4, x: 545, icon: "📱", meta: "Phones (HA Companion presence + push) and wall tablets for dashboards. Main VLAN over Wi-Fi." },
   { id: "iot", label: "IoT devices", sub: "lights · plugs · locks", type: "iot", vlan: "iot", tier: 4, x: 690, icon: "💡", meta: "Wi-Fi/Matter IoT — smart plugs, some lighting, locks and sensors — isolated on the IoT VLAN (Zigbee kit rides its own mesh via the coordinator on Unraid, not Wi-Fi)." },
   { id: "garage-leaf", label: "Garage bar + kit", sub: "iot", type: "iot", vlan: "iot", tier: 4, x: 940, icon: "🍺", meta: "Garage bar electronics (keg flow-meter, WLED, sensors) and any garage IoT, reached over the fibre link." },
+  { id: "downloads", label: "Download stack", sub: "qBit · Deluge · Prowlarr", type: "service", vlan: "download", tier: 4, x: 815, icon: "📥", meta: "qBittorrent, Deluge and Prowlarr (with the *arr apps) as Docker containers on Unraid, pinned to a dedicated isolated VLAN (VLAN-tagged macvlan/ipvlan). Firewalled off every other VLAN — no reach to HA, cameras or main — and forced out through a VPN with a kill-switch (e.g. gluetun), so torrent/usenet traffic never touches the rest of the house and can't leak if the tunnel drops." },
 ];
 
 export const EDGES: NetEdge[] = [
@@ -111,6 +114,7 @@ export const EDGES: NetEdge[] = [
   { from: "aps", to: "phones", kind: "wifi" },
   { from: "aps", to: "iot", kind: "wifi" },
   { from: "garage", to: "garage-leaf", kind: "wired" },
+  { from: "unraid", to: "downloads", kind: "wired", label: "VLAN" },
 ];
 
 // Tier → vertical position in the 0–560 virtual space used by NetworkMap.
